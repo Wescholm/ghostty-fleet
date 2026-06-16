@@ -1086,6 +1086,15 @@ palette: Palette = .{},
 /// Available since: 1.1.0
 @"split-divider-color": ?Color = null,
 
+/// Comma-separated list of fields to display in the sidebar tab cards.
+/// Available fields: `title`, `directory`, `status`.
+/// - `title`: the tab title (process name or custom rename)
+/// - `directory`: the working directory (last path component)
+/// - `status`: status entries set via `ghosttyctl set-status` (e.g. git branch)
+///
+/// Default: `title,directory,status`
+@"sidebar-fields": ?[:0]const u8 = null,
+
 /// Control when Ghostty preserves a zoomed split. Under normal circumstances,
 /// any operation that changes focus or layout of the split tree in a window
 /// will unzoom any zoomed split. This configuration allows you to control

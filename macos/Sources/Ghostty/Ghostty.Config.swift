@@ -552,6 +552,53 @@ extension Ghostty {
             )
         }
 
+        /// The terminal background as an NSColor, for use by the sidebar theme.
+        var backgroundNSColor: NSColor {
+            guard let config = self.config else { return .windowBackgroundColor }
+            var color: ghostty_config_color_s = .init()
+            let key = "background"
+            if !ghostty_config_get(config, &color, key, UInt(key.lengthOfBytes(using: .utf8))) {
+                return .windowBackgroundColor
+            }
+            return NSColor(ghostty: color)
+        }
+
+        /// The terminal foreground as an NSColor, for use by the sidebar theme.
+        var foregroundNSColor: NSColor {
+            guard let config = self.config else { return .labelColor }
+            var color: ghostty_config_color_s = .init()
+            let key = "foreground"
+            if !ghostty_config_get(config, &color, key, UInt(key.lengthOfBytes(using: .utf8))) {
+                return .labelColor
+            }
+            return NSColor(ghostty: color)
+        }
+
+        /// Sidebar theme derived from the terminal background/foreground colors.
+        var sidebarTheme: SidebarTheme {
+            return SidebarTheme.from(background: backgroundNSColor, foreground: foregroundNSColor)
+        }
+
+        /// Which fields to show in sidebar tab cards.
+        var sidebarFields: Set<SidebarField> {
+            guard let config = self.config else { return SidebarField.defaultFields }
+            var v: UnsafePointer<Int8>?
+            let key = "sidebar-fields"
+            guard ghostty_config_get(config, &v, key, UInt(key.lengthOfBytes(using: .utf8))) else {
+                return SidebarField.defaultFields
+            }
+            guard let ptr = v else { return SidebarField.defaultFields }
+            let str = String(cString: ptr)
+            var fields = Set<SidebarField>()
+            for part in str.split(separator: ",") {
+                let trimmed = part.trimmingCharacters(in: .whitespaces)
+                if let field = SidebarField(rawValue: trimmed) {
+                    fields.insert(field)
+                }
+            }
+            return fields.isEmpty ? SidebarField.defaultFields : fields
+        }
+
         #if canImport(AppKit)
         var quickTerminalPosition: QuickTerminalPosition {
             guard let config = self.config else { return .top }
