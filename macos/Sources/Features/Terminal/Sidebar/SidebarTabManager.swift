@@ -65,9 +65,15 @@ class SidebarTabManager: ObservableObject {
 
     /// CPU samples per surface id for activity detection: (cpu ns, pid, sample time).
     private var cpuSamples: [UUID: (cpu: UInt64, pid: Int, time: TimeInterval)] = [:]
+    /// Last time each surface's foreground process was above the CPU threshold.
+    private var lastBusy: [UUID: TimeInterval] = [:]
     /// Surfaces whose foreground process is actively using CPU ("working").
     private var workingSurfaces: Set<UUID> = []
     private var activityTimer: Timer?
+
+    /// Keep a tab "working" for this long after its CPU dips, so brief gaps
+    /// between tool calls don't flicker the indicator.
+    private static let workingGracePeriod: TimeInterval = 2.5
 
     init(window: NSWindow, bellTriggersAttention: Bool = true) {
         self.window = window
@@ -295,11 +301,15 @@ class SidebarTabManager: ObservableObject {
                 let cpuDelta = Double(cpu &- prev.cpu)
                 let wallDelta = (now - prev.time) * 1_000_000_000
                 let usage = wallDelta > 0 ? cpuDelta / wallDelta : 0  // fraction of one core
-                if usage > 0.03 { newWorking.insert(sid) }
+                if usage > 0.03 { lastBusy[sid] = now }
             }
             cpuSamples[sid] = (cpu, pid, now)
+            if let busy = lastBusy[sid], now - busy < Self.workingGracePeriod {
+                newWorking.insert(sid)
+            }
         }
         cpuSamples = cpuSamples.filter { seen.contains($0.key) }
+        lastBusy = lastBusy.filter { seen.contains($0.key) }
 
         if newWorking != workingSurfaces {
             workingSurfaces = newWorking
