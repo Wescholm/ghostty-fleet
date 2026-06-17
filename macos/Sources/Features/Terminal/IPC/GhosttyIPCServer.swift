@@ -237,6 +237,8 @@ final class GhosttyIPCServer {
             handleTabList(client: client)
         case "tab.current":
             handleTabCurrent(client: client)
+        case "tab.focus":
+            handleTabFocus(params: params, client: client)
         default:
             sendError("unknown method: \(method)", to: client)
         }
@@ -355,6 +357,17 @@ final class GhosttyIPCServer {
         sendOk(tabInfo(surface: surface, controller: controller, window: window, isActive: true), to: client)
     }
 
+    private func handleTabFocus(params: [String: Any], client: ClientConnection) {
+        guard let controller = resolveController(params: params),
+              let window = controller.window else {
+            sendError("tab not found", to: client)
+            return
+        }
+        NSApp.activate(ignoringOtherApps: true)
+        window.makeKeyAndOrderFront(nil)
+        sendOk(["focused": true], to: client)
+    }
+
     // MARK: - Tab Resolution
 
     /// Resolve a `BaseTerminalController` from params. If `tab_id` is provided, finds the
@@ -384,18 +397,20 @@ final class GhosttyIPCServer {
     private func controllerForSurfaceId(_ id: UUID) -> BaseTerminalController? {
         for window in NSApp.windows {
             guard let controller = window.windowController as? BaseTerminalController else { continue }
-            if controller.focusedSurface?.id == id {
+            // Search the whole split tree, not just the focused surface, so IPC
+            // can target a tab even when the matching surface is a background split.
+            for surface in controller.surfaceTree where surface.id == id {
                 return controller
             }
         }
         return nil
     }
 
-    /// Find a surface by UUID across all windows.
+    /// Find a surface by UUID across all windows (searches every split, not just focused).
     private func surfaceForId(_ id: UUID) -> Ghostty.SurfaceView? {
         for window in NSApp.windows {
             guard let controller = window.windowController as? BaseTerminalController else { continue }
-            if let surface = controller.focusedSurface, surface.id == id {
+            for surface in controller.surfaceTree where surface.id == id {
                 return surface
             }
         }
@@ -417,6 +432,9 @@ final class GhosttyIPCServer {
         ]
         if let pwd = surface.pwd {
             info["pwd"] = pwd
+        }
+        if let pid = surface.surfaceModel?.foregroundPID {
+            info["foreground_pid"] = pid
         }
         return info
     }

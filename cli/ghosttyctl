@@ -25,6 +25,7 @@ Commands:
   clear-status <key>       Clear a status key
   list                     List all tabs (JSON)
   current                  Get current tab info (JSON)
+  focus [tab_id]           Bring a tab to the front (defaults to $GHOSTTY_TAB_ID)
 
 Environment:
   GHOSTTY_SOCKET   Override the IPC socket path
@@ -170,6 +171,17 @@ cmd_current() {
     send_request '{"method": "tab.current", "params": {}}'
 }
 
+cmd_focus() {
+    # Focus a tab: explicit tab_id arg, else $GHOSTTY_TAB_ID, else the current tab.
+    local tab_id="${1:-${GHOSTTY_TAB_ID:-}}"
+    if [[ -n "$tab_id" ]]; then
+        tab_id="$(json_escape "$tab_id")"
+        send_request "{\"method\": \"tab.focus\", \"params\": {\"tab_id\": \"$tab_id\"}}"
+    else
+        send_request '{"method": "tab.focus", "params": {}}'
+    fi
+}
+
 # ── Main dispatch ────────────────────────────────────────────────────────
 
 if [[ $# -lt 1 ]]; then
@@ -205,6 +217,10 @@ case "$1" in
     current)
         shift
         cmd_current "$@"
+        ;;
+    focus)
+        shift
+        cmd_focus "$@"
         ;;
     *)
         echo "error: unknown command '$1'" >&2
