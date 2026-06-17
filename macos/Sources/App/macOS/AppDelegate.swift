@@ -846,7 +846,16 @@ class AppDelegate: NSObject,
 
     private func updateAppIcon(from config: Ghostty.Config) {
         Task.detached {
+#if DEBUG
+            // Sidebar fork (debug build): force a distinct icon so this build is never
+            // confused with a release Ghostty — in the Dock, Finder, Spotlight, or
+            // ⌘-Tab. AppIconUpdater uses NSWorkspace.setIcon, so this applies the custom
+            // icon to the whole bundle, not just the running Dock tile. Change `.blueprint`
+            // to any AppIcon case (.xray, .chalkboard, .retro, .glass, …) to taste.
+            await self.appIconUpdater.update(icon: .blueprint)
+#else
             await self.appIconUpdater.update(icon: AppIcon(config: config))
+#endif
         }
     }
 
