@@ -1142,9 +1142,12 @@ extension AppDelegate {
 
     /// Build a "Tab Color" submenu and insert it into the View menu after "Change Tab Title...".
     private func setupTabColorSubmenu() {
-        guard let viewMenu = NSApp.mainMenu?.item(withTitle: "View")?.submenu else { return }
-        guard let changeTabTitleItem = self.menuChangeTabTitle else { return }
-        guard let insertIndex = viewMenu.items.firstIndex(of: changeTabTitleItem) else { return }
+        // Anchor to the menu that actually contains the "Change Tab Title" item
+        // (a wired IBOutlet) instead of looking up the "View" menu by its English
+        // title, which silently no-ops under other system locales.
+        guard let changeTabTitleItem = self.menuChangeTabTitle,
+              let viewMenu = changeTabTitleItem.menu,
+              let insertIndex = viewMenu.items.firstIndex(of: changeTabTitleItem) else { return }
 
         let tabColorSubmenu = NSMenu(title: "Tab Color")
         for color in TerminalTabColor.allCases {
