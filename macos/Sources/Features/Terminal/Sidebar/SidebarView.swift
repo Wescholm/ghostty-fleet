@@ -254,6 +254,11 @@ private struct SidebarTabCard: View {
                             Circle()
                                 .fill(theme.attentionColor)
                                 .frame(width: 8, height: 8)
+                        } else if tab.isWorking {
+                            // Foreground process is actively using CPU
+                            Circle()
+                                .fill(Color.green)
+                                .frame(width: 7, height: 7)
                         }
                     }
                 }

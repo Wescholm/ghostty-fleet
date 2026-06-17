@@ -1,5 +1,6 @@
 import Cocoa
 import Combine
+import Darwin
 
 /// Observes the tab group of a window and publishes tab metadata for the sidebar.
 @MainActor
@@ -16,6 +17,7 @@ class SidebarTabManager: ObservableObject {
         let statusEntries: [TabMetadataStore.StatusEntry]
         let isSelected: Bool
         let needsAttention: Bool
+        let isWorking: Bool
         let tabColor: TerminalTabColor
         let window: NSWindow
 
@@ -38,6 +40,7 @@ class SidebarTabManager: ObservableObject {
                 && lhs.surfaceId == rhs.surfaceId
                 && lhs.statusEntries == rhs.statusEntries
                 && lhs.needsAttention == rhs.needsAttention
+                && lhs.isWorking == rhs.isWorking
                 && lhs.tabColor == rhs.tabColor
         }
     }
@@ -60,16 +63,26 @@ class SidebarTabManager: ObservableObject {
     private var gitInfoCache: [String: GitInfo] = [:]
     private var gitPollTask: Task<Void, Never>?
 
+    /// CPU samples per surface id for activity detection: (cpu ns, pid, sample time).
+    private var cpuSamples: [UUID: (cpu: UInt64, pid: Int, time: TimeInterval)] = [:]
+    /// Surfaces whose foreground process is actively using CPU ("working").
+    private var workingSurfaces: Set<UUID> = []
+    private var activityTimer: Timer?
+
     init(window: NSWindow, bellTriggersAttention: Bool = true) {
         self.window = window
         self.bellTriggersAttention = bellTriggersAttention
         setupObservers()
         refresh()
         startGitPolling()
+        activityTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.sampleActivity()
+        }
     }
 
     deinit {
         timer?.invalidate()
+        activityTimer?.invalidate()
         gitPollTask?.cancel()
         observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
@@ -251,6 +264,58 @@ class SidebarTabManager: ObservableObject {
         if changed { refresh() }
     }
 
+    // MARK: - Activity
+
+    /// Sample CPU usage of each tab's foreground process to detect which sessions
+    /// are actively computing. proc_pidinfo is a fast syscall, so this runs on the
+    /// main actor and re-publishes only when the working set changes.
+    private func sampleActivity() {
+        guard let window else { return }
+        let tabWindows: [NSWindow]
+        if let tabbedWindows = window.tabbedWindows, !tabbedWindows.isEmpty {
+            tabWindows = tabbedWindows
+        } else {
+            tabWindows = [window]
+        }
+
+        let now = Date().timeIntervalSinceReferenceDate
+        var newWorking: Set<UUID> = []
+        var seen: Set<UUID> = []
+        for w in tabWindows {
+            guard let controller = w.windowController as? BaseTerminalController,
+                  let surface = controller.focusedSurface else { continue }
+            let sid = surface.id
+            seen.insert(sid)
+            guard let pid = surface.surfaceModel?.foregroundPID,
+                  let cpu = Self.processCPUNanos(pid: pid) else {
+                cpuSamples[sid] = nil
+                continue
+            }
+            if let prev = cpuSamples[sid], prev.pid == pid, now > prev.time {
+                let cpuDelta = Double(cpu &- prev.cpu)
+                let wallDelta = (now - prev.time) * 1_000_000_000
+                let usage = wallDelta > 0 ? cpuDelta / wallDelta : 0  // fraction of one core
+                if usage > 0.03 { newWorking.insert(sid) }
+            }
+            cpuSamples[sid] = (cpu, pid, now)
+        }
+        cpuSamples = cpuSamples.filter { seen.contains($0.key) }
+
+        if newWorking != workingSurfaces {
+            workingSurfaces = newWorking
+            refresh()
+        }
+    }
+
+    /// Total CPU time (nanoseconds) consumed by a process, or nil if unavailable.
+    nonisolated private static func processCPUNanos(pid: Int) -> UInt64? {
+        var info = proc_taskinfo()
+        let size = Int32(MemoryLayout<proc_taskinfo>.size)
+        let result = proc_pidinfo(Int32(pid), PROC_PIDTASKINFO, 0, &info, size)
+        guard result == size else { return nil }
+        return info.pti_total_user &+ info.pti_total_system
+    }
+
     // MARK: - Refresh
 
     func refresh() {
@@ -288,6 +353,7 @@ class SidebarTabManager: ObservableObject {
                 statusEntries: entries,
                 isSelected: w === selectedWindow,
                 needsAttention: attentionWindows.contains(wid) && w !== selectedWindow,
+                isWorking: sid.map { workingSurfaces.contains($0) } ?? false,
                 tabColor: color,
                 window: w
             )
