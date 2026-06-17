@@ -60,7 +60,7 @@ the day Zig links the macOS 26 SDK natively. The Zig std patch and overlay SDK l
 | `make xcode` | Open the project in Xcode (needed for previews / the MCP bridge). |
 
 The app lands at `macos/build/Debug/Ghostty.app` (overwritten in place; bundle id
-`com.mitchellh.ghostty.debug`). Override paths via `make build XCODE_DEV=… ZIG_DIR=… CONFIG=Release`.
+`com.wescholm.ghostty-fleet`). Override paths via `make build XCODE_DEV=… ZIG_DIR=… CONFIG=Release`.
 
 ### Upstream commands (still valid; the macOS app specifically needs the workaround above)
 - **Build:** `zig build` (`-Demit-macos-app=false` to skip the app bundle). **Test:** `zig build test`
