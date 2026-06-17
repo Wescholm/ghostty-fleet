@@ -29,6 +29,8 @@ pub fn create(b: *std.Build, opts: Options) *LipoStep {
 
     const run_step = RunStep.create(b, b.fmt("lipo {s}", .{opts.name}));
     run_step.addArgs(&.{ "lipo", "-create", "-output" });
+    // [local-build-workaround] real toolchain for lipo (macOS 26.5 + Zig 0.15.2).
+    run_step.setEnvironmentVariable("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer");
     const output = run_step.addOutputFileArg(opts.out_name);
     run_step.addFileArg(opts.input_a);
     run_step.addFileArg(opts.input_b);

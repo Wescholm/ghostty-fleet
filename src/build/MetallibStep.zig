@@ -56,6 +56,8 @@ pub fn create(b: *std.Build, opts: Options) ?*MetallibStep {
         b.fmt("metal {s}", .{opts.name}),
     );
     run_ir.addArgs(&.{ "/usr/bin/xcrun", "-sdk", sdk, "metal", "-o" });
+    // [local-build-workaround] real toolchain for xcrun metal (macOS 26.5 + Zig 0.15.2).
+    run_ir.setEnvironmentVariable("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer");
     const output_ir = run_ir.addOutputFileArg(b.fmt("{s}.ir", .{opts.name}));
     run_ir.addArgs(&.{"-c"});
     for (opts.sources) |source| run_ir.addFileArg(source);
@@ -71,6 +73,8 @@ pub fn create(b: *std.Build, opts: Options) ?*MetallibStep {
         b.fmt("metallib {s}", .{opts.name}),
     );
     run_lib.addArgs(&.{ "/usr/bin/xcrun", "-sdk", sdk, "metallib", "-o" });
+    // [local-build-workaround] real toolchain for xcrun metallib (macOS 26.5 + Zig 0.15.2).
+    run_lib.setEnvironmentVariable("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer");
     const output_lib = run_lib.addOutputFileArg(b.fmt("{s}.metallib", .{opts.name}));
     run_lib.addFileArg(output_ir);
     run_lib.step.dependOn(&run_ir.step);

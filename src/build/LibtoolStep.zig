@@ -32,6 +32,10 @@ pub fn create(b: *std.Build, opts: Options) *LibtoolStep {
 
     const run_step = RunStep.create(b, b.fmt("libtool {s}", .{opts.name}));
     run_step.addArgs(&.{ "libtool", "-static", "-o" });
+    // [local-build-workaround] macOS 26.5 + Zig 0.15.2: the build runs with a
+    // broken DEVELOPER_DIR so Zig links host exes against its bundled libSystem
+    // stub; restore the real toolchain for this Xcode tool step.
+    run_step.setEnvironmentVariable("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer");
     const output = run_step.addOutputFileArg(opts.out_name);
     for (opts.sources, 0..) |source, i| {
         run_step.addFileArg(normalizeArchive(
@@ -73,6 +77,8 @@ fn normalizeArchive(
         "/bin/cp \"$1\" \"$2\" && /usr/bin/ranlib \"$2\"",
         "_",
     });
+    // [local-build-workaround] real toolchain for ranlib (see note above).
+    run_step.setEnvironmentVariable("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer");
     run_step.addFileArg(source);
     return run_step.addOutputFileArg(b.fmt("{d}-{s}", .{ index, out_name }));
 }

@@ -50,6 +50,8 @@ pub fn create(b: *std.Build, opts: Options) *XCFrameworkStep {
         const run = RunStep.create(b, b.fmt("xcframework {s}", .{opts.name}));
         run.has_side_effects = true;
         run.addArgs(&.{ "xcodebuild", "-create-xcframework" });
+        // [local-build-workaround] real toolchain for xcodebuild (macOS 26.5 + Zig 0.15.2).
+        run.setEnvironmentVariable("DEVELOPER_DIR", "/Applications/Xcode.app/Contents/Developer");
         for (opts.libraries) |lib| {
             run.addArg("-library");
             run.addFileArg(lib.library);
