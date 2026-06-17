@@ -9,6 +9,9 @@ class SidebarTabManager: ObservableObject {
         let title: String
         let pwd: String?
         let gitBranch: String?
+        let gitDirty: Bool
+        let gitAhead: Int
+        let gitBehind: Int
         let surfaceId: UUID?
         let statusEntries: [TabMetadataStore.StatusEntry]
         let isSelected: Bool
@@ -30,6 +33,8 @@ class SidebarTabManager: ObservableObject {
         static func == (lhs: TabItem, rhs: TabItem) -> Bool {
             lhs.id == rhs.id && lhs.title == rhs.title && lhs.isSelected == rhs.isSelected
                 && lhs.pwd == rhs.pwd && lhs.gitBranch == rhs.gitBranch
+                && lhs.gitDirty == rhs.gitDirty && lhs.gitAhead == rhs.gitAhead
+                && lhs.gitBehind == rhs.gitBehind
                 && lhs.surfaceId == rhs.surfaceId
                 && lhs.statusEntries == rhs.statusEntries
                 && lhs.needsAttention == rhs.needsAttention
@@ -50,9 +55,9 @@ class SidebarTabManager: ObservableObject {
     private var observers: [NSObjectProtocol] = []
     private var timer: Timer?
 
-    /// Cache of git branch keyed by pwd. Populated off the main thread by a
+    /// Cache of git info keyed by pwd. Populated off the main thread by a
     /// background poll so refresh() never does filesystem I/O on the main thread.
-    private var gitBranchCache: [String: String?] = [:]
+    private var gitInfoCache: [String: GitInfo] = [:]
     private var gitPollTask: Task<Void, Never>?
 
     init(window: NSWindow, bellTriggersAttention: Bool = true) {
@@ -152,25 +157,64 @@ class SidebarTabManager: ObservableObject {
         attentionWindows.remove(id)
     }
 
-    // MARK: - Git Branch
+    // MARK: - Git Info
 
-    /// Read the git branch from .git/HEAD in the given directory.
-    /// Walks up to find the repo root (supports subdirectories).
-    /// `nonisolated static` so it can run off the main actor in the poll task.
-    nonisolated private static func gitBranch(at pwd: String) -> String? {
-        var dir = pwd
-        while dir != "/" {
-            let headPath = (dir as NSString).appendingPathComponent(".git/HEAD")
-            if let contents = try? String(contentsOfFile: headPath, encoding: .utf8) {
-                let prefix = "ref: refs/heads/"
-                if contents.hasPrefix(prefix) {
-                    return contents.dropFirst(prefix.count).trimmingCharacters(in: .whitespacesAndNewlines)
-                }
-                return nil // detached HEAD
-            }
-            dir = (dir as NSString).deletingLastPathComponent
+    /// Branch, dirty state, and ahead/behind for a working directory.
+    struct GitInfo: Equatable {
+        var branch: String?
+        var dirty: Bool
+        var ahead: Int
+        var behind: Int
+
+        static let none = GitInfo(branch: nil, dirty: false, ahead: 0, behind: 0)
+    }
+
+    /// Read git info for a directory via `git status`. Worktree- and submodule-aware
+    /// (unlike reading .git/HEAD directly). `nonisolated static` so it runs off the
+    /// main actor in the poll task.
+    nonisolated private static func gitInfo(at pwd: String) -> GitInfo {
+        guard let out = runGit(["-C", pwd, "status", "--porcelain=v2", "--branch"]) else {
+            return .none
         }
-        return nil
+        var info = GitInfo.none
+        for line in out.split(separator: "\n", omittingEmptySubsequences: true) {
+            if line.hasPrefix("# branch.head ") {
+                let name = line.dropFirst("# branch.head ".count).trimmingCharacters(in: .whitespaces)
+                info.branch = (name == "(detached)") ? nil : name
+            } else if line.hasPrefix("# branch.ab ") {
+                for part in line.dropFirst("# branch.ab ".count).split(separator: " ") {
+                    if part.hasPrefix("+") { info.ahead = Int(part.dropFirst()) ?? 0 }
+                    else if part.hasPrefix("-") { info.behind = Int(part.dropFirst()) ?? 0 }
+                }
+            } else if !line.hasPrefix("#") {
+                info.dirty = true
+            }
+        }
+        return info
+    }
+
+    /// Run a git command and return stdout, or nil on failure. Read-only and
+    /// non-interactive (no credential prompts, no index locks).
+    nonisolated private static func runGit(_ args: [String]) -> String? {
+        let proc = Process()
+        proc.executableURL = URL(fileURLWithPath: "/usr/bin/git")
+        proc.arguments = args
+        let pipe = Pipe()
+        proc.standardOutput = pipe
+        proc.standardError = FileHandle.nullDevice
+        var env = ProcessInfo.processInfo.environment
+        env["GIT_TERMINAL_PROMPT"] = "0"
+        env["GIT_OPTIONAL_LOCKS"] = "0"
+        proc.environment = env
+        do {
+            try proc.run()
+        } catch {
+            return nil
+        }
+        let data = pipe.fileHandleForReading.readDataToEndOfFile()
+        proc.waitUntilExit()
+        guard proc.terminationStatus == 0 else { return nil }
+        return String(data: data, encoding: .utf8)
     }
 
     /// Periodically reads git branches for the current tabs off the main thread,
@@ -180,12 +224,12 @@ class SidebarTabManager: ObservableObject {
             while !Task.isCancelled {
                 guard let pwds = await self?.currentPwds() else { return }
                 if !pwds.isEmpty {
-                    var results: [String: String?] = [:]
+                    var results: [String: GitInfo] = [:]
                     for pwd in pwds {
                         if Task.isCancelled { return }
-                        results[pwd] = SidebarTabManager.gitBranch(at: pwd)
+                        results[pwd] = SidebarTabManager.gitInfo(at: pwd)
                     }
-                    await self?.applyGitBranches(results)
+                    await self?.applyGitInfo(results)
                 }
                 try? await Task.sleep(nanoseconds: 1_000_000_000)
             }
@@ -196,12 +240,11 @@ class SidebarTabManager: ObservableObject {
         Set(tabs.compactMap { $0.pwd })
     }
 
-    private func applyGitBranches(_ results: [String: String?]) {
+    private func applyGitInfo(_ results: [String: GitInfo]) {
         var changed = false
-        for (pwd, branch) in results {
-            let existing = gitBranchCache[pwd]
-            if existing == nil || existing! != branch {
-                gitBranchCache[pwd] = branch
+        for (pwd, info) in results {
+            if gitInfoCache[pwd] != info {
+                gitInfoCache[pwd] = info
                 changed = true
             }
         }
@@ -230,14 +273,17 @@ class SidebarTabManager: ObservableObject {
             let sid = surface?.id
             let pwd = surface?.pwd
             let entries = sid.map { metadataStore.statusEntries(for: $0) } ?? []
-            let branch = pwd.flatMap { gitBranchCache[$0] ?? nil }
+            let gitInfo = pwd.flatMap { gitInfoCache[$0] } ?? .none
             let color = (w as? TerminalWindow)?.tabColor ?? .none
 
             return TabItem(
                 id: wid,
                 title: w.title,
                 pwd: pwd,
-                gitBranch: branch,
+                gitBranch: gitInfo.branch,
+                gitDirty: gitInfo.dirty,
+                gitAhead: gitInfo.ahead,
+                gitBehind: gitInfo.behind,
                 surfaceId: sid,
                 statusEntries: entries,
                 isSelected: w === selectedWindow,

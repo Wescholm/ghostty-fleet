@@ -201,6 +201,14 @@ private struct SidebarTabCard: View {
 
     private static let cardRadius: CGFloat = 8
 
+    /// Compact "↑2 ↓1" upstream divergence label.
+    private static func aheadBehind(ahead: Int, behind: Int) -> String {
+        var s = ""
+        if ahead > 0 { s += "↑\(ahead)" }
+        if behind > 0 { s += (s.isEmpty ? "" : " ") + "↓\(behind)" }
+        return s
+    }
+
     /// The accent color for the left border strip.
     /// When dimming is enabled, inactive tabs use reduced opacity for a gentle dim.
     /// When no color is set (.none), the strip is fully transparent.
@@ -263,7 +271,7 @@ private struct SidebarTabCard: View {
                     }
                 }
 
-                // Git branch
+                // Git branch (+ dirty dot and ahead/behind)
                 if fields.contains(.gitBranch), let branch = tab.gitBranch {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.triangle.branch")
@@ -273,6 +281,18 @@ private struct SidebarTabCard: View {
                             .font(.system(size: 10))
                             .foregroundColor(theme.secondaryText)
                             .lineLimit(1)
+                        if tab.gitDirty {
+                            // Uncommitted changes
+                            Circle()
+                                .fill(theme.secondaryText)
+                                .frame(width: 4, height: 4)
+                        }
+                        if tab.gitAhead > 0 || tab.gitBehind > 0 {
+                            Text(Self.aheadBehind(ahead: tab.gitAhead, behind: tab.gitBehind))
+                                .font(.system(size: 9))
+                                .foregroundColor(theme.secondaryText)
+                                .lineLimit(1)
+                        }
                     }
                 }
 
