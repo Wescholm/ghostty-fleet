@@ -109,9 +109,9 @@ fmt: ## Auto-fix Swift formatting (SwiftLint)
 	@command -v swiftlint >/dev/null || { echo "swiftlint not installed (brew install swiftlint)"; exit 1; }
 	swiftlint lint --strict --fix
 
-sync: ## Fetch ghostty-org (origin) and report how far behind this branch is
-	git fetch origin
-	@echo "behind ghostty-org/main by $$(git rev-list --count HEAD..origin/main 2>/dev/null || echo '?') commits — rebase manually when ready (see SIDEBAR-FORK-REPORT.md)"
+sync: ## Fetch ghostty-org (upstream) and report how far behind this branch is
+	git fetch upstream
+	@echo "behind ghostty-org/main by $$(git rev-list --count HEAD..upstream/main 2>/dev/null || echo '?') commits — rebase manually when ready (see SIDEBAR-FORK-REPORT.md)"
 
 xcode: ## Open the project in Xcode (needed for previews / the MCP bridge)
 	open macos/$(PROJECT)
