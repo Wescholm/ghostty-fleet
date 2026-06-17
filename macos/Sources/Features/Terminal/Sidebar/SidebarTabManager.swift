@@ -50,15 +50,22 @@ class SidebarTabManager: ObservableObject {
     private var observers: [NSObjectProtocol] = []
     private var timer: Timer?
 
+    /// Cache of git branch keyed by pwd. Populated off the main thread by a
+    /// background poll so refresh() never does filesystem I/O on the main thread.
+    private var gitBranchCache: [String: String?] = [:]
+    private var gitPollTask: Task<Void, Never>?
+
     init(window: NSWindow, bellTriggersAttention: Bool = true) {
         self.window = window
         self.bellTriggersAttention = bellTriggersAttention
         setupObservers()
         refresh()
+        startGitPolling()
     }
 
     deinit {
         timer?.invalidate()
+        gitPollTask?.cancel()
         observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
@@ -149,7 +156,8 @@ class SidebarTabManager: ObservableObject {
 
     /// Read the git branch from .git/HEAD in the given directory.
     /// Walks up to find the repo root (supports subdirectories).
-    private func gitBranch(at pwd: String) -> String? {
+    /// `nonisolated static` so it can run off the main actor in the poll task.
+    nonisolated private static func gitBranch(at pwd: String) -> String? {
         var dir = pwd
         while dir != "/" {
             let headPath = (dir as NSString).appendingPathComponent(".git/HEAD")
@@ -163,6 +171,41 @@ class SidebarTabManager: ObservableObject {
             dir = (dir as NSString).deletingLastPathComponent
         }
         return nil
+    }
+
+    /// Periodically reads git branches for the current tabs off the main thread,
+    /// updating the cache and re-publishing only when a branch actually changes.
+    private func startGitPolling() {
+        gitPollTask = Task.detached(priority: .utility) { [weak self] in
+            while !Task.isCancelled {
+                guard let pwds = await self?.currentPwds() else { return }
+                if !pwds.isEmpty {
+                    var results: [String: String?] = [:]
+                    for pwd in pwds {
+                        if Task.isCancelled { return }
+                        results[pwd] = SidebarTabManager.gitBranch(at: pwd)
+                    }
+                    await self?.applyGitBranches(results)
+                }
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+            }
+        }
+    }
+
+    private func currentPwds() -> Set<String> {
+        Set(tabs.compactMap { $0.pwd })
+    }
+
+    private func applyGitBranches(_ results: [String: String?]) {
+        var changed = false
+        for (pwd, branch) in results {
+            let existing = gitBranchCache[pwd]
+            if existing == nil || existing! != branch {
+                gitBranchCache[pwd] = branch
+                changed = true
+            }
+        }
+        if changed { refresh() }
     }
 
     // MARK: - Refresh
@@ -187,7 +230,7 @@ class SidebarTabManager: ObservableObject {
             let sid = surface?.id
             let pwd = surface?.pwd
             let entries = sid.map { metadataStore.statusEntries(for: $0) } ?? []
-            let branch = pwd.flatMap { gitBranch(at: $0) }
+            let branch = pwd.flatMap { gitBranchCache[$0] ?? nil }
             let color = (w as? TerminalWindow)?.tabColor ?? .none
 
             return TabItem(
@@ -263,9 +306,9 @@ class SidebarTabManager: ObservableObject {
         let targetWindow = tabbedWindows[destinationIndex]
 
         if sourceIndex > destinationIndex {
-            targetWindow.addTabbedWindow(movingWindow, ordered: .below)
+            targetWindow.addTabbedWindowSafely(movingWindow, ordered: .below)
         } else {
-            targetWindow.addTabbedWindow(movingWindow, ordered: .above)
+            targetWindow.addTabbedWindowSafely(movingWindow, ordered: .above)
         }
 
         if let selectedWindow = window.tabGroup?.selectedWindow {
