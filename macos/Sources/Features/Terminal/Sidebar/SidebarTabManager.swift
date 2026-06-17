@@ -93,6 +93,15 @@ class SidebarTabManager: ObservableObject {
         observers.forEach { NotificationCenter.default.removeObserver($0) }
     }
 
+#if DEBUG
+    /// Preview/testing only: a manager with fixed tabs and none of the live
+    /// machinery (no window, observers, timers, or git polling).
+    init(previewTabs: [TabItem]) {
+        self.bellTriggersAttention = false
+        self.tabs = previewTabs
+    }
+#endif
+
     private func setupObservers() {
         let center = NotificationCenter.default
 

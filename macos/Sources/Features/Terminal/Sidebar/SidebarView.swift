@@ -337,3 +337,57 @@ private struct SidebarTabCard: View {
         )
     }
 }
+
+// MARK: - Preview
+
+#if DEBUG
+private func previewTab(
+    _ title: String,
+    dir: String,
+    branch: String?,
+    dirty: Bool = false,
+    ahead: Int = 0,
+    behind: Int = 0,
+    selected: Bool = false,
+    attention: Bool = false,
+    working: Bool = false,
+    color: TerminalTabColor = .none,
+    status: [TabMetadataStore.StatusEntry] = []
+) -> SidebarTabManager.TabItem {
+    let w = NSWindow()
+    return SidebarTabManager.TabItem(
+        id: ObjectIdentifier(w),
+        title: title,
+        pwd: "/Users/me/\(dir)",
+        gitBranch: branch,
+        gitDirty: dirty,
+        gitAhead: ahead,
+        gitBehind: behind,
+        surfaceId: UUID(),
+        statusEntries: status,
+        isSelected: selected,
+        needsAttention: attention,
+        isWorking: working,
+        tabColor: color,
+        window: w
+    )
+}
+
+#Preview("Sidebar — states") {
+    SidebarView(
+        tabManager: SidebarTabManager(previewTabs: [
+            previewTab("api-server", dir: "api", branch: "main", dirty: true, selected: true, working: true),
+            previewTab("Claude: refactor auth flow", dir: "webapp", branch: "feature/auth",
+                       ahead: 2, attention: true, color: .blue),
+            previewTab("npm test — watch", dir: "webapp-wt", branch: "fix/flaky-spec",
+                       behind: 1, working: true, color: .green),
+            previewTab("idle shell", dir: "dotfiles", branch: "main"),
+            previewTab("deploy", dir: "infra", branch: "release/v2", dirty: true, ahead: 1, behind: 3,
+                       status: [.init(key: "port", value: ":3000", icon: "network")]),
+            previewTab("no-git scratch", dir: "tmp", branch: nil),
+        ]),
+        theme: .default
+    )
+    .frame(width: 250, height: 460)
+}
+#endif
