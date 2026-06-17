@@ -88,7 +88,7 @@ is not a fork issue.
 - App launches and stays alive (no crash) — all fork subsystems initialized.
 - IPC socket `/tmp/ghostty-501.sock` created with `0600` perms (matches the security audit).
 - `ghosttyctl list` returned live tab metadata:
-  `{"tabs":[{"is_active":true,"pwd":"/Users/nikita","title":"…","tab_id":"D5D700D7-…"}],"ok":true}`
+  `{"tabs":[{"is_active":true,"pwd":"/Users/you","title":"…","tab_id":"D5D700D7-…"}],"ok":true}`
 
 ## 5. Maintaining this going forward
 
