@@ -14,9 +14,19 @@ class LastWindowPosition {
         // e.g. adding a toolbar affects the window's frame.
         guard let window, window.isVisible else { return false }
         let frame = window.frame
+        // Never persist a frame below the window's own minimum: a momentarily
+        // collapsed window (e.g. mid-layout) would otherwise be restored invisible.
+        let minFrame = minFrameSize(for: window)
+        guard frame.size.width >= minFrame.width, frame.size.height >= minFrame.height else { return false }
         let rect = [frame.origin.x, frame.origin.y, frame.size.width, frame.size.height]
         UserDefaults.ghostty.set(rect, forKey: positionKey)
         return true
+    }
+
+    /// The window's minimum frame size, derived from its `contentMinSize` (which
+    /// accounts for the title bar). Windows without one yield ~zero, i.e. no floor.
+    private func minFrameSize(for window: NSWindow) -> NSSize {
+        window.frameRect(forContentRect: NSRect(origin: .zero, size: window.contentMinSize)).size
     }
 
     /// Restores a previously saved window frame (or parts of it) onto the given window.
@@ -46,8 +56,11 @@ class LastWindowPosition {
         }
 
         if restoreSize, values.count >= 4 {
-            newFrame.size.width = min(values[2], visibleFrame.width)
-            newFrame.size.height = min(values[3], visibleFrame.height)
+            // Clamp between the window's own minimum (never restore an invisible,
+            // collapsed window) and the visible screen size.
+            let minFrame = minFrameSize(for: window)
+            newFrame.size.width = min(max(values[2], minFrame.width), visibleFrame.width)
+            newFrame.size.height = min(max(values[3], minFrame.height), visibleFrame.height)
         }
 
         // If the new frame is not constrained to the visible screen,

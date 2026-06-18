@@ -1163,6 +1163,13 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
 
         window.contentView = splitView
 
+        // The sidebar's NSSplitView replaces the SwiftUI terminal container as the
+        // window's contentView, which removes the terminal grid's natural minimum.
+        // Enforce one explicitly so the window can't collapse to an invisible size.
+        // LastWindowPosition reads this back off the window, so it's the single
+        // source of truth for the floor applied to saved/restored frames.
+        window.contentMinSize = Self.minContentSize
+
         // If we have a default size, we want to apply it.
         if let defaultSize {
             defaultSize.apply(to: window)
@@ -1201,6 +1208,16 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         syncAppearance(.init(config))
     }
 
+    /// Minimum content size for a terminal window. The sidebar replaces the
+    /// terminal's natural minimum (see `windowDidLoad`), so we define one here,
+    /// apply it as the window's `contentMinSize`, and let `LastWindowPosition`
+    /// read it back — keeping a single source of truth.
+    private static let minContentSize = NSSize(width: 480, height: 320)
+
+    /// Content size used as a fallback when no usable size could be resolved
+    /// (a degenerate restored frame, or a split view that collapsed before layout).
+    private static let fallbackContentSize = NSSize(width: 1024, height: 720)
+
     /// Setup correct window frame before showing the window
     override func showWindow(_ sender: Any?) {
         guard let terminalWindow = window as? TerminalWindow else { return }
@@ -1223,6 +1240,20 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         // we should center the window
         if !originChanged, !restored {
             // This doesn't work in `windowDidLoad` somehow
+            terminalWindow.center()
+        }
+
+        // Fork safety net: the sidebar's NSSplitView contentView removes the
+        // terminal's intrinsic sizing, and a frame restored from a prior monitor
+        // layout can land off-screen — either leaves the window invisible. Ensure a
+        // usable, on-screen frame before showing.
+        let contentSize = terminalWindow.contentRect(forFrameRect: terminalWindow.frame).size
+        if contentSize.width <= Self.minContentSize.width ||
+            contentSize.height <= Self.minContentSize.height {
+            // No real size was applied (degenerate restore or collapsed split view).
+            terminalWindow.setContentSize(Self.fallbackContentSize)
+        }
+        if !NSScreen.screens.contains(where: { $0.visibleFrame.intersects(terminalWindow.frame) }) {
             terminalWindow.center()
         }
 
