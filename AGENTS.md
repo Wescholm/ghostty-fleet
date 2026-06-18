@@ -62,6 +62,17 @@ the day Zig links the macOS 26 SDK natively. The Zig std patch and overlay SDK l
 The app lands at `macos/build/Debug/Ghostty.app` (overwritten in place; bundle id
 `com.wescholm.ghostty-fleet`). Override paths via `make build XCODE_DEV=… ZIG_DIR=… CONFIG=Release`.
 
+### Dev tooling (MCP servers, `.mcp.json`)
+- **`xcode`** (`mcpbridge`) — Xcode bridge for SwiftUI `#Preview` rendering / navigator issues (see `VALIDATION.md`).
+- **`xcode-build`** (XcodeBuildMCP) — wraps `xcodebuild` for the **Swift app** loop (build/test/run/logs).
+  `DEVELOPER_DIR` is pinned to real Xcode in `.mcp.json` because `xcode-select` here points at
+  CommandLineTools. It **cannot** build `GhosttyKit.xcframework` (that's Zig) — run `make build` for
+  that first; it only drives the Swift side. (`npx …@latest` auto-installs on first launch.)
+- **`peekaboo`** — screen capture / window inspection, for verifying the live UI.
+
+> **Build rule:** the xcframework is owned by `make build` / `build-macos.sh` (Zig + the macOS-26
+> toolchain workaround). No `xcodebuild` wrapper can produce it — don't re-debug the toolchain wall.
+
 ### Upstream commands (still valid; the macOS app specifically needs the workaround above)
 - **Build:** `zig build` (`-Demit-macos-app=false` to skip the app bundle). **Test:** `zig build test`
   (prefer `-Dtest-filter=<name>`). **Format:** `zig fmt .`, `swiftlint lint --strict --fix`,

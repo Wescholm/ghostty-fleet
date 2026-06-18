@@ -3,6 +3,25 @@
     "xcode": {
       "type": "stdio",
       "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/mcpbridge"
+    },
+    "xcode-build": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "xcodebuildmcp@latest",
+        "mcp"
+      ],
+      "env": {
+        "DEVELOPER_DIR": "/Applications/Xcode.app/Contents/Developer"
+      }
+    },
+    "peekaboo": {
+      "type": "stdio",
+      "command": "peekaboo",
+      "args": [
+        "mcp"
+      ],
+      "env": {}
     }
   }
 }

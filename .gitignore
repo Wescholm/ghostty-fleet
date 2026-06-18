@@ -31,3 +31,9 @@ vgcore.*
 
 
 CLAUDE.md
+
+# Claude Code local config (skills, settings, session state) — keep local, don't publish
+.claude/
+
+# Generated scratch output (e.g. doc-scrape dumps from skill tooling)
+output/
