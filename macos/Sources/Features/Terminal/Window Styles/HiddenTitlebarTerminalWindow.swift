@@ -55,20 +55,25 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
         titleVisibility = .hidden
         titlebarAppearsTransparent = true
 
-        // Hide the traffic lights (window control buttons)
-        standardWindowButton(.closeButton)?.isHidden = true
-        standardWindowButton(.miniaturizeButton)?.isHidden = true
-        standardWindowButton(.zoomButton)?.isHidden = true
+        // Fork change: keep the traffic lights (close/miniaturize/zoom) visible, floating over the
+        // content, instead of upstream's hide-them-entirely for this style. The sidebar insets its
+        // top to clear them (TerminalController.sidebarTopInset → SidebarView.topInset). The
+        // titleVisibility/.transparent settings above keep the rest of the titlebar invisible, so
+        // only the buttons show.
+        standardWindowButton(.closeButton)?.isHidden = false
+        standardWindowButton(.miniaturizeButton)?.isHidden = false
+        standardWindowButton(.zoomButton)?.isHidden = false
+        titlebarSeparatorStyle = .none
 
         // Disallow tabbing if the titlebar is hidden, since that will (should) also hide the tab bar.
         tabbingMode = .disallowed
 
-        // Nuke it from orbit -- hide the titlebar container entirely, just in case. There are
-        // some operations that appear to bring back the titlebar visibility so this ensures
-        // it is gone forever.
+        // Keep the titlebar container visible -- it hosts the traffic lights. (Upstream hid it here
+        // to nuke any title bleed-through; we rely on titleVisibility + titlebarAppearsTransparent
+        // for that instead, so the buttons survive.)
         if let themeFrame = contentView?.superview,
            let titleBarContainer = themeFrame.firstDescendant(withClassName: "NSTitlebarContainerView") {
-            titleBarContainer.isHidden = true
+            titleBarContainer.isHidden = false
         }
     }
 

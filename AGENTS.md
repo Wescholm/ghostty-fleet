@@ -160,6 +160,9 @@ on-disk bundle stays `Ghostty.app` (PRODUCT_NAME unchanged).
   sidebar. Default `transparent` shows only the normal titlebar (no tab row with ≤1 tab). For a clean
   sidebar-only look use `macos-titlebar-style = hidden` (per-fork via launch arg
   `--macos-titlebar-style=hidden`, since the fork shares the global `~/.config/ghostty/config`).
+  Unlike upstream, the fork's `hidden` style **keeps the traffic-light window controls** (floating
+  top-left; the sidebar insets its first card below them) — see `HiddenTitlebarTerminalWindow` +
+  `TerminalController.sidebarTopInset`.
 - **Trust the build, not SourceKit.** Live SourceKit diagnostics for this multi-file module are
   unreliable (false "cannot find type X", "No such module 'Sparkle'"). Confirm with a real build.
 - **A background-launched app makes no window.** Launching `Ghostty.app` from a detached script won't

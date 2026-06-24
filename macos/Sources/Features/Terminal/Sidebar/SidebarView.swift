@@ -64,6 +64,11 @@ struct SidebarView: View {
     var theme: SidebarTheme
     var fields: Set<SidebarField> = SidebarField.defaultFields
 
+    /// Top clearance (points) the first card needs so it doesn't sit under the floating traffic
+    /// lights when the window uses the hidden titlebar style. Zero for other styles, whose content
+    /// already sits below a real titlebar. Set by TerminalController.sidebarTopInset(for:).
+    var topInset: CGFloat = 0
+
     @AppStorage("SidebarShowCardBorder") private var showCardBorder: Bool = true
     @AppStorage("SidebarDimInactiveColors") private var dimInactiveColors: Bool = false
     @State private var draggingTabID: ObjectIdentifier?
@@ -144,7 +149,7 @@ struct SidebarView: View {
                 }
             }
             .padding(.horizontal, 8)
-            .padding(.top, 8)
+            .padding(.top, max(8, topInset))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(theme.background)

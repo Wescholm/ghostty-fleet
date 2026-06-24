@@ -42,6 +42,13 @@ Orange takes priority over green (a session that needs you isn't "busy working")
 
 5. **Activity hysteresis** — folded into (2): the grace period that prevents green-dot flicker.
 
+6. **Window controls in the hidden titlebar** — `feat(window): keep traffic lights in hidden style`
+   With `macos-titlebar-style = hidden` (the clean sidebar-only look) upstream Ghostty also hides the
+   close/minimize/zoom buttons. The fork keeps them — floating top-left over the sidebar — and insets
+   the sidebar's first card below them (`HiddenTitlebarTerminalWindow` +
+   `TerminalController.sidebarTopInset` → `SidebarView.topInset`), so you get the edge-to-edge look
+   *and* working window controls.
+
 ## ghosttyctl quick reference (new)
 
 ```sh

@@ -599,6 +599,13 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         refreshAllSidebars()
     }
 
+    /// Top inset for the sidebar so its first card clears the floating traffic lights when the
+    /// titlebar is hidden (`macos-titlebar-style = hidden`). Other styles keep their content below a
+    /// real titlebar, so they need no inset. 28pt matches the standard titlebar height.
+    static func sidebarTopInset(for config: Ghostty.Config) -> CGFloat {
+        config.macosTitlebarStyle == .hidden ? 28 : 0
+    }
+
     /// Updates the sidebar theme when the terminal config changes.
     private func updateSidebarTheme(_ config: Ghostty.Config) {
         guard let sidebarHostingView, let sidebarTabManager else { return }
@@ -606,7 +613,8 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         sidebarHostingView.rootView = SidebarView(
             tabManager: sidebarTabManager,
             theme: newTheme,
-            fields: config.sidebarFields
+            fields: config.sidebarFields,
+            topInset: Self.sidebarTopInset(for: config)
         )
     }
 
@@ -1141,7 +1149,8 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         let sidebarHostingView = NSHostingView(rootView: SidebarView(
             tabManager: tabManager,
             theme: ghostty.config.sidebarTheme,
-            fields: ghostty.config.sidebarFields
+            fields: ghostty.config.sidebarFields,
+            topInset: Self.sidebarTopInset(for: config)
         ))
         self.sidebarHostingView = sidebarHostingView
 
