@@ -53,7 +53,10 @@ extension NSWindow {
         // *automatic* tabs, but Ghostty tabs *explicitly* through here — so this is the real
         // chokepoint. Returning false makes the caller present the window standalone, so no
         // NSWindowTabGroup forms and the macOS-26 NSToolbar tab strip never appears.
-        if UserDefaults.standard.bool(forKey: "FleetDisableNativeTabs") {
+        // Use the shared accessor: it defaults to `true` when unset, whereas the old
+        // `UserDefaults.standard.bool(...)` here defaulted to `false`, leaving this chokepoint open on a
+        // fresh install so non-Cmd+T paths still formed a native tab group (audit finding M3).
+        if BaseTerminalController.nativeTabsDisabled {
             return false
         }
 

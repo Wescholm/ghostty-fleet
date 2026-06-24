@@ -203,10 +203,10 @@ class AppDelegate: NSObject,
         // native NSWindow tabbing app-wide. With no NSWindowTabGroup, macOS never shows its window
         // tab bar (including the macOS-26 NSToolbar tab strip), so the entire tab-bar-suppression
         // code path goes dead — the cheap validation that moving to in-app sessions removes the
-        // tab-bar bug class. Off by default; enable with:
-        //   defaults write com.wescholm.ghostty-fleet FleetDisableNativeTabs -bool YES
-        // or a launch arg:  open … --args -FleetDisableNativeTabs YES
-        if UserDefaults.standard.object(forKey: "FleetDisableNativeTabs") as? Bool ?? true {
+        // tab-bar bug class. **On by default**; disable (re-enable native tabbing) with:
+        //   defaults write com.wescholm.ghostty-fleet FleetDisableNativeTabs -bool NO
+        // or a launch arg:  open … --args -FleetDisableNativeTabs NO
+        if BaseTerminalController.nativeTabsDisabled {
             NSWindow.allowsAutomaticWindowTabbing = false
         }
     }

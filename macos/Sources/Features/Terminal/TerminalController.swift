@@ -999,8 +999,7 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         // needs quit confirmation. This lets us attach the confirmation to something
         // that is running.
         guard let confirmWindow = all
-            .first(where: { $0.surfaceTree.contains(where: { $0.needsConfirmQuit }) })?
-            .surfaceTree.first(where: { $0.needsConfirmQuit })?
+            .first(where: { $0.anySessionNeedsConfirmQuit })?
             .window
         else {
             closeAllWindowsImmediately()
@@ -1041,10 +1040,33 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         let tabIndex: Int?
         weak var tabGroup: NSWindowTabGroup?
         let tabColor: TerminalTabColor
+        // All in-app sessions of the window, so close-window undo restores the *whole* window —
+        // every session, not just the active one (audit H3). nil for callers that predate sessions.
+        var sessions: [SessionUndo]? = nil
+        var activeSessionIndex: Int = 0
+    }
+
+    /// One session's snapshot for close-window undo (the closure retains these trees, keeping their
+    /// surfaces/ptys alive until undo/expiry — same mechanism as session-close undo).
+    struct SessionUndo {
+        let surfaceTree: SplitTree<Ghostty.SurfaceView>
+        let status: SessionStatus
+        let titleOverride: String?
+        let tabColor: TerminalTabColor?
     }
 
     convenience init(_ ghostty: Ghostty.App, with undoState: UndoState) {
-        self.init(ghostty, withSurfaceTree: undoState.surfaceTree)
+        // Restore every session if the snapshot has them (H3); else the legacy single-tree path.
+        if let sessionUndos = undoState.sessions, !sessionUndos.isEmpty {
+            let activeIdx = min(max(0, undoState.activeSessionIndex), sessionUndos.count - 1)
+            let restored = sessionUndos.map { s in
+                Session(surfaceTree: s.surfaceTree, status: s.status, titleOverride: s.titleOverride, tabColor: s.tabColor)
+            }
+            self.init(ghostty, withSurfaceTree: restored[activeIdx].surfaceTree)
+            restoreSessions(restored, activeIndex: activeIdx)
+        } else {
+            self.init(ghostty, withSurfaceTree: undoState.surfaceTree)
+        }
 
         // Show the window and restore its frame
         showWindow(nil)
@@ -1096,7 +1118,11 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             focusedSurface: focusedSurface?.id,
             tabIndex: window.tabGroup?.windows.firstIndex(of: window),
             tabGroup: window.tabGroup,
-            tabColor: (window as? TerminalWindow)?.tabColor ?? .none)
+            tabColor: (window as? TerminalWindow)?.tabColor ?? .none,
+            sessions: sessions.map { s in
+                SessionUndo(surfaceTree: s.surfaceTree, status: s.status, titleOverride: s.titleOverride, tabColor: s.tabColor)
+            },
+            activeSessionIndex: activeSessionIndex)
     }
 
     // MARK: - NSWindowController
@@ -1432,8 +1458,7 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
     @IBAction func newTab(_ sender: Any?) {
         // Sidebar re-architecture (Step 5): when native NSWindow tabbing is disabled (the default),
         // Cmd+T / the "+" adds an in-app session in this window instead of a new tabbed window.
-        let disableNativeTabs = UserDefaults.standard.object(forKey: "FleetDisableNativeTabs") as? Bool ?? true
-        if disableNativeTabs {
+        if BaseTerminalController.nativeTabsDisabled {
             newSession()
             return
         }
@@ -1443,6 +1468,14 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
     }
 
     @IBAction func closeTab(_ sender: Any?) {
+        // In-app sessions (default): "Close Tab" closes the active session — undoable, so no
+        // confirmation needed (audit H4; the native-tab guard below tore down the whole window because
+        // there is no tab group). The last session falls through to closeWindow, which confirms + undoes.
+        if BaseTerminalController.nativeTabsDisabled && sessions.count > 1 {
+            closeSession(at: activeSessionIndex)
+            return
+        }
+
         guard let window = window else { return }
         guard window.tabGroup?.windows.count ?? 0 > 1 else {
             closeWindow(sender)
@@ -1463,6 +1496,16 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
     }
 
     @IBAction func closeOtherTabs(_ sender: Any?) {
+        // In-app sessions (default): close every session except the active one (audit L2). By identity
+        // + re-find index so it's robust to the index shifts each closeSession causes.
+        if BaseTerminalController.nativeTabsDisabled {
+            guard let activeId = activeSession?.id else { return }
+            for id in sessions.filter({ $0.id != activeId }).map(\.id) {
+                if let idx = sessions.firstIndex(where: { $0.id == id }) { closeSession(at: idx) }
+            }
+            return
+        }
+
         guard let window = window else { return }
         guard let tabGroup = window.tabGroup else { return }
 
@@ -1495,6 +1538,14 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
     }
 
     @IBAction func closeTabsOnTheRight(_ sender: Any?) {
+        // In-app sessions (default): close the sessions after the active one (audit L2).
+        if BaseTerminalController.nativeTabsDisabled {
+            for id in sessions.enumerated().filter({ $0.offset > activeSessionIndex }).map(\.element.id) {
+                if let idx = sessions.firstIndex(where: { $0.id == id }) { closeSession(at: idx) }
+            }
+            return
+        }
+
         guard let window = window else { return }
         guard let tabGroup = window.tabGroup else { return }
         guard let currentIndex = tabGroup.windows.firstIndex(of: window) else { return }
@@ -1537,7 +1588,7 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         let windows: [NSWindow] = window.tabGroup?.windows ?? [window]
         guard let confirmController = windows
             .compactMap({ $0.windowController as? TerminalController })
-            .first(where: { $0.surfaceTree.contains(where: { $0.needsConfirmQuit }) })
+            .first(where: { $0.anySessionNeedsConfirmQuit })
         else {
             closeWindowImmediately()
             return

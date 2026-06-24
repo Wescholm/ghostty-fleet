@@ -61,6 +61,15 @@ class BaseTerminalController: NSWindowController,
         sessions.indices.contains(activeSessionIndex) ? sessions[activeSessionIndex] : nil
     }
 
+    /// Single source of truth for the `FleetDisableNativeTabs` flag (sidebar re-architecture). When on
+    /// (the default), native macOS window tabbing is disabled and tab-like actions create/switch in-app
+    /// ``Session``s instead. **Defaults to `true` when the key is unset** — every read site must use this
+    /// accessor; reading `UserDefaults.standard.bool(...)` directly defaults to `false` and silently
+    /// re-enables native tabbing for non-Cmd+T entry points (audit finding M3).
+    static var nativeTabsDisabled: Bool {
+        UserDefaults.standard.object(forKey: "FleetDisableNativeTabs") as? Bool ?? true
+    }
+
     /// This can be set to show/hide the command palette.
     @Published var commandPaletteIsShowing: Bool = false
 
@@ -391,9 +400,11 @@ class BaseTerminalController: NSWindowController,
     func closeSession(at index: Int) {
         guard sessions.indices.contains(index) else { return }
 
-        // Last session: closing it means closing the window (window-level undo lives elsewhere).
+        // Last session: closing it means closing the window. Route through performClose (→
+        // windowShouldClose → the confirm + window-undo path) rather than the bare window.close(),
+        // which skipped both the running-process confirmation and undo registration (audit H5).
         guard sessions.count > 1 else {
-            window?.close()
+            if let window { window.performClose(nil) } else { /* no window: nothing to close */ }
             return
         }
 
@@ -1445,19 +1456,27 @@ class BaseTerminalController: NSWindowController,
 
     // MARK: NSWindowDelegate
 
+    /// True if any surface in **any** in-app session (not just the mounted/active tree) needs a
+    /// close confirmation. Closing the window or quitting kills every session, so those confirmations
+    /// must consider background sessions too — otherwise a background agent is killed with no prompt
+    /// (sidebar re-architecture; audit finding H3).
+    var anySessionNeedsConfirmQuit: Bool {
+        sessions.contains { session in session.surfaceTree.contains { $0.needsConfirmQuit } }
+    }
+
     /// Check whether window should be closed without showing an alert
     func windowCanBeClosedWithoutConfirmation() -> Bool {
         // We must have a window. Is it even possible not to?
         guard let window = self.window else { return true }
 
-        // If we have no surfaces, close.
-        if surfaceTree.isEmpty { return true }
+        // If we have no surfaces in any session, close.
+        if sessions.allSatisfy({ $0.surfaceTree.isEmpty }) { return true }
 
         // If we already have an alert, continue with it
         guard alert == nil else { return false }
 
-        // If our surfaces don't require confirmation, close.
-        if !surfaceTree.contains(where: { $0.needsConfirmQuit }) { return true }
+        // If no session's surfaces require confirmation, close.
+        if !anySessionNeedsConfirmQuit { return true }
 
         return false
     }
