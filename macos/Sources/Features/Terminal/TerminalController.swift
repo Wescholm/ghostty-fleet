@@ -636,7 +636,13 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
     /// titlebar is hidden (`macos-titlebar-style = hidden`). Other styles keep their content below a
     /// real titlebar, so they need no inset. 28pt matches the standard titlebar height.
     static func sidebarTopInset(for config: Ghostty.Config) -> CGFloat {
-        config.macosTitlebarStyle == .hidden ? 28 : 0
+        // The hidden titlebar floats the traffic lights over the sidebar, so the first card needs top
+        // clearance to sit clear of them (the lights are ~18pt down + ~16pt tall, and the glass panel is
+        // itself inset 8pt). The fork also maps `tabs` → the hidden nib when native tabs are disabled
+        // (see windowNibName), so treat that as hidden too — otherwise the first card tucks under the lights.
+        let usesHiddenTitlebar = config.macosTitlebarStyle == .hidden ||
+            (config.macosTitlebarStyle == .tabs && BaseTerminalController.nativeTabsDisabled)
+        return usesHiddenTitlebar ? 44 : 0
     }
 
     /// Whether the sidebar should adopt a Liquid Glass pane: macOS 26+ with Reduce Transparency off.
