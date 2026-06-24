@@ -426,6 +426,16 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             return newWindow(ghostty, withBaseConfig: baseConfig, withParent: parent)
         }
 
+        // In-app sessions (default): add a session to the parent window instead of a native tab, so
+        // every "new tab" entry point (this static path is shared by AppDelegate.newTab and
+        // NewTerminalIntent .tab) matches Cmd+T. Without this, with the flag on they hit
+        // addTabbedWindowSafely (now correctly a no-op) and silently created nothing useful (audit M4).
+        if BaseTerminalController.nativeTabsDisabled {
+            parentController.newSession(baseConfig: baseConfig)
+            parentController.window?.makeKeyAndOrderFront(nil)
+            return parentController
+        }
+
         // If our parent is in non-native fullscreen, then new tabs do not work.
         // See: https://github.com/mitchellh/ghostty/issues/392
         if let fullscreenStyle = parentController.fullscreenStyle,
