@@ -31,6 +31,11 @@ final class GhosttyIPCServer {
     private var clients: [Int32: ClientConnection] = [:]
     private var socketPath: String = ""
 
+    /// (dev, ino) of the socket file we successfully bound. `stop()` only removes the path when it
+    /// still resolves to *this* inode, so an exiting instance never deletes a successor's socket after
+    /// an overlapping relaunch (audit H2).
+    private var boundInode: (dev: dev_t, ino: ino_t)?
+
     /// Per-client state for buffering partial reads.
     private class ClientConnection {
         let fd: Int32
@@ -46,11 +51,48 @@ final class GhosttyIPCServer {
 
     // MARK: - Lifecycle
 
+    /// Build a `sockaddr_un` for `path`, or nil if the path is too long. Shared by `bind` and the
+    /// liveness probe.
+    private static func makeSockaddr(_ path: String) -> sockaddr_un? {
+        var addr = sockaddr_un()
+        addr.sun_family = sa_family_t(AF_UNIX)
+        let pathBytes = path.utf8CString
+        guard pathBytes.count <= MemoryLayout.size(ofValue: addr.sun_path) else { return nil }
+        withUnsafeMutablePointer(to: &addr.sun_path) { ptr in
+            ptr.withMemoryRebound(to: CChar.self, capacity: pathBytes.count) { dest in
+                for i in 0..<pathBytes.count { dest[i] = pathBytes[i] }
+            }
+        }
+        return addr
+    }
+
+    /// True if a server is currently accepting on `path` (a real `connect()` succeeds). Used to detect
+    /// an overlapping live instance vs. a stale leftover socket file (audit H2).
+    private static func isLiveSocket(_ path: String) -> Bool {
+        guard var addr = makeSockaddr(path) else { return false }
+        let fd = socket(AF_UNIX, SOCK_STREAM, 0)
+        guard fd >= 0 else { return false }
+        defer { close(fd) }
+        let result = withUnsafePointer(to: &addr) { ptr in
+            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) { sockPtr in
+                connect(fd, sockPtr, socklen_t(MemoryLayout<sockaddr_un>.size))
+            }
+        }
+        return result == 0
+    }
+
     func start() {
         let uid = getuid()
         socketPath = "/tmp/ghostty-\(uid).sock"
 
-        // Remove stale socket if it exists
+        // If a live server already owns the path, an instance is still up (e.g. an overlapping
+        // relaunch). The newest instance takes over; `stop()` won't delete a successor's socket, so the
+        // handoff is clean. If the probe fails the socket is merely stale and the unlink below clears it.
+        if Self.isLiveSocket(socketPath) {
+            Self.logger.warning("IPC: a live server already owns \(self.socketPath); taking over")
+        }
+
+        // Remove the stale (or superseded) socket file.
         unlink(socketPath)
 
         // Create socket
@@ -61,21 +103,11 @@ final class GhosttyIPCServer {
         }
 
         // Bind
-        var addr = sockaddr_un()
-        addr.sun_family = sa_family_t(AF_UNIX)
-        let pathBytes = socketPath.utf8CString
-        guard pathBytes.count <= MemoryLayout.size(ofValue: addr.sun_path) else {
+        guard var addr = Self.makeSockaddr(socketPath) else {
             Self.logger.warning("IPC: socket path too long")
             close(serverFd)
             serverFd = -1
             return
-        }
-        withUnsafeMutablePointer(to: &addr.sun_path) { ptr in
-            ptr.withMemoryRebound(to: CChar.self, capacity: pathBytes.count) { dest in
-                for i in 0..<pathBytes.count {
-                    dest[i] = pathBytes[i]
-                }
-            }
         }
 
         let bindResult = withUnsafePointer(to: &addr) { ptr in
@@ -99,6 +131,12 @@ final class GhosttyIPCServer {
             close(serverFd)
             serverFd = -1
             return
+        }
+
+        // Record the inode we just bound so stop() only ever removes our own socket (audit H2).
+        var info = stat()
+        if stat(socketPath, &info) == 0 {
+            boundInode = (info.st_dev, info.st_ino)
         }
 
         // Set non-blocking
@@ -133,10 +171,16 @@ final class GhosttyIPCServer {
         }
         clients.removeAll()
 
-        // Remove socket file
-        if !socketPath.isEmpty {
-            unlink(socketPath)
+        // Remove the socket file only if the path still resolves to the inode we bound. After an
+        // overlapping relaunch the path may already point to a newer instance's socket — deleting it
+        // would orphan that live listener (audit H2).
+        if !socketPath.isEmpty, let bound = boundInode {
+            var info = stat()
+            if stat(socketPath, &info) == 0, info.st_dev == bound.dev, info.st_ino == bound.ino {
+                unlink(socketPath)
+            }
         }
+        boundInode = nil
 
         if serverFd >= 0 {
             close(serverFd)
