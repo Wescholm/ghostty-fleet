@@ -230,6 +230,19 @@ private struct SidebarTabCard: View {
         Color(nsColor: .separatorColor).opacity(0.3)
     }
 
+    /// Color for the lifecycle status dot, or `nil` for `.idle` (no dot). Attention reuses the theme's
+    /// attention color (orange); the rest are fixed semantic colors.
+    static func statusColor(_ status: SessionStatus, theme: SidebarTheme) -> Color? {
+        switch status {
+        case .attention: return theme.attentionColor   // bell / notify
+        case .error:     return .red
+        case .waiting:   return .yellow                 // agent blocked on the user
+        case .running:   return .green                  // agent/CPU working
+        case .done:      return .blue                   // agent finished
+        case .idle:      return nil
+        }
+    }
+
     var body: some View {
         HStack(spacing: 0) {
             // Left color accent strip — uses UnevenRoundedRectangle so it
@@ -255,15 +268,12 @@ private struct SidebarTabCard: View {
 
                         Spacer()
 
-                        if tab.needsAttention {
+                        // Single lifecycle status dot (color = state). `.idle` shows nothing.
+                        if let statusColor = Self.statusColor(tab.status, theme: theme) {
                             Circle()
-                                .fill(theme.attentionColor)
+                                .fill(statusColor)
                                 .frame(width: 8, height: 8)
-                        } else if tab.isWorking {
-                            // Foreground process is actively using CPU
-                            Circle()
-                                .fill(Color.green)
-                                .frame(width: 7, height: 7)
+                                .help(tab.status.rawValue)
                         }
                     }
                 }
@@ -354,8 +364,7 @@ private func previewTab(
     ahead: Int = 0,
     behind: Int = 0,
     selected: Bool = false,
-    attention: Bool = false,
-    working: Bool = false,
+    state: SessionStatus = .idle,
     color: TerminalTabColor = .none,
     status: [TabMetadataStore.StatusEntry] = []
 ) -> SidebarTabManager.TabItem {
@@ -370,8 +379,7 @@ private func previewTab(
         surfaceId: UUID(),
         statusEntries: status,
         isSelected: selected,
-        needsAttention: attention,
-        isWorking: working,
+        status: state,
         tabColor: color
     )
 }
@@ -379,15 +387,16 @@ private func previewTab(
 #Preview("Sidebar — states") {
     SidebarView(
         tabManager: SidebarTabManager(previewTabs: [
-            previewTab("api-server", dir: "api", branch: "main", dirty: true, selected: true, working: true),
+            previewTab("api-server", dir: "api", branch: "main", dirty: true, selected: true, state: .running),
             previewTab("Claude: refactor auth flow", dir: "webapp", branch: "feature/auth",
-                       ahead: 2, attention: true, color: .blue),
+                       ahead: 2, state: .waiting, color: .blue),
             previewTab("npm test — watch", dir: "webapp-wt", branch: "fix/flaky-spec",
-                       behind: 1, working: true, color: .green),
-            previewTab("idle shell", dir: "dotfiles", branch: "main"),
+                       behind: 1, state: .running, color: .green),
             previewTab("deploy", dir: "infra", branch: "release/v2", dirty: true, ahead: 1, behind: 3,
-                       status: [.init(key: "port", value: ":3000", icon: "network")]),
-            previewTab("no-git scratch", dir: "tmp", branch: nil),
+                       state: .error, status: [.init(key: "port", value: ":3000", icon: "network")]),
+            previewTab("build core", dir: "core", branch: "main", state: .done),
+            previewTab("bell rang", dir: "logs", branch: nil, state: .attention),
+            previewTab("idle shell", dir: "dotfiles", branch: "main"),
         ]),
         theme: .default
     )

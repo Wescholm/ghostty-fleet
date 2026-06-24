@@ -233,6 +233,8 @@ final class GhosttyIPCServer {
             handleTabSetStatus(params: params, client: client)
         case "tab.clear-status":
             handleTabClearStatus(params: params, client: client)
+        case "tab.set-state":
+            handleTabSetState(params: params, client: client)
         case "tab.list":
             handleTabList(client: client)
         case "tab.current":
@@ -329,6 +331,29 @@ final class GhosttyIPCServer {
 
         TabMetadataStore.shared.clearStatus(tabId: target.session.id, key: key)
         sendOk(["status_cleared": true], to: client)
+    }
+
+    /// Set the session's lifecycle *state* (the card's status dot) — distinct from the key/value
+    /// status entries above. Agent-authoritative: meant for Claude Code hooks (`ghosttyctl state
+    /// running|waiting|done|idle|error`). Resolves across all sessions, so it reaches a background one.
+    private func handleTabSetState(params: [String: Any], client: ClientConnection) {
+        guard let stateStr = params["state"] as? String else {
+            sendError("tab.set-state requires 'state' param", to: client)
+            return
+        }
+        guard let status = SessionStatus(rawValue: stateStr) else {
+            let valid = SessionStatus.allCases.map(\.rawValue).joined(separator: ", ")
+            sendError("invalid state '\(stateStr)' (expected one of: \(valid))", to: client)
+            return
+        }
+
+        guard let target = resolveTarget(params: params) else {
+            sendError("tab not found", to: client)
+            return
+        }
+
+        target.session.status = status
+        sendOk(["state_set": true], to: client)
     }
 
     private func handleTabList(client: ClientConnection) {

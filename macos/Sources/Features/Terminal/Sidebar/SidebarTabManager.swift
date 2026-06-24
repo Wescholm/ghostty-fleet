@@ -22,8 +22,10 @@ class SidebarTabManager: ObservableObject {
         let surfaceId: UUID?
         let statusEntries: [TabMetadataStore.StatusEntry]
         let isSelected: Bool
-        let needsAttention: Bool
-        let isWorking: Bool
+        /// The single effective lifecycle status rendered as the card's status dot. Merges the
+        /// agent-reported `Session.status` with the CPU "working" and bell/notify "attention" signals
+        /// (see ``effectiveStatus(reported:attention:working:)``). `.idle` ⇒ no dot.
+        let status: SessionStatus
         let tabColor: TerminalTabColor
 
         /// The last path component of the pwd, for compact display.
@@ -44,8 +46,7 @@ class SidebarTabManager: ObservableObject {
                 && lhs.gitBehind == rhs.gitBehind
                 && lhs.surfaceId == rhs.surfaceId
                 && lhs.statusEntries == rhs.statusEntries
-                && lhs.needsAttention == rhs.needsAttention
-                && lhs.isWorking == rhs.isWorking
+                && lhs.status == rhs.status
                 && lhs.tabColor == rhs.tabColor
         }
     }
@@ -351,13 +352,42 @@ class SidebarTabManager: ObservableObject {
         }
     }
 
+    /// Mach timebase (numer/denom) for converting `proc_taskinfo` CPU times — which are in Mach
+    /// absolute-time units, *not* nanoseconds — into nanoseconds. On Apple Silicon the tick is ~24 MHz
+    /// (numer/denom ≈ 125/3), so the raw value is ~41× too small; without this conversion the "working"
+    /// CPU heuristic's threshold was never reached and the dot never lit on Apple Silicon.
+    nonisolated private static let machTimebase: mach_timebase_info_data_t = {
+        var tb = mach_timebase_info_data_t()
+        mach_timebase_info(&tb)
+        return tb
+    }()
+
     /// Total CPU time (nanoseconds) consumed by a process, or nil if unavailable.
     nonisolated private static func processCPUNanos(pid: Int) -> UInt64? {
         var info = proc_taskinfo()
         let size = Int32(MemoryLayout<proc_taskinfo>.size)
         let result = proc_pidinfo(Int32(pid), PROC_PIDTASKINFO, 0, &info, size)
         guard result == size else { return nil }
-        return info.pti_total_user &+ info.pti_total_system
+        let ticks = info.pti_total_user &+ info.pti_total_system
+        let tb = Self.machTimebase
+        return ticks &* UInt64(tb.numer) / UInt64(tb.denom)
+    }
+
+    // MARK: - Status
+
+    /// Merge the layered status signals into the single value the card's dot shows. Precedence
+    /// (chosen with the user): **attention > error > waiting > running > done > idle**. `attention`
+    /// is the bell/notify flag; `working` is the foreground-CPU heuristic (counts as running and
+    /// outranks a stale done/idle); `reported` is the agent-authoritative `Session.status` set over
+    /// IPC (`ghosttyctl state …`, e.g. from Claude Code hooks).
+    static func effectiveStatus(reported: SessionStatus, attention: Bool, working: Bool) -> SessionStatus {
+        if attention || reported == .attention { return .attention }
+        if reported == .error { return .error }
+        if reported == .waiting { return .waiting }
+        if reported == .running { return .running }
+        if working { return .running }
+        if reported == .done { return .done }
+        return .idle
     }
 
     // MARK: - Refresh
@@ -395,8 +425,11 @@ class SidebarTabManager: ObservableObject {
                 surfaceId: sid,
                 statusEntries: entries,
                 isSelected: isSelected,
-                needsAttention: attentionSessions.contains(session.id) && session.id != activeId,
-                isWorking: sid.map { workingSurfaces.contains($0) } ?? false,
+                status: Self.effectiveStatus(
+                    reported: session.status,
+                    attention: attentionSessions.contains(session.id) && session.id != activeId,
+                    working: sid.map { workingSurfaces.contains($0) } ?? false
+                ),
                 tabColor: color
             )
         }

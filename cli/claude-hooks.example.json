@@ -1,0 +1,19 @@
+{
+  "//": "Ghostty Fleet — live per-session status from Claude Code, via ghosttyctl.",
+  "//1": "Drop these `hooks` into your Claude Code settings (~/.claude/settings.json or a",
+  "//2": "project .claude/settings.json). Each hook runs in the session's shell, so it inherits",
+  "//3": "GHOSTTY_TAB_ID and targets the right sidebar card automatically — even a background one.",
+  "//4": "Requires `ghosttyctl` on PATH (see cli/ghosttyctl). The dot colors: running=green,",
+  "//5": "waiting=yellow, done=blue (see ENHANCEMENTS.md). Remove the `//*` keys; they're just notes.",
+  "hooks": {
+    "UserPromptSubmit": [
+      { "hooks": [ { "type": "command", "command": "ghosttyctl state running" } ] }
+    ],
+    "Notification": [
+      { "hooks": [ { "type": "command", "command": "ghosttyctl state waiting" } ] }
+    ],
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "ghosttyctl state done" } ] }
+    ]
+  }
+}
