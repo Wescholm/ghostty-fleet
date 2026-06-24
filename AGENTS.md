@@ -189,14 +189,16 @@ on-disk bundle stays `Ghostty.app` (PRODUCT_NAME unchanged).
   *above the sidebar* — and the fork's `NSTabBar` hider (`sidebarActive`) does **not** catch a toolbar.
   This bit even with the flag on whenever the *titlebar style* was `tabs` (common, because the fork
   shares the global `~/.config/ghostty/config` / `…Application Support/com.mitchellh.ghostty/config*`
-  with a release Ghostty that wants native tabs). **Fix:** `TerminalController.windowNibName` now falls
-  back to the **transparent** nib when the style is `tabs` *and* `nativeTabsDisabled` — the tabs style is
-  meaningless without native tabs, so no toolbar is built and no band appears (release Ghostty keeps its
-  tabs since its flag is false). The `NSTabBar` (non-toolbar) leak only remains if you set
-  `FleetDisableNativeTabs=false`. For a clean sidebar-only look use `macos-titlebar-style = hidden`
-  (per-fork via `--macos-titlebar-style=hidden`); unlike upstream, the fork's `hidden` style **keeps the
-  traffic-light controls** (floating top-left; the sidebar insets its first card below them) — see
-  `HiddenTitlebarTerminalWindow` + `TerminalController.sidebarTopInset`.
+  with a release Ghostty that wants native tabs). **Fix:** `TerminalController.windowNibName` maps `tabs`
+  → the **hidden** nib when `nativeTabsDisabled` — the tabs style is meaningless without native tabs, so
+  instead of an empty toolbar the fork drops the title bar entirely and the sidebar's floating Liquid
+  Glass panel + the terminal run edge-to-edge into one seamless window (floating traffic lights, no band;
+  the macOS-26 "navigation floats above content" look). Release Ghostty keeps its native tabs (its flag is
+  false). The `NSTabBar` (non-toolbar) leak only remains if you set `FleetDisableNativeTabs=false`. The
+  fork's `hidden` style **keeps the traffic-light controls** (floating top-left; the sidebar insets its
+  first card below them via `TerminalController.sidebarTopInset` = 28) — see `HiddenTitlebarTerminalWindow`.
+  The sidebar itself is a floating `NSGlassEffectView` panel on a terminal-colored surface (see
+  `makeSidebarPane` + `SeamlessSplitView`), gated on macOS 26 + Reduce-Transparency-off.
 - **Trust the build, not SourceKit.** Live SourceKit diagnostics for this multi-file module are
   unreliable (false "cannot find type X", "No such module 'Sparkle'"). Confirm with a real build.
 - **macOS 26 is the baseline — deployment target is 26.0** (all three app configs in `project.pbxproj`;
