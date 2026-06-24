@@ -30,6 +30,32 @@ enum SessionStatus: String, Codable, CaseIterable {
     case error
 }
 
+/// Pure index arithmetic for the controller's session array, extracted from the live mutators so it can
+/// be unit-tested without spinning up a controller / surfaces / undo manager (audit M2).
+enum SessionIndexMath {
+    /// Clamp `index` into `0..<count` (or 0 when the array is empty).
+    static func clamped(_ index: Int, count: Int) -> Int {
+        guard count > 0 else { return 0 }
+        return min(max(0, index), count - 1)
+    }
+
+    /// When closing the session at `index` in an array of `count` (> 1), the neighbor to switch to
+    /// first so the mounted tree is never empty: the previous session if closing the last, else the next.
+    static func neighborIndex(closing index: Int, count: Int) -> Int {
+        (index == count - 1) ? index - 1 : index + 1
+    }
+
+    /// The new `activeSessionIndex` after the session at `removed` is removed from the array.
+    static func activeIndexAfterRemoval(active: Int, removed: Int) -> Int {
+        active > removed ? active - 1 : active
+    }
+
+    /// The new `activeSessionIndex` after a session is inserted at `inserted`.
+    static func activeIndexAfterInsertion(active: Int, inserted: Int) -> Int {
+        inserted <= active ? active + 1 : active
+    }
+}
+
 /// A single in-window terminal **session**: one split tree plus the metadata the sidebar renders.
 ///
 /// Part of the sidebar re-architecture (`SIDEBAR-REARCHITECTURE.md`). One `TerminalController` owns an

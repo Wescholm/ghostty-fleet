@@ -436,8 +436,7 @@ class BaseTerminalController: NSWindowController,
 
         // If closing the active session, mount a neighbor before removing it so we never mount empty.
         if wasActive {
-            let neighbor = (index == sessions.count - 1) ? index - 1 : index + 1
-            selectSession(at: neighbor) // sets activeSessionIndex = neighbor, mounts its tree
+            selectSession(at: SessionIndexMath.neighborIndex(closing: index, count: sessions.count))
         }
 
         // Occlude the closing session's surfaces (it isn't mounted now). They stay alive — held by the
@@ -449,7 +448,7 @@ class BaseTerminalController: NSWindowController,
         sessions.remove(at: index)
 
         // Keep activeSessionIndex pointing at the same (active) session after the removal shift.
-        if activeSessionIndex > index { activeSessionIndex -= 1 }
+        activeSessionIndex = SessionIndexMath.activeIndexAfterRemoval(active: activeSessionIndex, removed: index)
 
         registerSessionCloseUndo(closed)
     }
@@ -498,7 +497,7 @@ class BaseTerminalController: NSWindowController,
             insertAt = min(max(0, closed.index), sessions.count)
         }
         sessions.insert(session, at: insertAt)
-        if insertAt <= activeSessionIndex { activeSessionIndex += 1 }
+        activeSessionIndex = SessionIndexMath.activeIndexAfterInsertion(active: activeSessionIndex, inserted: insertAt)
 
         if closed.wasActive {
             // Mount + focus in one shot, restoring the originally-focused surface (handles splits).
@@ -541,7 +540,7 @@ class BaseTerminalController: NSWindowController,
     /// unmounted. No-op on an empty list.
     func restoreSessions(_ restored: [Session], activeIndex: Int) {
         guard !restored.isEmpty else { return }
-        let idx = min(max(0, activeIndex), restored.count - 1)
+        let idx = SessionIndexMath.clamped(activeIndex, count: restored.count)
         sessions = restored
         activeSessionIndex = idx
         surfaceTree = restored[idx].surfaceTree
@@ -902,7 +901,7 @@ class BaseTerminalController: NSWindowController,
                 if let surface = view.surface { ghostty_surface_set_occlusion(surface, false) }
             }
             sessions.remove(at: sessionIndex)
-            if activeSessionIndex > sessionIndex { activeSessionIndex -= 1 }
+            activeSessionIndex = SessionIndexMath.activeIndexAfterRemoval(active: activeSessionIndex, removed: sessionIndex)
         } else {
             // The session survives with its remaining splits.
             sessions[sessionIndex].surfaceTree = newTree
