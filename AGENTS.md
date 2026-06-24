@@ -142,9 +142,12 @@ Don't assume a tool/skill/agent applies; this table is the source of truth. Veri
 - **`Sidebar/SidebarView.swift`** — the SwiftUI sidebar (cards, drag-reorder, context menu, dot/
   branch rendering). Has a `#Preview` ("Sidebar — states") + a `previewTabs:` mock init for rendering.
 - **`IPC/GhosttyIPCServer.swift`** — Unix-socket server (`/tmp/ghostty-<uid>.sock`, 0600) for the CLI:
-  `tab.rename/notify/set-status/clear-status/list/current/focus`. Resolves `tab_id` across the whole
-  split tree.
-- **`IPC/TabMetadataStore.swift`** — per-tab status entries (set via IPC).
+  `tab.rename/notify/set-status/clear-status/list/current/focus`. Since G1 it is **session-aware**:
+  `resolve(surfaceId:)` / `resolveTarget(params:)` search **every session's** tree (not just the mounted
+  one), so the CLI reaches **background** sessions; `tab.list` emits one entry per in-app session;
+  `tab.focus` calls `selectSession()`; `tab.rename` sets the *session's* title; `tab.notify` posts the
+  originating surface so attention attributes to the right session.
+- **`IPC/TabMetadataStore.swift`** — per-**session** status entries (set via IPC, keyed by `Session.id`).
 - **`Window Styles/TerminalWindow.swift`** — hides the native tab bar when `sidebarActive` (see gotcha).
 - **`cli/ghosttyctl`** — the CLI. `ghosttyctl list` (incl. `foreground_pid`), `focus <tab_id>`,
   `set-status k v --icon sf.symbol`, `rename`, `notify`.

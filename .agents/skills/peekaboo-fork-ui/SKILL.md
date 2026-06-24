@@ -51,8 +51,12 @@ Then pass `--app PID:$PID` (or `--pid $PID`) to every peekaboo command below.
 
 **Read / assert the sidebar — no screenshot, deterministic:**
 ```bash
-peekaboo inspect-ui --app PID:$PID    # AX tree: sidebar list, card title, dir, child elements
+peekaboo inspect-ui --app-target "PID:$PID"    # AX tree: sidebar list, card title, dir, child elements
 ```
+> ⚠️ `inspect-ui` is the odd one out: it takes **`--app-target "PID:$PID"`** (with the literal `PID:`
+> prefix), *not* the `--app PID:$PID` that `list`/`click`/`menu`/`type` use. A bare `--app` errors
+> "Unknown option"; a bare numeric `--app-target 1234` errors "Application not found". You can also
+> target by bundle id: `--app-target com.wescholm.ghostty-fleet`.
 Prefer this for assertions ("does the card show branch X / the dirty dot") — it returns text, so
 it's stable and diffable, unlike eyeballing pixels. Also available as the `mcp__peekaboo__inspect_ui`
 MCP tool. If a long sidebar (this fork is built for *many* parallel sessions) gets truncated, raise
@@ -73,10 +77,13 @@ screencapture -o -x -l <window-id> /tmp/fork.png                    # NOT peekab
 
 **Drive the UI (AX — no synthetic mouse, no screenshot):**
 ```bash
-peekaboo inspect-ui --app PID:$PID                    # get element ids first
+peekaboo inspect-ui --app-target "PID:$PID"          # get element ids first (note --app-target)
 peekaboo click --on <id> --app PID:$PID              # click by element id, or:
 peekaboo perform-action --on <id> --action AXPress   # AXShowMenu opens a card's context menu
+peekaboo type "echo hi" --return --app PID:$PID      # types into the focused terminal surface
 ```
+`type` (background delivery) lands in the *active session's* focused surface — handy to write a unique
+marker into a session, switch away/back, and assert keep-alive via the terminal-content AX value.
 `perform-action` invokes the accessibility action directly, so it works even when the window is
 off-screen or unfocused — handy for exercising the sidebar (select a tab, open the context menu).
 
@@ -89,7 +96,7 @@ coordinates, or just click by element id and sidestep the whole class of error.
 **Read / click the menu bar:**
 ```bash
 peekaboo menu list  --app PID:$PID                          # full menu structure (AX)
-peekaboo menu click --app PID:$PID --path "Shell > New Tab" # nested path
+peekaboo menu click --app PID:$PID --path "File > New Tab"  # new in-app session (File, not Shell)
 ```
 (Note: the fork's menu bar title + items still read "Ghostty", not "Ghostty Fleet" — see the
 "Distinct name" note in CLAUDE.md. The Dock / ⌘-Tab / Finder read "Ghostty Fleet".)

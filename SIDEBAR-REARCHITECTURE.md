@@ -1,8 +1,8 @@
 # Sidebar re-architecture — in-app sessions
 
-> Status: **Steps 0–5 core landed & verified** (in-app sessions are the live default; native window
-> tabbing is off by default). Next: G1 IPC-over-sessions, G2 per-session bell/status, then
-> restoration/undo. This is the architecture direction for the sidebar fork.
+> Status: **Steps 0–6 landed & verified** (in-app sessions are the live default; native window
+> tabbing is off by default; IPC-over-sessions / G1 reaches background sessions). Next: G2 per-session
+> bell/status, then restoration/undo. This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
 >
@@ -173,13 +173,25 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
   directions works, the off-screen session stays live (keep-alive), and no native tab bar / no crash.
   **Still pending in Step 5's scope:** render `Session.status` on the cards, and the two
   review-mandated wirings — per-session **bell/status from each `Session`'s own surfaces** (not the
-  controller-level mounted-tree publisher, which only sees the active tree — G2), and IPC over
-  sessions (G1, see Step 6).
-- **Step 6 (BLOCKER, land with Step 5):** migrate `GhosttyIPCServer.surfaceForId` /
-  `controllerForSurfaceId` to iterate `controller.sessions[].surfaceTree`, not just the mounted
-  `surfaceTree` — otherwise `ghosttyctl set-status/focus/rename/notify` can't reach **background**
-  sessions, which is the fork's core feature (G1). Replace `handleTabFocus`'s `makeKeyAndOrderFront`
-  with `selectSession()` (`GHOSTTY_TAB_ID` is already a per-surface UUID).
+  controller-level mounted-tree publisher, which only sees the active tree — G2). IPC over sessions
+  (G1) is now **done** — see Step 6.
+- **Step 6 / G1 (done & verified):** `GhosttyIPCServer` resolution now searches every session's tree,
+  not just the mounted one, so `ghosttyctl` reaches **background** sessions. Concretely: `resolve(surfaceId:)`
+  / `resolveTarget(params:)` iterate `controller.sessions[].surfaceTree`; `tab.list` emits one entry **per
+  session** (so background sessions are discoverable, not one-per-window); `tab.focus` calls
+  `selectSession()` (switches the in-app session, not just `makeKeyAndOrderFront`); `tab.rename` sets the
+  *session's* `titleOverride`; and `tab.set-status`/`clear-status` key `TabMetadataStore` by **session id**
+  (so status follows the session across surface swaps/splits). `tab.notify` posts the originating *surface*
+  so the sidebar attributes attention to the owning session (the old window-object path was the G1 TODO).
+  `SidebarTabManager` reads status by session id and clears attention for whatever session becomes active
+  (so an IPC `focus` that bypasses `selectTab` can't leave a stale dot). **Verified e2e** (peekaboo-fork-ui,
+  3 sessions): `list` shows all sessions; set-status / rename / notify / focus all land on the correct
+  *background* card; per-session keep-alive holds (each session keeps its own scrollback across switches);
+  no crash. **Known follow-up (not G1):** renaming the *active* session updates its card but not the window
+  titlebar — the titlebar still reads `controller.titleOverride` while sidebar + IPC rename set
+  `session.titleOverride`. This is a pre-existing title-layer split (the Cmd+Shift+I `promptTabTitle` dialog
+  is the inverse: it updates the titlebar but not the card). Unify the title layer so the window chrome
+  tracks `activeSession.titleOverride` — folds together with the `promptRenameTab` per-session-prompt TODO.
 - **Step 7:** reimplement undo/redo in terms of `(controller, sessionIndex)` (net-new code).
 - **Step 8:** new single-window multi-session `TerminalRestorableState` (serialize the array of
   `SplitTree`s + `activeSessionIndex`); bump the format version and raise `minimumVersion` to **reject
