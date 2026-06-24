@@ -39,8 +39,16 @@ Options:
 USAGE
 }
 
-# Escape a string for safe inclusion in a JSON value.
+# Escape a string for safe inclusion inside a JSON "..." value (returns the escaped contents, no quotes).
+# Prefer a real encoder (python3 json.dumps) so ALL control characters are escaped — terminal titles and
+# agent output routinely contain ESC/BEL/VT/FF, which the server's strict JSONSerialization rejects if
+# emitted raw. Fall back to the hand-rolled escaper when python3 isn't available (handles the common
+# cases; rare other C0 controls may still be rejected).
 json_escape() {
+    if command -v python3 >/dev/null 2>&1; then
+        python3 -c 'import json,sys; sys.stdout.write(json.dumps(sys.argv[1])[1:-1])' "$1"
+        return
+    fi
     local s="$1"
     s="${s//\\/\\\\}"
     s="${s//\"/\\\"}"
