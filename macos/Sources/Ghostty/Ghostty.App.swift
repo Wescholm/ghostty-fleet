@@ -1165,7 +1165,11 @@ extension Ghostty {
 
                     // Similar to goto_split (see comment there) about our performability,
                     // we should make this more accurate later.
-                    guard (surfaceView.window?.tabGroup?.windows.count ?? 0) > 1 else { return false }
+                    // In-app sessions (sidebar re-architecture): goto_tab is performable when the window
+                    // has more than one in-app session, not only a native tab group (audit M5).
+                    let sessionCount = (surfaceView.window?.windowController as? BaseTerminalController)?.sessions.count ?? 0
+                    let tabCount = surfaceView.window?.tabGroup?.windows.count ?? 0
+                    guard sessionCount > 1 || tabCount > 1 else { return false }
 
                     NotificationCenter.default.post(
                         name: Notification.ghosttyGotoTab,

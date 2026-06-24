@@ -1733,6 +1733,28 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         guard let tabEnum = tabEnumAny as? ghostty_action_goto_tab_e else { return }
         let tabIndex: Int32 = tabEnum.rawValue
 
+        // In-app sessions (default): map goto_tab to selectSession (audit M5). With no native tab group
+        // the native path below is dead, so the goto_tab keybinds (ctrl+1…, next/prev/last) did nothing
+        // — this gives keyboard session switching. 1-indexed N → N-1; PREVIOUS/NEXT wrap; LAST = last.
+        if BaseTerminalController.nativeTabsDisabled {
+            let count = sessions.count
+            guard count > 0 else { return }
+            let dest: Int
+            if tabIndex >= 1 {
+                dest = min(Int(tabIndex - 1), count - 1)
+            } else if tabIndex == GHOSTTY_GOTO_TAB_PREVIOUS.rawValue {
+                dest = (activeSessionIndex - 1 + count) % count
+            } else if tabIndex == GHOSTTY_GOTO_TAB_NEXT.rawValue {
+                dest = (activeSessionIndex + 1) % count
+            } else if tabIndex == GHOSTTY_GOTO_TAB_LAST.rawValue {
+                dest = count - 1
+            } else {
+                return
+            }
+            selectSession(at: dest)
+            return
+        }
+
         guard let windowController = window.windowController else { return }
         guard let tabGroup = windowController.window?.tabGroup else { return }
         let tabbedWindows = tabGroup.windows
