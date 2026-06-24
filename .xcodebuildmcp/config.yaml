@@ -5,7 +5,6 @@ enabledWorkflows:
   - macos
   - project-discovery
   - swift-package
-  - ui-automation
   - utilities
   - xcode-ide
 debug: true
