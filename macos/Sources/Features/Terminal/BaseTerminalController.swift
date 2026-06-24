@@ -56,6 +56,10 @@ class BaseTerminalController: NSWindowController,
     /// Index of the active session within ``sessions`` (changed by ``selectSession(at:focus:)``).
     @Published private(set) var activeSessionIndex: Int = 0
 
+    /// Bumped on every ``selectSession(at:focus:)``; its deferred focus hop bails if superseded, so a
+    /// rapid burst of switches can't move focus into a now-background surface (audit L1).
+    private var sessionSwitchGeneration = 0
+
     /// The active session, or nil before ``sessions`` is initialized.
     var activeSession: Session? {
         sessions.indices.contains(activeSessionIndex) ? sessions[activeSessionIndex] : nil
@@ -363,10 +367,14 @@ class BaseTerminalController: NSWindowController,
             ?? surfaceTree.root?.leftmostLeaf()
         if let view = target {
             focusedSurfaceDidChange(to: view)
+            sessionSwitchGeneration += 1
+            let generation = sessionSwitchGeneration
             DispatchQueue.main.async { [weak self] in
+                // Bail if a later switch superseded this one before the runloop turn (audit L1).
+                guard let self, self.sessionSwitchGeneration == generation else { return }
                 Ghostty.moveFocus(to: view, from: outgoing)
                 view.window?.makeKeyAndOrderFront(nil)
-                self?.syncFocusToSurfaceTree()
+                self.syncFocusToSurfaceTree()
             }
         }
     }
@@ -419,6 +427,9 @@ class BaseTerminalController: NSWindowController,
             titleOverride: closing.titleOverride,
             tabColor: closing.tabColor,
             index: index,
+            // Anchor the undo position to the left-neighbor's identity so it restores to the right slot
+            // even if the remaining sessions were reordered in between (audit L5). nil = was first.
+            leftNeighborId: index > 0 ? sessions[index - 1].id : nil,
             wasActive: wasActive,
             focusedSurface: wasActive ? focusedSurface?.id : nil
         )
@@ -450,6 +461,7 @@ class BaseTerminalController: NSWindowController,
         let titleOverride: String?
         let tabColor: TerminalTabColor?
         let index: Int
+        let leftNeighborId: UUID?  // identity anchor for the restore position (audit L5)
         let wasActive: Bool
         let focusedSurface: UUID?
     }
@@ -474,7 +486,17 @@ class BaseTerminalController: NSWindowController,
             titleOverride: closed.titleOverride,
             tabColor: closed.tabColor
         )
-        let insertAt = min(max(0, closed.index), sessions.count)
+        // Restore next to the former left-neighbor by identity (robust to reorder, audit L5); fall back
+        // to the clamped original index if it was the first session or the neighbor is gone.
+        let insertAt: Int
+        if let leftId = closed.leftNeighborId,
+           let j = sessions.firstIndex(where: { $0.id == leftId }) {
+            insertAt = j + 1
+        } else if closed.leftNeighborId == nil {
+            insertAt = 0
+        } else {
+            insertAt = min(max(0, closed.index), sessions.count)
+        }
         sessions.insert(session, at: insertAt)
         if insertAt <= activeSessionIndex { activeSessionIndex += 1 }
 

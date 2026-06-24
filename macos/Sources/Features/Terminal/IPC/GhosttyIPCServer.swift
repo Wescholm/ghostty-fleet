@@ -102,6 +102,9 @@ final class GhosttyIPCServer {
             return
         }
 
+        // Close-on-exec so the listener fd can't leak into shells/programs we spawn (audit L13).
+        fcntl(serverFd, F_SETFD, fcntl(serverFd, F_GETFD) | FD_CLOEXEC)
+
         // Bind
         guard var addr = Self.makeSockaddr(socketPath) else {
             Self.logger.warning("IPC: socket path too long")
@@ -201,6 +204,9 @@ final class GhosttyIPCServer {
             }
         }
         guard clientFd >= 0 else { return }
+
+        // Close-on-exec so the connection fd can't leak into shells/programs we spawn (audit L13).
+        fcntl(clientFd, F_SETFD, fcntl(clientFd, F_GETFD) | FD_CLOEXEC)
 
         // Set non-blocking
         let flags = fcntl(clientFd, F_GETFL)

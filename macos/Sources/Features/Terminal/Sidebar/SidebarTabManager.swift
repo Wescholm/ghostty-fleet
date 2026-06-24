@@ -334,6 +334,12 @@ class SidebarTabManager: ObservableObject {
                 changed = true
             }
         }
+        // Drop cache entries for pwds no longer shown so the cache can't grow unbounded over a long
+        // session of opening/closing many directories (audit L8).
+        let live = currentPwds()
+        if gitInfoCache.count > live.count {
+            gitInfoCache = gitInfoCache.filter { live.contains($0.key) }
+        }
         if changed { refresh() }
     }
 
