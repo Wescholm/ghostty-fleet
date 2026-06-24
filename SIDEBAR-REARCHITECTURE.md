@@ -57,40 +57,47 @@ not core function. A full audit ran 2026-06-24 (**`AUDIT-REPORT.md`**); its clos
       events; the redo *action* (menu) and the undo keybinds all work, so this is almost certainly a
       harness artifact — verify once by hand.
 
-### Audit follow-ups (remaining, 2026-06-24 — see `AUDIT-REPORT.md` for full detail)
+### Audit follow-ups (2026-06-24 — see `AUDIT-REPORT.md` for full detail)
 
-Fixed already: H3/H4/H5 (close/quit data-loss), M3 (flag default), M4 (new-tab routing). Remaining,
-by the report's priority:
+Nearly all of the audit's verified findings landed in the fix batch (commits `3f0f48289..eac89cd98`,
+pushed to `origin/dev`). Status:
 
-- [ ] **H2 — IPC stale-socket race (recoverable).** `GhosttyIPCServer.start()` unlinks+binds with no
-      liveness check; overlapping quit/relaunch orphans the listener (path → dead inode while the process
-      LISTENs on an unlinked one; `connect()` → ECONNREFUSED). Probe-connect before unlink; in `stop()`
-      only unlink if we still own the inode. *(H1 "ghosttyctl hangs" was a verified **false positive** —
-      it returns in ~10 ms; do not chase it.)*
-- [ ] **M1 — background session surface death.** `ghosttyDidCloseSurface` only matches the mounted tree,
-      so a background session whose process exits leaves a zombie card. Search all sessions; remove the
-      node from its session (drop the session if its tree empties).
-- [ ] **M5 — keyboard session switching.** `onGotoTab` bails on the absent `tabGroup` → `goto_tab`
-      (ctrl+1…/next/prev/last) is dead. Route to `selectSession(at:)` when the flag is on.
-- [ ] **M6 — occlusion-gate the sidebar pollers.** The 0.5 s refresh + 1 s CPU + 1 s git poll run even
-      when the window is occluded/minimized (Apple *Work When Visible* divergence). Suspend on
-      `windowDidChangeOcclusionState`/`didResignActive`; re-arm + refresh on becoming visible. (Subsumes
-      the git-spawn-per-second and "rebuild tabs every tick" LOWs.)
-- [ ] **M7 — `ghosttyctl` `json_escape` misses C0 controls** (VT/FF/ESC in titles/output) → the server's
-      strict `JSONSerialization` rejects the request. Build the payload with a real encoder (`jq -Rs` /
-      `python3 -c 'json.dumps'`). Robustness, not injection.
-- [ ] **Tests** for the now-untested pure logic: `effectiveStatus` precedence; extract the session
-      index-math (`closeSession`/`restoreClosedSession`/`moveSession`/`restoreSessions`) into pure helpers
-      + `SessionIndexMathTests`; `SessionStatus` rawValues/`allCases`; `TabMetadataStore`; an explicit
-      pre-v8 `sessions == nil` back-compat assertion; an IPC dispatch/resolver seam.
-- [ ] **Docs sweep** (will mislead the next agent): AGENTS.md "In flight" callout still says Steps are in
-      progress; README dot legend still shows the obsolete two-dot model + omits `ghosttyctl state`;
-      SIDEBAR-FORK-REPORT.md "no shell-out"/resolved follow-ups; stale "not yet referenced" / "Step 5"
-      comments in `Session.swift` / `BaseTerminalController.swift`; the "229 tests" count (~251).
-- [ ] **Lower-value:** `@Observable`/event-driven sidebar instead of the 0.5 s republish-all poll (Apple
-      Observation guidance; L4/L11); `selectSession` async-focus generation token (L1); `ClosedSession.index`
-      anchored to a neighbor's identity, not a raw index (L5); prune `gitInfoCache` (L8); `FD_CLOEXEC` on
-      IPC fds (L13); v8→v7 downgrade keeps the active tree top-level for older readers (L16).
+- [x] **H3/H4/H5 — close/quit data-loss cluster.** Session-aware confirm (`anySessionNeedsConfirmQuit`),
+      close-window undo restores *all* sessions, bulk-close IBActions route to `closeSession`, last-session
+      close → `performClose`. (`3f0f48289`, `963e566b3`.)
+- [x] **M3 — `FleetDisableNativeTabs` chokepoint default.** One shared `BaseTerminalController.nativeTabsDisabled`
+      (`?? true`) accessor replaces all three reads incl. the load-bearing `NSWindow+Extension` chokepoint. (`3f0f48289`.)
+- [x] **M4 — shared new-tab routing.** Static `TerminalController.newTab` → `newSession` (covers
+      `AppDelegate.newTab` + `NewTerminalIntent`). (`963e566b3`.)
+- [x] **H2 — IPC stale-socket race.** Probe-connect before unlink; `stop()` only unlinks if we still own the
+      inode. *(H1 "ghosttyctl hangs" was a verified **false positive** — it returns in ~10 ms; do not chase
+      it.)* (`3f34d58cf`.)
+- [x] **M1 — background session surface death.** `ghosttyDidCloseSurface` searches every session's tree,
+      removes the node, and drops the session when its tree empties. (`a2632639a`.)
+- [x] **M5 — keyboard session switching.** `onGotoTab` (+ the App-level `gotoTab` handler) routes
+      `goto_tab` to `selectSession` when the flag is on. (`bfb38b73e`.)
+- [x] **M6 — occlusion-gate the sidebar pollers.** The refresh / CPU / git timers suspend on
+      `didChangeOcclusionState` and re-arm + refresh on becoming visible. (`c2a8083d4`.)
+- [x] **M7 — `ghosttyctl` JSON escaping.** `json_escape` now covers C0 controls (`python3 json.dumps` with
+      a bash fallback). (`95315ba2f`.)
+- [x] **Tests.** `effectiveStatus` precedence, `SessionStatus` contract, `TabMetadataStore` (`dac41d518`);
+      session index-math extracted into pure `SessionIndexMath` + `SessionIndexMathTests` (M2, `eac89cd98`);
+      pre-v8 `sessions == nil` back-compat assertion. (~260 tests, all passing.)
+- [x] **Docs sweep.** AGENTS.md "In flight" callout, README dot legend + `ghosttyctl state`,
+      SIDEBAR-FORK-REPORT.md, stale code comments, test counts. (`d26434d05`.)
+- [x] **Tail hardening.** `selectSession` async-focus generation token (L1), `ClosedSession.leftNeighborId`
+      anchored to a neighbor's identity (L5), `gitInfoCache` prune (L8), `FD_CLOEXEC` on the IPC fds (L13).
+      (`dde1321cc`.)
+
+**Deferred — lower value / higher risk (revisit later, not blocking):**
+
+- [ ] **L4/L11 — `@Observable`/event-driven sidebar** instead of the 0.5 s republish-everything poll
+      (Apple Observation guidance). A larger refactor; M6 occlusion-gating already removed the energy
+      concern, so this is now an optimization, not a correctness fix.
+- [ ] **L27 — IPC dispatch/resolver test seam.** Verb dispatch + `resolveTarget`/`resolve(surfaceId:)`
+      are still only coverable end-to-end; a pure, unit-testable seam needs a small refactor.
+- [ ] **L16 — restoration downgrade path.** A v8→v7 writer that keeps the active tree top-level so an
+      older build could still open the active session. Rare (downgrade-after-upgrade); deferred.
 
 ## Vision
 
