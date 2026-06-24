@@ -155,12 +155,14 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
 - **Step 6:** migrate IPC resolvers to iterate `controller.sessions`; replace `handleTabFocus`'s
   `makeKeyAndOrderFront` with a `selectSession()` API (`GHOSTTY_TAB_ID` is already a per-surface UUID).
 - **Step 7:** reimplement undo/redo in terms of `(controller, sessionIndex)` (net-new code).
-- **Step 8:** new multi-session `TerminalRestorableState` (serialize an array of `SplitTree`s +
-  `activeSessionIndex`, bump the format version; decide old-state migration).
+- **Step 8:** new single-window multi-session `TerminalRestorableState` (serialize the array of
+  `SplitTree`s + `activeSessionIndex`); bump the format version and raise `minimumVersion` to **reject
+  pre-rework state once** (one-time reset, no migration — Scope decision 2).
 - **Step 9:** audit the long tail of native-tab references (AppDelegate hide-others / Show-All-Tabs,
   AppleScript, `Fullscreen.swift`, `TabTitleEditor`, `TabGroupCloseCoordinator`, `NSWindow+Extension`).
-- **Step 10:** decide/implement (or stub) lost OS-native features (Show All Tabs overview, native drag,
-  move-session-to-another-window).
+- **Step 10:** remove/disable the dropped native-tab menu items (Show All Tabs, Merge All Windows,
+  move/drag between windows) — out of scope under single-window (Scope decision 3); the sidebar
+  replaces them.
 - **Step 11:** verify with `make test` + the `peekaboo-fork-ui` skill (switch focus/IME, off-screen sessions
   stay live, restoration round-trips N sessions, fullscreen/traffic-lights no longer touch tab chrome);
   remove the dead suppression code.
@@ -176,11 +178,19 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
   intends the same direction and the high-churn `Window Styles/*` suppression hacks shrink.
 - **Lost OS niceties** (Show All Tabs, native drag) must be hand-built or consciously dropped.
 
-## Open decisions (sizing levers)
+## Scope decisions (resolved)
 
-1. **Multi-window scope** — still support multiple real windows / "move session to another window"?
-2. **Restoration compat** — migrate existing saved state, or one-time reset on upgrade?
-3. **Which native-tab niceties to preserve** (Show All Tabs overview, native drag) vs. drop.
+1. **Single window.** No multiple real windows and no "move session to another window" (for now): one
+   `NSWindow` / one `TerminalController` / N sessions. This simplifies undo, restoration, and IPC (no
+   cross-window or tab-group machinery to reimplement). `Cmd+T` *and* `Cmd+N` both create a new
+   in-app session.
+2. **Restoration: one-time reset on upgrade** — do *not* migrate old per-window/tab-group state. The
+   old model doesn't map onto single-window/N-sessions, and migration code is one-time cost plus
+   long-tail risk. Bump the restorable `minimumVersion` to reject pre-rework state once; the new
+   single-window/N-session format restores reliably afterward.
+3. **Drop the native-tab niceties.** Under single-window scope, "move/drag between windows" and "Merge
+   All Windows" are moot, and "Show All Tabs" is replaced by the sidebar itself (which already has
+   drag-reorder). Remove/disable their menu items; nothing to reimplement.
 
 ## Step 0 — how to run the validation
 
