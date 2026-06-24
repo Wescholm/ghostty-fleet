@@ -1,0 +1,955 @@
+# SwiftUI API Index (macOS)
+
+A map of macOS-available SwiftUI symbols to their documentation. Use this to find the right symbol, then fetch its content live when you need detail.
+
+## How to fetch live content
+
+The human pages (`developer.apple.com/documentation/swiftui/<symbol>`) are a JavaScript app and return **no content** when fetched directly. The machine-readable content lives at the DocC JSON endpoint:
+
+```
+https://developer.apple.com/tutorials/data/documentation/swiftui/<symbol>.json
+```
+
+For a member (method/property), the URL extends the parent, e.g. `.../swiftui/view/padding(_:).json`. Symbol slugs are lowercase.
+
+Total macOS-available symbols crawled: 3491 (top-level listed below).
+
+---
+
+## Accessibility
+
+- [Accessibility fundamentals](https://developer.apple.com/documentation/swiftui/accessibility-fundamentals) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibility-fundamentals.json`
+- [AccessibilityActionCategory](https://developer.apple.com/documentation/swiftui/accessibilityactioncategory) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityactioncategory.json`
+- [AccessibilityActionKind](https://developer.apple.com/documentation/swiftui/accessibilityactionkind) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityactionkind.json`
+- [AccessibilityAdjustmentDirection](https://developer.apple.com/documentation/swiftui/accessibilityadjustmentdirection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityadjustmentdirection.json`
+- [AccessibilityChildBehavior](https://developer.apple.com/documentation/swiftui/accessibilitychildbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitychildbehavior.json`
+- [AccessibilityCustomContentKey](https://developer.apple.com/documentation/swiftui/accessibilitycustomcontentkey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitycustomcontentkey.json`
+- [AccessibilityDirectTouchOptions](https://developer.apple.com/documentation/swiftui/accessibilitydirecttouchoptions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitydirecttouchoptions.json`
+- [AccessibilityFocusState](https://developer.apple.com/documentation/swiftui/accessibilityfocusstate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityfocusstate.json`
+- [AccessibilityHeadingLevel](https://developer.apple.com/documentation/swiftui/accessibilityheadinglevel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityheadinglevel.json`
+- [AccessibilityRotorContent](https://developer.apple.com/documentation/swiftui/accessibilityrotorcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityrotorcontent.json`
+- [AccessibilityRotorContentBuilder](https://developer.apple.com/documentation/swiftui/accessibilityrotorcontentbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityrotorcontentbuilder.json`
+- [AccessibilityRotorEntry](https://developer.apple.com/documentation/swiftui/accessibilityrotorentry) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityrotorentry.json`
+- [AccessibilitySystemRotor](https://developer.apple.com/documentation/swiftui/accessibilitysystemrotor) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitysystemrotor.json`
+- [AccessibilityTechnologies](https://developer.apple.com/documentation/swiftui/accessibilitytechnologies) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitytechnologies.json`
+- [AccessibilityTraits](https://developer.apple.com/documentation/swiftui/accessibilitytraits) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitytraits.json`
+- [AccessibilityZoomGestureAction](https://developer.apple.com/documentation/swiftui/accessibilityzoomgestureaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityzoomgestureaction.json`
+- [Accessible appearance](https://developer.apple.com/documentation/swiftui/accessible-appearance) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessible-appearance.json`
+- [Accessible descriptions](https://developer.apple.com/documentation/swiftui/accessible-descriptions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessible-descriptions.json`
+- [Accessible navigation](https://developer.apple.com/documentation/swiftui/accessible-navigation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessible-navigation.json`
+- [Creating accessible views](https://developer.apple.com/documentation/swiftui/creating-accessible-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/creating-accessible-views.json`
+
+## Animations
+
+- [Animatable](https://developer.apple.com/documentation/swiftui/animatable) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animatable.json`
+- [AnimatableModifier](https://developer.apple.com/documentation/swiftui/animatablemodifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animatablemodifier.json`
+- [AnimatablePair](https://developer.apple.com/documentation/swiftui/animatablepair) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animatablepair.json`
+- [Animation](https://developer.apple.com/documentation/swiftui/animation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animation.json`
+- [AnimationCompletionCriteria](https://developer.apple.com/documentation/swiftui/animationcompletioncriteria) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animationcompletioncriteria.json`
+- [AnimationTimelineSchedule](https://developer.apple.com/documentation/swiftui/animationtimelineschedule) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animationtimelineschedule.json`
+- [Animations](https://developer.apple.com/documentation/swiftui/animations) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animations.json`
+- [AnyTransition](https://developer.apple.com/documentation/swiftui/anytransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anytransition.json`
+- [AsymmetricTransition](https://developer.apple.com/documentation/swiftui/asymmetrictransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/asymmetrictransition.json`
+- [BlurReplaceTransition](https://developer.apple.com/documentation/swiftui/blurreplacetransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/blurreplacetransition.json`
+- [ContentTransition](https://developer.apple.com/documentation/swiftui/contenttransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contenttransition.json`
+- [Controlling the timing and movements of your animations](https://developer.apple.com/documentation/swiftui/controlling-the-timing-and-movements-of-your-animations) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlling-the-timing-and-movements-of-your-animations.json`
+- [CustomAnimation](https://developer.apple.com/documentation/swiftui/customanimation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/customanimation.json`
+- [EmptyMatchedTransitionSourceConfiguration](https://developer.apple.com/documentation/swiftui/emptymatchedtransitionsourceconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptymatchedtransitionsourceconfiguration.json`
+- [GlassEffectTransition](https://developer.apple.com/documentation/swiftui/glasseffecttransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/glasseffecttransition.json`
+- [IdentityTransition](https://developer.apple.com/documentation/swiftui/identitytransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/identitytransition.json`
+- [KeyframeTimeline](https://developer.apple.com/documentation/swiftui/keyframetimeline) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyframetimeline.json`
+- [MatchedTransitionSourceConfiguration](https://developer.apple.com/documentation/swiftui/matchedtransitionsourceconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/matchedtransitionsourceconfiguration.json`
+- [MoveTransition](https://developer.apple.com/documentation/swiftui/movetransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/movetransition.json`
+- [OffsetTransition](https://developer.apple.com/documentation/swiftui/offsettransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/offsettransition.json`
+- [OpacityTransition](https://developer.apple.com/documentation/swiftui/opacitytransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/opacitytransition.json`
+- [PhaseAnimator](https://developer.apple.com/documentation/swiftui/phaseanimator) — `https://developer.apple.com/tutorials/data/documentation/swiftui/phaseanimator.json`
+- [PushTransition](https://developer.apple.com/documentation/swiftui/pushtransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pushtransition.json`
+- [ScaleTransition](https://developer.apple.com/documentation/swiftui/scaletransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scaletransition.json`
+- [ScrollTransitionConfiguration](https://developer.apple.com/documentation/swiftui/scrolltransitionconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolltransitionconfiguration.json`
+- [SlideTransition](https://developer.apple.com/documentation/swiftui/slidetransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/slidetransition.json`
+- [Spring](https://developer.apple.com/documentation/swiftui/spring) — `https://developer.apple.com/tutorials/data/documentation/swiftui/spring.json`
+- [SpringKeyframe](https://developer.apple.com/documentation/swiftui/springkeyframe) — `https://developer.apple.com/tutorials/data/documentation/swiftui/springkeyframe.json`
+- [SpringLoadingBehavior](https://developer.apple.com/documentation/swiftui/springloadingbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/springloadingbehavior.json`
+- [SymbolEffectTransition](https://developer.apple.com/documentation/swiftui/symboleffecttransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/symboleffecttransition.json`
+- [Transaction](https://developer.apple.com/documentation/swiftui/transaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/transaction.json`
+- [TransactionKey](https://developer.apple.com/documentation/swiftui/transactionkey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/transactionkey.json`
+- [Transition](https://developer.apple.com/documentation/swiftui/transition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/transition.json`
+- [TransitionPhase](https://developer.apple.com/documentation/swiftui/transitionphase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/transitionphase.json`
+- [TransitionProperties](https://developer.apple.com/documentation/swiftui/transitionproperties) — `https://developer.apple.com/tutorials/data/documentation/swiftui/transitionproperties.json`
+- [Unifying your app’s animations](https://developer.apple.com/documentation/swiftui/unifying-your-app-s-animations) — `https://developer.apple.com/tutorials/data/documentation/swiftui/unifying-your-app-s-animations.json`
+- [withAnimation(_:_:)](https://developer.apple.com/documentation/swiftui/withanimation(_:_:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/withanimation(_:_:).json`
+- [withAnimation(_:completionCriteria:_:completion:)](https://developer.apple.com/documentation/swiftui/withanimation(_:completioncriteria:_:completion:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/withanimation(_:completioncriteria:_:completion:).json`
+- [withTransaction(_:_:)](https://developer.apple.com/documentation/swiftui/withtransaction(_:_:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/withtransaction(_:_:).json`
+- [withTransaction(_:_:_:)](https://developer.apple.com/documentation/swiftui/withtransaction(_:_:_:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/withtransaction(_:_:_:).json`
+
+## App Structure
+
+- [AccessoryCircularCapacityGaugeStyle](https://developer.apple.com/documentation/swiftui/accessorycircularcapacitygaugestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessorycircularcapacitygaugestyle.json`
+- [AccessoryCircularGaugeStyle](https://developer.apple.com/documentation/swiftui/accessorycirculargaugestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessorycirculargaugestyle.json`
+- [AccessoryLinearCapacityGaugeStyle](https://developer.apple.com/documentation/swiftui/accessorylinearcapacitygaugestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessorylinearcapacitygaugestyle.json`
+- [AccessoryLinearGaugeStyle](https://developer.apple.com/documentation/swiftui/accessorylineargaugestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessorylineargaugestyle.json`
+- [Add rich graphics to your SwiftUI app](https://developer.apple.com/documentation/swiftui/add-rich-graphics-to-your-swiftui-app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/add-rich-graphics-to-your-swiftui-app.json`
+- [Adding a search interface to your app](https://developer.apple.com/documentation/swiftui/adding-a-search-interface-to-your-app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/adding-a-search-interface-to-your-app.json`
+- [Adopting drag and drop using SwiftUI](https://developer.apple.com/documentation/swiftui/adopting-drag-and-drop-using-swiftui) — `https://developer.apple.com/tutorials/data/documentation/swiftui/adopting-drag-and-drop-using-swiftui.json`
+- [AlertScene](https://developer.apple.com/documentation/swiftui/alertscene) — `https://developer.apple.com/tutorials/data/documentation/swiftui/alertscene.json`
+- [Anchor](https://developer.apple.com/documentation/swiftui/anchor) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anchor.json`
+- [Angle](https://developer.apple.com/documentation/swiftui/angle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/angle.json`
+- [AnyCompositorContent](https://developer.apple.com/documentation/swiftui/anycompositorcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anycompositorcontent.json`
+- [AnyTabContent](https://developer.apple.com/documentation/swiftui/anytabcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anytabcontent.json`
+- [App](https://developer.apple.com/documentation/swiftui/app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/app.json`
+- [App extensions](https://developer.apple.com/documentation/swiftui/app-extensions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/app-extensions.json`
+- [App organization](https://developer.apple.com/documentation/swiftui/app-organization) — `https://developer.apple.com/tutorials/data/documentation/swiftui/app-organization.json`
+- [AppKit integration](https://developer.apple.com/documentation/swiftui/appkit-integration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/appkit-integration.json`
+- [AssistiveAccess](https://developer.apple.com/documentation/swiftui/assistiveaccess) — `https://developer.apple.com/tutorials/data/documentation/swiftui/assistiveaccess.json`
+- [AutomaticDisclosureGroupStyle](https://developer.apple.com/documentation/swiftui/automaticdisclosuregroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticdisclosuregroupstyle.json`
+- [AutomaticFormStyle](https://developer.apple.com/documentation/swiftui/automaticformstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticformstyle.json`
+- [AutomaticImmersionStyle](https://developer.apple.com/documentation/swiftui/automaticimmersionstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticimmersionstyle.json`
+- [AutomaticMenuBarExtraStyle](https://developer.apple.com/documentation/swiftui/automaticmenubarextrastyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticmenubarextrastyle.json`
+- [Axis](https://developer.apple.com/documentation/swiftui/axis) — `https://developer.apple.com/tutorials/data/documentation/swiftui/axis.json`
+- [Backyard Birds: Building an app with SwiftData and widgets](https://developer.apple.com/documentation/swiftui/backyard-birds-sample) — `https://developer.apple.com/tutorials/data/documentation/swiftui/backyard-birds-sample.json`
+- [BadgeProminence](https://developer.apple.com/documentation/swiftui/badgeprominence) — `https://developer.apple.com/tutorials/data/documentation/swiftui/badgeprominence.json`
+- [Bindable](https://developer.apple.com/documentation/swiftui/bindable) — `https://developer.apple.com/tutorials/data/documentation/swiftui/bindable.json`
+- [BlendMode](https://developer.apple.com/documentation/swiftui/blendmode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/blendmode.json`
+- [Bringing multiple windows to your SwiftUI app](https://developer.apple.com/documentation/swiftui/bringing-multiple-windows-to-your-swiftui-app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/bringing-multiple-windows-to-your-swiftui-app.json`
+- [Building a document-based app using SwiftData](https://developer.apple.com/documentation/swiftui/building-a-document-based-app-using-swiftdata) — `https://developer.apple.com/tutorials/data/documentation/swiftui/building-a-document-based-app-using-swiftdata.json`
+- [Building a document-based app with SwiftUI](https://developer.apple.com/documentation/swiftui/building-a-document-based-app-with-swiftui) — `https://developer.apple.com/tutorials/data/documentation/swiftui/building-a-document-based-app-with-swiftui.json`
+- [Building a great Mac app with SwiftUI](https://developer.apple.com/documentation/swiftui/building-a-great-mac-app-with-swiftui) — `https://developer.apple.com/tutorials/data/documentation/swiftui/building-a-great-mac-app-with-swiftui.json`
+- [Capsule](https://developer.apple.com/documentation/swiftui/capsule) — `https://developer.apple.com/tutorials/data/documentation/swiftui/capsule.json`
+- [Chirality](https://developer.apple.com/documentation/swiftui/chirality) — `https://developer.apple.com/tutorials/data/documentation/swiftui/chirality.json`
+- [Circle](https://developer.apple.com/documentation/swiftui/circle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/circle.json`
+- [ColumnsFormStyle](https://developer.apple.com/documentation/swiftui/columnsformstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/columnsformstyle.json`
+- [CommandGroup](https://developer.apple.com/documentation/swiftui/commandgroup) — `https://developer.apple.com/tutorials/data/documentation/swiftui/commandgroup.json`
+- [CommandGroupPlacement](https://developer.apple.com/documentation/swiftui/commandgroupplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/commandgroupplacement.json`
+- [Commands](https://developer.apple.com/documentation/swiftui/commands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/commands.json`
+- [CommandsBuilder](https://developer.apple.com/documentation/swiftui/commandsbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/commandsbuilder.json`
+- [Composing advanced graphics effects with SwiftUI](https://developer.apple.com/documentation/swiftui/composing-advanced-graphics-effects-with-swiftui) — `https://developer.apple.com/tutorials/data/documentation/swiftui/composing-advanced-graphics-effects-with-swiftui.json`
+- [CompositorContent](https://developer.apple.com/documentation/swiftui/compositorcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/compositorcontent.json`
+- [CompositorContentBuilder](https://developer.apple.com/documentation/swiftui/compositorcontentbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/compositorcontentbuilder.json`
+- [ConcentricRectangle](https://developer.apple.com/documentation/swiftui/concentricrectangle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/concentricrectangle.json`
+- [ContainerValueKey](https://developer.apple.com/documentation/swiftui/containervaluekey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/containervaluekey.json`
+- [ContainerValues](https://developer.apple.com/documentation/swiftui/containervalues) — `https://developer.apple.com/tutorials/data/documentation/swiftui/containervalues.json`
+- [ContentMarginPlacement](https://developer.apple.com/documentation/swiftui/contentmarginplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contentmarginplacement.json`
+- [ContentMode](https://developer.apple.com/documentation/swiftui/contentmode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contentmode.json`
+- [ContentSizeCategory](https://developer.apple.com/documentation/swiftui/contentsizecategory) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contentsizecategory.json`
+- [ContentToolbarPlacement](https://developer.apple.com/documentation/swiftui/contenttoolbarplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contenttoolbarplacement.json`
+- [ControlWidget](https://developer.apple.com/documentation/swiftui/controlwidget) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlwidget.json`
+- [ControlWidgetConfiguration](https://developer.apple.com/documentation/swiftui/controlwidgetconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlwidgetconfiguration.json`
+- [ControlWidgetConfigurationBuilder](https://developer.apple.com/documentation/swiftui/controlwidgetconfigurationbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlwidgetconfigurationbuilder.json`
+- [ControlWidgetTemplateBuilder](https://developer.apple.com/documentation/swiftui/controlwidgettemplatebuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlwidgettemplatebuilder.json`
+- [CoordinateSpace](https://developer.apple.com/documentation/swiftui/coordinatespace) — `https://developer.apple.com/tutorials/data/documentation/swiftui/coordinatespace.json`
+- [CustomizableToolbarContent](https://developer.apple.com/documentation/swiftui/customizabletoolbarcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/customizabletoolbarcontent.json`
+- [DefaultDocumentGroupLaunchActions](https://developer.apple.com/documentation/swiftui/defaultdocumentgrouplaunchactions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultdocumentgrouplaunchactions.json`
+- [DefaultGaugeStyle](https://developer.apple.com/documentation/swiftui/defaultgaugestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultgaugestyle.json`
+- [DefaultGroupBoxStyle](https://developer.apple.com/documentation/swiftui/defaultgroupboxstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultgroupboxstyle.json`
+- [DefaultSettingsLinkLabel](https://developer.apple.com/documentation/swiftui/defaultsettingslinklabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultsettingslinklabel.json`
+- [DefaultToolbarItem](https://developer.apple.com/documentation/swiftui/defaulttoolbaritem) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaulttoolbaritem.json`
+- [DefaultWindowStyle](https://developer.apple.com/documentation/swiftui/defaultwindowstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultwindowstyle.json`
+- [DefaultWindowToolbarStyle](https://developer.apple.com/documentation/swiftui/defaultwindowtoolbarstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultwindowtoolbarstyle.json`
+- [DialogSeverity](https://developer.apple.com/documentation/swiftui/dialogseverity) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dialogseverity.json`
+- [DisclosureGroupStyle](https://developer.apple.com/documentation/swiftui/disclosuregroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/disclosuregroupstyle.json`
+- [DisclosureGroupStyleConfiguration](https://developer.apple.com/documentation/swiftui/disclosuregroupstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/disclosuregroupstyleconfiguration.json`
+- [DismissAction](https://developer.apple.com/documentation/swiftui/dismissaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dismissaction.json`
+- [DismissImmersiveSpaceAction](https://developer.apple.com/documentation/swiftui/dismissimmersivespaceaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dismissimmersivespaceaction.json`
+- [DismissSearchAction](https://developer.apple.com/documentation/swiftui/dismisssearchaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dismisssearchaction.json`
+- [DismissWindowAction](https://developer.apple.com/documentation/swiftui/dismisswindowaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dismisswindowaction.json`
+- [DisplayProxy](https://developer.apple.com/documentation/swiftui/displayproxy) — `https://developer.apple.com/tutorials/data/documentation/swiftui/displayproxy.json`
+- [Divider](https://developer.apple.com/documentation/swiftui/divider) — `https://developer.apple.com/tutorials/data/documentation/swiftui/divider.json`
+- [DocumentBaseBox](https://developer.apple.com/documentation/swiftui/documentbasebox) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentbasebox.json`
+- [DocumentConfiguration](https://developer.apple.com/documentation/swiftui/documentconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentconfiguration.json`
+- [DocumentCreationSource](https://developer.apple.com/documentation/swiftui/documentcreationsource) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentcreationsource.json`
+- [DocumentGroup](https://developer.apple.com/documentation/swiftui/documentgroup) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentgroup.json`
+- [DocumentReadConfiguration](https://developer.apple.com/documentation/swiftui/documentreadconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentreadconfiguration.json`
+- [DocumentReader](https://developer.apple.com/documentation/swiftui/documentreader) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentreader.json`
+- [DocumentWriteConfiguration](https://developer.apple.com/documentation/swiftui/documentwriteconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentwriteconfiguration.json`
+- [DocumentWriter](https://developer.apple.com/documentation/swiftui/documentwriter) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentwriter.json`
+- [Documents](https://developer.apple.com/documentation/swiftui/documents) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documents.json`
+- [Drag and drop](https://developer.apple.com/documentation/swiftui/drag-and-drop) — `https://developer.apple.com/tutorials/data/documentation/swiftui/drag-and-drop.json`
+- [DragConfiguration](https://developer.apple.com/documentation/swiftui/dragconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dragconfiguration.json`
+- [DragSession](https://developer.apple.com/documentation/swiftui/dragsession) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dragsession.json`
+- [DropConfiguration](https://developer.apple.com/documentation/swiftui/dropconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dropconfiguration.json`
+- [DropDelegate](https://developer.apple.com/documentation/swiftui/dropdelegate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dropdelegate.json`
+- [DropInfo](https://developer.apple.com/documentation/swiftui/dropinfo) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dropinfo.json`
+- [DropOperation](https://developer.apple.com/documentation/swiftui/dropoperation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dropoperation.json`
+- [DropProposal](https://developer.apple.com/documentation/swiftui/dropproposal) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dropproposal.json`
+- [DropSession](https://developer.apple.com/documentation/swiftui/dropsession) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dropsession.json`
+- [DynamicProperty](https://developer.apple.com/documentation/swiftui/dynamicproperty) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dynamicproperty.json`
+- [DynamicTypeSize](https://developer.apple.com/documentation/swiftui/dynamictypesize) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dynamictypesize.json`
+- [Edge](https://developer.apple.com/documentation/swiftui/edge) — `https://developer.apple.com/tutorials/data/documentation/swiftui/edge.json`
+- [EdgeInsets](https://developer.apple.com/documentation/swiftui/edgeinsets) — `https://developer.apple.com/tutorials/data/documentation/swiftui/edgeinsets.json`
+- [EditActions](https://developer.apple.com/documentation/swiftui/editactions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/editactions.json`
+- [Ellipse](https://developer.apple.com/documentation/swiftui/ellipse) — `https://developer.apple.com/tutorials/data/documentation/swiftui/ellipse.json`
+- [EmptyCommands](https://developer.apple.com/documentation/swiftui/emptycommands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptycommands.json`
+- [EmptyContent](https://developer.apple.com/documentation/swiftui/emptycontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptycontent.json`
+- [EmptyControlWidgetConfiguration](https://developer.apple.com/documentation/swiftui/emptycontrolwidgetconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptycontrolwidgetconfiguration.json`
+- [EmptyControlWidgetTemplate](https://developer.apple.com/documentation/swiftui/emptycontrolwidgettemplate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptycontrolwidgettemplate.json`
+- [EmptyVisualEffect](https://developer.apple.com/documentation/swiftui/emptyvisualeffect) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptyvisualeffect.json`
+- [EmptyWidgetConfiguration](https://developer.apple.com/documentation/swiftui/emptywidgetconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptywidgetconfiguration.json`
+- [Entry()](https://developer.apple.com/documentation/swiftui/entry()) — `https://developer.apple.com/tutorials/data/documentation/swiftui/entry().json`
+- [EveryMinuteTimelineSchedule](https://developer.apple.com/documentation/swiftui/everyminutetimelineschedule) — `https://developer.apple.com/tutorials/data/documentation/swiftui/everyminutetimelineschedule.json`
+- [ExpandedWindowToolbarStyle](https://developer.apple.com/documentation/swiftui/expandedwindowtoolbarstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/expandedwindowtoolbarstyle.json`
+- [ExplicitTimelineSchedule](https://developer.apple.com/documentation/swiftui/explicittimelineschedule) — `https://developer.apple.com/tutorials/data/documentation/swiftui/explicittimelineschedule.json`
+- [FetchedResults](https://developer.apple.com/documentation/swiftui/fetchedresults) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fetchedresults.json`
+- [FileDialogBrowserOptions](https://developer.apple.com/documentation/swiftui/filedialogbrowseroptions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/filedialogbrowseroptions.json`
+- [FileDocument](https://developer.apple.com/documentation/swiftui/filedocument) — `https://developer.apple.com/tutorials/data/documentation/swiftui/filedocument.json`
+- [FileDocumentConfiguration](https://developer.apple.com/documentation/swiftui/filedocumentconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/filedocumentconfiguration.json`
+- [FileDocumentReadConfiguration](https://developer.apple.com/documentation/swiftui/filedocumentreadconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/filedocumentreadconfiguration.json`
+- [FileDocumentWriteConfiguration](https://developer.apple.com/documentation/swiftui/filedocumentwriteconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/filedocumentwriteconfiguration.json`
+- [FileWrapperDocumentReader](https://developer.apple.com/documentation/swiftui/filewrapperdocumentreader) — `https://developer.apple.com/tutorials/data/documentation/swiftui/filewrapperdocumentreader.json`
+- [FileWrapperDocumentWriter](https://developer.apple.com/documentation/swiftui/filewrapperdocumentwriter) — `https://developer.apple.com/tutorials/data/documentation/swiftui/filewrapperdocumentwriter.json`
+- [FillStyle](https://developer.apple.com/documentation/swiftui/fillstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fillstyle.json`
+- [Food Truck: Building a SwiftUI multiplatform app](https://developer.apple.com/documentation/swiftui/food-truck-building-a-swiftui-multiplatform-app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/food-truck-building-a-swiftui-multiplatform-app.json`
+- [ForEach](https://developer.apple.com/documentation/swiftui/foreach) — `https://developer.apple.com/tutorials/data/documentation/swiftui/foreach.json`
+- [ForEachSectionCollection](https://developer.apple.com/documentation/swiftui/foreachsectioncollection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/foreachsectioncollection.json`
+- [FormStyle](https://developer.apple.com/documentation/swiftui/formstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/formstyle.json`
+- [FormStyleConfiguration](https://developer.apple.com/documentation/swiftui/formstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/formstyleconfiguration.json`
+- [FullImmersionStyle](https://developer.apple.com/documentation/swiftui/fullimmersionstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fullimmersionstyle.json`
+- [Gauge](https://developer.apple.com/documentation/swiftui/gauge) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gauge.json`
+- [GaugeStyle](https://developer.apple.com/documentation/swiftui/gaugestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gaugestyle.json`
+- [GaugeStyleConfiguration](https://developer.apple.com/documentation/swiftui/gaugestyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gaugestyleconfiguration.json`
+- [GlassEffectContainer](https://developer.apple.com/documentation/swiftui/glasseffectcontainer) — `https://developer.apple.com/tutorials/data/documentation/swiftui/glasseffectcontainer.json`
+- [Group](https://developer.apple.com/documentation/swiftui/group) — `https://developer.apple.com/tutorials/data/documentation/swiftui/group.json`
+- [GroupBoxStyle](https://developer.apple.com/documentation/swiftui/groupboxstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/groupboxstyle.json`
+- [GroupBoxStyleConfiguration](https://developer.apple.com/documentation/swiftui/groupboxstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/groupboxstyleconfiguration.json`
+- [GroupElementsOfContent](https://developer.apple.com/documentation/swiftui/groupelementsofcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/groupelementsofcontent.json`
+- [GroupSectionsOfContent](https://developer.apple.com/documentation/swiftui/groupsectionsofcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/groupsectionsofcontent.json`
+- [HelpLink](https://developer.apple.com/documentation/swiftui/helplink) — `https://developer.apple.com/tutorials/data/documentation/swiftui/helplink.json`
+- [HiddenTitleBarWindowStyle](https://developer.apple.com/documentation/swiftui/hiddentitlebarwindowstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/hiddentitlebarwindowstyle.json`
+- [HorizontalEdge](https://developer.apple.com/documentation/swiftui/horizontaledge) — `https://developer.apple.com/tutorials/data/documentation/swiftui/horizontaledge.json`
+- [HoverPhase](https://developer.apple.com/documentation/swiftui/hoverphase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/hoverphase.json`
+- [ImmersionStyle](https://developer.apple.com/documentation/swiftui/immersionstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/immersionstyle.json`
+- [Immersive spaces](https://developer.apple.com/documentation/swiftui/immersive-spaces) — `https://developer.apple.com/tutorials/data/documentation/swiftui/immersive-spaces.json`
+- [ImmersiveSpaceContent](https://developer.apple.com/documentation/swiftui/immersivespacecontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/immersivespacecontent.json`
+- [ImmersiveSpaceContentBuilder](https://developer.apple.com/documentation/swiftui/immersivespacecontentbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/immersivespacecontentbuilder.json`
+- [ImportFromDevicesCommands](https://developer.apple.com/documentation/swiftui/importfromdevicescommands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/importfromdevicescommands.json`
+- [IndexedIdentifierCollection](https://developer.apple.com/documentation/swiftui/indexedidentifiercollection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/indexedidentifiercollection.json`
+- [Input events](https://developer.apple.com/documentation/swiftui/input-events) — `https://developer.apple.com/tutorials/data/documentation/swiftui/input-events.json`
+- [InspectorCommands](https://developer.apple.com/documentation/swiftui/inspectorcommands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/inspectorcommands.json`
+- [InterfaceOrientation](https://developer.apple.com/documentation/swiftui/interfaceorientation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/interfaceorientation.json`
+- [KeyEquivalent](https://developer.apple.com/documentation/swiftui/keyequivalent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyequivalent.json`
+- [KeyPress](https://developer.apple.com/documentation/swiftui/keypress) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keypress.json`
+- [Landmarks: Building an app with Liquid Glass](https://developer.apple.com/documentation/swiftui/landmarks-building-an-app-with-liquid-glass) — `https://developer.apple.com/tutorials/data/documentation/swiftui/landmarks-building-an-app-with-liquid-glass.json`
+- [Landmarks: Displaying custom activity badges](https://developer.apple.com/documentation/swiftui/landmarks-displaying-custom-activity-badges) — `https://developer.apple.com/tutorials/data/documentation/swiftui/landmarks-displaying-custom-activity-badges.json`
+- [Landmarks: Refining the system provided Liquid Glass effect in toolbars](https://developer.apple.com/documentation/swiftui/landmarks-refining-the-system-provided-glass-effect-in-toolbars) — `https://developer.apple.com/tutorials/data/documentation/swiftui/landmarks-refining-the-system-provided-glass-effect-in-toolbars.json`
+- [LegibilityWeight](https://developer.apple.com/documentation/swiftui/legibilityweight) — `https://developer.apple.com/tutorials/data/documentation/swiftui/legibilityweight.json`
+- [LimitedAvailabilityConfiguration](https://developer.apple.com/documentation/swiftui/limitedavailabilityconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/limitedavailabilityconfiguration.json`
+- [LinearCapacityGaugeStyle](https://developer.apple.com/documentation/swiftui/linearcapacitygaugestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/linearcapacitygaugestyle.json`
+- [Loading and displaying a large data feed](https://developer.apple.com/documentation/swiftui/loading-and-displaying-a-large-data-feed) — `https://developer.apple.com/tutorials/data/documentation/swiftui/loading-and-displaying-a-large-data-feed.json`
+- [Making a card game with drag, drop, and reordering in SwiftUI](https://developer.apple.com/documentation/swiftui/making-a-card-game-with-drag-drop-and-reordering-in-swiftui) — `https://developer.apple.com/tutorials/data/documentation/swiftui/making-a-card-game-with-drag-drop-and-reordering-in-swiftui.json`
+- [Managing model data in your app](https://developer.apple.com/documentation/swiftui/managing-model-data-in-your-app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/managing-model-data-in-your-app.json`
+- [MaterialActiveAppearance](https://developer.apple.com/documentation/swiftui/materialactiveappearance) — `https://developer.apple.com/tutorials/data/documentation/swiftui/materialactiveappearance.json`
+- [MenuBarExtra](https://developer.apple.com/documentation/swiftui/menubarextra) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menubarextra.json`
+- [MenuBarExtraStyle](https://developer.apple.com/documentation/swiftui/menubarextrastyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menubarextrastyle.json`
+- [Menus and commands](https://developer.apple.com/documentation/swiftui/menus-and-commands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menus-and-commands.json`
+- [Migrating to the SwiftUI life cycle](https://developer.apple.com/documentation/swiftui/migrating-to-the-swiftui-life-cycle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/migrating-to-the-swiftui-life-cycle.json`
+- [Model data](https://developer.apple.com/documentation/swiftui/model-data) — `https://developer.apple.com/tutorials/data/documentation/swiftui/model-data.json`
+- [ModifiedContent](https://developer.apple.com/documentation/swiftui/modifiedcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/modifiedcontent.json`
+- [Monitoring data changes in your app](https://developer.apple.com/documentation/swiftui/monitoring-model-data-changes-in-your-app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/monitoring-model-data-changes-in-your-app.json`
+- [MoveCommandDirection](https://developer.apple.com/documentation/swiftui/movecommanddirection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/movecommanddirection.json`
+- [NSApplicationDelegateAdaptor](https://developer.apple.com/documentation/swiftui/nsapplicationdelegateadaptor) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsapplicationdelegateadaptor.json`
+- [NSHostingSceneBridgingOptions](https://developer.apple.com/documentation/swiftui/nshostingscenebridgingoptions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nshostingscenebridgingoptions.json`
+- [NSHostingSceneRepresentation](https://developer.apple.com/documentation/swiftui/nshostingscenerepresentation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nshostingscenerepresentation.json`
+- [NSHostingSizingOptions](https://developer.apple.com/documentation/swiftui/nshostingsizingoptions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nshostingsizingoptions.json`
+- [Namespace](https://developer.apple.com/documentation/swiftui/namespace) — `https://developer.apple.com/tutorials/data/documentation/swiftui/namespace.json`
+- [NewDocumentAction](https://developer.apple.com/documentation/swiftui/newdocumentaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/newdocumentaction.json`
+- [OpenDocumentAction](https://developer.apple.com/documentation/swiftui/opendocumentaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/opendocumentaction.json`
+- [OpenImmersiveSpaceAction](https://developer.apple.com/documentation/swiftui/openimmersivespaceaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/openimmersivespaceaction.json`
+- [OpenSettingsAction](https://developer.apple.com/documentation/swiftui/opensettingsaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/opensettingsaction.json`
+- [OpenURLAction](https://developer.apple.com/documentation/swiftui/openurlaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/openurlaction.json`
+- [OpenWindowAction](https://developer.apple.com/documentation/swiftui/openwindowaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/openwindowaction.json`
+- [OutlineGroup](https://developer.apple.com/documentation/swiftui/outlinegroup) — `https://developer.apple.com/tutorials/data/documentation/swiftui/outlinegroup.json`
+- [OutlineSubgroupChildren](https://developer.apple.com/documentation/swiftui/outlinesubgroupchildren) — `https://developer.apple.com/tutorials/data/documentation/swiftui/outlinesubgroupchildren.json`
+- [PaletteSelectionEffect](https://developer.apple.com/documentation/swiftui/paletteselectioneffect) — `https://developer.apple.com/tutorials/data/documentation/swiftui/paletteselectioneffect.json`
+- [Path](https://developer.apple.com/documentation/swiftui/path) — `https://developer.apple.com/tutorials/data/documentation/swiftui/path.json`
+- [PencilHoverPose](https://developer.apple.com/documentation/swiftui/pencilhoverpose) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pencilhoverpose.json`
+- [PencilPreferredAction](https://developer.apple.com/documentation/swiftui/pencilpreferredaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pencilpreferredaction.json`
+- [Performance analysis](https://developer.apple.com/documentation/swiftui/performance-analysis) — `https://developer.apple.com/tutorials/data/documentation/swiftui/performance-analysis.json`
+- [Performing a search operation](https://developer.apple.com/documentation/swiftui/performing-a-search-operation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/performing-a-search-operation.json`
+- [PeriodicTimelineSchedule](https://developer.apple.com/documentation/swiftui/periodictimelineschedule) — `https://developer.apple.com/tutorials/data/documentation/swiftui/periodictimelineschedule.json`
+- [Persistent storage](https://developer.apple.com/documentation/swiftui/persistent-storage) — `https://developer.apple.com/tutorials/data/documentation/swiftui/persistent-storage.json`
+- [PlainWindowStyle](https://developer.apple.com/documentation/swiftui/plainwindowstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/plainwindowstyle.json`
+- [PointerStyle](https://developer.apple.com/documentation/swiftui/pointerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pointerstyle.json`
+- [PresentedWindowContent](https://developer.apple.com/documentation/swiftui/presentedwindowcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentedwindowcontent.json`
+- [ProgressiveImmersionAspectRatio](https://developer.apple.com/documentation/swiftui/progressiveimmersionaspectratio) — `https://developer.apple.com/tutorials/data/documentation/swiftui/progressiveimmersionaspectratio.json`
+- [ProgressiveImmersionStyle](https://developer.apple.com/documentation/swiftui/progressiveimmersionstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/progressiveimmersionstyle.json`
+- [ProjectionTransform](https://developer.apple.com/documentation/swiftui/projectiontransform) — `https://developer.apple.com/tutorials/data/documentation/swiftui/projectiontransform.json`
+- [Prominence](https://developer.apple.com/documentation/swiftui/prominence) — `https://developer.apple.com/tutorials/data/documentation/swiftui/prominence.json`
+- [PullDownMenuBarExtraStyle](https://developer.apple.com/documentation/swiftui/pulldownmenubarextrastyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pulldownmenubarextrastyle.json`
+- [ReadableDocument](https://developer.apple.com/documentation/swiftui/readabledocument) — `https://developer.apple.com/tutorials/data/documentation/swiftui/readabledocument.json`
+- [Rectangle](https://developer.apple.com/documentation/swiftui/rectangle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/rectangle.json`
+- [RectangleCornerInsets](https://developer.apple.com/documentation/swiftui/rectanglecornerinsets) — `https://developer.apple.com/tutorials/data/documentation/swiftui/rectanglecornerinsets.json`
+- [RectangleCornerRadii](https://developer.apple.com/documentation/swiftui/rectanglecornerradii) — `https://developer.apple.com/tutorials/data/documentation/swiftui/rectanglecornerradii.json`
+- [RedactionReasons](https://developer.apple.com/documentation/swiftui/redactionreasons) — `https://developer.apple.com/tutorials/data/documentation/swiftui/redactionreasons.json`
+- [ReferenceFileDocument](https://developer.apple.com/documentation/swiftui/referencefiledocument) — `https://developer.apple.com/tutorials/data/documentation/swiftui/referencefiledocument.json`
+- [ReferenceFileDocumentConfiguration](https://developer.apple.com/documentation/swiftui/referencefiledocumentconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/referencefiledocumentconfiguration.json`
+- [RefreshAction](https://developer.apple.com/documentation/swiftui/refreshaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/refreshaction.json`
+- [RemoteDeviceIdentifier](https://developer.apple.com/documentation/swiftui/remotedeviceidentifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/remotedeviceidentifier.json`
+- [RemoteImmersiveSpace](https://developer.apple.com/documentation/swiftui/remoteimmersivespace) — `https://developer.apple.com/tutorials/data/documentation/swiftui/remoteimmersivespace.json`
+- [RenameAction](https://developer.apple.com/documentation/swiftui/renameaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/renameaction.json`
+- [ReorderDifference](https://developer.apple.com/documentation/swiftui/reorderdifference) — `https://developer.apple.com/tutorials/data/documentation/swiftui/reorderdifference.json`
+- [ReorderableSingleCollectionIdentifier](https://developer.apple.com/documentation/swiftui/reorderablesinglecollectionidentifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/reorderablesinglecollectionidentifier.json`
+- [RoundedCornerStyle](https://developer.apple.com/documentation/swiftui/roundedcornerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/roundedcornerstyle.json`
+- [RoundedRectangle](https://developer.apple.com/documentation/swiftui/roundedrectangle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/roundedrectangle.json`
+- [SafeAreaRegions](https://developer.apple.com/documentation/swiftui/safearearegions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/safearearegions.json`
+- [ScaledMetric](https://developer.apple.com/documentation/swiftui/scaledmetric) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scaledmetric.json`
+- [Scene](https://developer.apple.com/documentation/swiftui/scene) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scene.json`
+- [SceneBuilder](https://developer.apple.com/documentation/swiftui/scenebuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scenebuilder.json`
+- [SceneLaunchBehavior](https://developer.apple.com/documentation/swiftui/scenelaunchbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scenelaunchbehavior.json`
+- [ScenePadding](https://developer.apple.com/documentation/swiftui/scenepadding) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scenepadding.json`
+- [ScenePhase](https://developer.apple.com/documentation/swiftui/scenephase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scenephase.json`
+- [SceneRestorationBehavior](https://developer.apple.com/documentation/swiftui/scenerestorationbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scenerestorationbehavior.json`
+- [SceneStorage](https://developer.apple.com/documentation/swiftui/scenestorage) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scenestorage.json`
+- [Scenes](https://developer.apple.com/documentation/swiftui/scenes) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scenes.json`
+- [Scoping a search operation](https://developer.apple.com/documentation/swiftui/scoping-a-search-operation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scoping-a-search-operation.json`
+- [Search](https://developer.apple.com/documentation/swiftui/search) — `https://developer.apple.com/tutorials/data/documentation/swiftui/search.json`
+- [SearchFieldPlacement](https://developer.apple.com/documentation/swiftui/searchfieldplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/searchfieldplacement.json`
+- [SearchScopeActivation](https://developer.apple.com/documentation/swiftui/searchscopeactivation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/searchscopeactivation.json`
+- [SearchSuggestionsPlacement](https://developer.apple.com/documentation/swiftui/searchsuggestionsplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/searchsuggestionsplacement.json`
+- [SearchToolbarBehavior](https://developer.apple.com/documentation/swiftui/searchtoolbarbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/searchtoolbarbehavior.json`
+- [SearchUnavailableContent](https://developer.apple.com/documentation/swiftui/searchunavailablecontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/searchunavailablecontent.json`
+- [Section](https://developer.apple.com/documentation/swiftui/section) — `https://developer.apple.com/tutorials/data/documentation/swiftui/section.json`
+- [SectionCollection](https://developer.apple.com/documentation/swiftui/sectioncollection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sectioncollection.json`
+- [SectionConfiguration](https://developer.apple.com/documentation/swiftui/sectionconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sectionconfiguration.json`
+- [SectionedFetchResults](https://developer.apple.com/documentation/swiftui/sectionedfetchresults) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sectionedfetchresults.json`
+- [SensoryFeedback](https://developer.apple.com/documentation/swiftui/sensoryfeedback) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sensoryfeedback.json`
+- [Settings](https://developer.apple.com/documentation/swiftui/settings) — `https://developer.apple.com/tutorials/data/documentation/swiftui/settings.json`
+- [SettingsLink](https://developer.apple.com/documentation/swiftui/settingslink) — `https://developer.apple.com/tutorials/data/documentation/swiftui/settingslink.json`
+- [ShadowStyle](https://developer.apple.com/documentation/swiftui/shadowstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shadowstyle.json`
+- [SidebarCommands](https://developer.apple.com/documentation/swiftui/sidebarcommands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sidebarcommands.json`
+- [SidebarRowSize](https://developer.apple.com/documentation/swiftui/sidebarrowsize) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sidebarrowsize.json`
+- [SpatialEventCollection](https://developer.apple.com/documentation/swiftui/spatialeventcollection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/spatialeventcollection.json`
+- [StrokeStyle](https://developer.apple.com/documentation/swiftui/strokestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/strokestyle.json`
+- [SubmitTriggers](https://developer.apple.com/documentation/swiftui/submittriggers) — `https://developer.apple.com/tutorials/data/documentation/swiftui/submittriggers.json`
+- [Suggesting search terms](https://developer.apple.com/documentation/swiftui/suggesting-search-terms) — `https://developer.apple.com/tutorials/data/documentation/swiftui/suggesting-search-terms.json`
+- [SurroundingsEffect](https://developer.apple.com/documentation/swiftui/surroundingseffect) — `https://developer.apple.com/tutorials/data/documentation/swiftui/surroundingseffect.json`
+- [SwiftUI](https://developer.apple.com/documentation/swiftui/) — `https://developer.apple.com/tutorials/data/documentation/swiftui/.json`
+- [System events](https://developer.apple.com/documentation/swiftui/system-events) — `https://developer.apple.com/tutorials/data/documentation/swiftui/system-events.json`
+- [SystemFormatStyle](https://developer.apple.com/documentation/swiftui/systemformatstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/systemformatstyle.json`
+- [TabBarMinimizeBehavior](https://developer.apple.com/documentation/swiftui/tabbarminimizebehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabbarminimizebehavior.json`
+- [TabBarPlacement](https://developer.apple.com/documentation/swiftui/tabbarplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabbarplacement.json`
+- [TabContent](https://developer.apple.com/documentation/swiftui/tabcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabcontent.json`
+- [TabContentBuilder](https://developer.apple.com/documentation/swiftui/tabcontentbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabcontentbuilder.json`
+- [TabCustomizationBehavior](https://developer.apple.com/documentation/swiftui/tabcustomizationbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabcustomizationbehavior.json`
+- [TabPlacement](https://developer.apple.com/documentation/swiftui/tabplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabplacement.json`
+- [TabRole](https://developer.apple.com/documentation/swiftui/tabrole) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabrole.json`
+- [TabSearchActivation](https://developer.apple.com/documentation/swiftui/tabsearchactivation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabsearchactivation.json`
+- [TabSection](https://developer.apple.com/documentation/swiftui/tabsection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabsection.json`
+- [TabSectionExpansion](https://developer.apple.com/documentation/swiftui/tabsectionexpansion) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabsectionexpansion.json`
+- [TextEditingCommands](https://developer.apple.com/documentation/swiftui/texteditingcommands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/texteditingcommands.json`
+- [TextFormattingCommands](https://developer.apple.com/documentation/swiftui/textformattingcommands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textformattingcommands.json`
+- [TimeDataSource](https://developer.apple.com/documentation/swiftui/timedatasource) — `https://developer.apple.com/tutorials/data/documentation/swiftui/timedatasource.json`
+- [TimelineSchedule](https://developer.apple.com/documentation/swiftui/timelineschedule) — `https://developer.apple.com/tutorials/data/documentation/swiftui/timelineschedule.json`
+- [TimelineScheduleMode](https://developer.apple.com/documentation/swiftui/timelineschedulemode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/timelineschedulemode.json`
+- [TitleBarWindowStyle](https://developer.apple.com/documentation/swiftui/titlebarwindowstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/titlebarwindowstyle.json`
+- [ToolbarCommands](https://developer.apple.com/documentation/swiftui/toolbarcommands) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarcommands.json`
+- [ToolbarContent](https://developer.apple.com/documentation/swiftui/toolbarcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarcontent.json`
+- [ToolbarContentBuilder](https://developer.apple.com/documentation/swiftui/toolbarcontentbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarcontentbuilder.json`
+- [ToolbarCustomizationBehavior](https://developer.apple.com/documentation/swiftui/toolbarcustomizationbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarcustomizationbehavior.json`
+- [ToolbarCustomizationOptions](https://developer.apple.com/documentation/swiftui/toolbarcustomizationoptions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarcustomizationoptions.json`
+- [ToolbarDefaultItemKind](https://developer.apple.com/documentation/swiftui/toolbardefaultitemkind) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbardefaultitemkind.json`
+- [ToolbarItem](https://developer.apple.com/documentation/swiftui/toolbaritem) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbaritem.json`
+- [ToolbarItemGroup](https://developer.apple.com/documentation/swiftui/toolbaritemgroup) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbaritemgroup.json`
+- [ToolbarItemPlacement](https://developer.apple.com/documentation/swiftui/toolbaritemplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbaritemplacement.json`
+- [ToolbarMinimizationSafeAreaAdjustment](https://developer.apple.com/documentation/swiftui/toolbarminimizationsafeareaadjustment) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarminimizationsafeareaadjustment.json`
+- [ToolbarMinimizeBehavior](https://developer.apple.com/documentation/swiftui/toolbarminimizebehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarminimizebehavior.json`
+- [ToolbarPlacement](https://developer.apple.com/documentation/swiftui/toolbarplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarplacement.json`
+- [ToolbarRole](https://developer.apple.com/documentation/swiftui/toolbarrole) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarrole.json`
+- [ToolbarTitleDisplayMode](https://developer.apple.com/documentation/swiftui/toolbartitledisplaymode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbartitledisplaymode.json`
+- [Toolbars](https://developer.apple.com/documentation/swiftui/toolbars) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbars.json`
+- [TouchBar](https://developer.apple.com/documentation/swiftui/touchbar) — `https://developer.apple.com/tutorials/data/documentation/swiftui/touchbar.json`
+- [TouchBarItemPresence](https://developer.apple.com/documentation/swiftui/touchbaritempresence) — `https://developer.apple.com/tutorials/data/documentation/swiftui/touchbaritempresence.json`
+- [TupleContent](https://developer.apple.com/documentation/swiftui/tuplecontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tuplecontent.json`
+- [TypesettingLanguage](https://developer.apple.com/documentation/swiftui/typesettinglanguage) — `https://developer.apple.com/tutorials/data/documentation/swiftui/typesettinglanguage.json`
+- [UIKit integration](https://developer.apple.com/documentation/swiftui/uikit-integration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/uikit-integration.json`
+- [URLDocumentConfiguration](https://developer.apple.com/documentation/swiftui/urldocumentconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/urldocumentconfiguration.json`
+- [UnevenRoundedRectangle](https://developer.apple.com/documentation/swiftui/unevenroundedrectangle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/unevenroundedrectangle.json`
+- [UnifiedCompactWindowToolbarStyle](https://developer.apple.com/documentation/swiftui/unifiedcompactwindowtoolbarstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/unifiedcompactwindowtoolbarstyle.json`
+- [UnifiedWindowToolbarStyle](https://developer.apple.com/documentation/swiftui/unifiedwindowtoolbarstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/unifiedwindowtoolbarstyle.json`
+- [UnitCurve](https://developer.apple.com/documentation/swiftui/unitcurve) — `https://developer.apple.com/tutorials/data/documentation/swiftui/unitcurve.json`
+- [UnitPoint](https://developer.apple.com/documentation/swiftui/unitpoint) — `https://developer.apple.com/tutorials/data/documentation/swiftui/unitpoint.json`
+- [UserInterfaceSizeClass](https://developer.apple.com/documentation/swiftui/userinterfacesizeclass) — `https://developer.apple.com/tutorials/data/documentation/swiftui/userinterfacesizeclass.json`
+- [UtilityWindow](https://developer.apple.com/documentation/swiftui/utilitywindow) — `https://developer.apple.com/tutorials/data/documentation/swiftui/utilitywindow.json`
+- [VectorArithmetic](https://developer.apple.com/documentation/swiftui/vectorarithmetic) — `https://developer.apple.com/tutorials/data/documentation/swiftui/vectorarithmetic.json`
+- [VerticalEdge](https://developer.apple.com/documentation/swiftui/verticaledge) — `https://developer.apple.com/tutorials/data/documentation/swiftui/verticaledge.json`
+- [Visibility](https://developer.apple.com/documentation/swiftui/visibility) — `https://developer.apple.com/tutorials/data/documentation/swiftui/visibility.json`
+- [WatchKit integration](https://developer.apple.com/documentation/swiftui/watchkit-integration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/watchkit-integration.json`
+- [Widget](https://developer.apple.com/documentation/swiftui/widget) — `https://developer.apple.com/tutorials/data/documentation/swiftui/widget.json`
+- [WidgetBundle](https://developer.apple.com/documentation/swiftui/widgetbundle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/widgetbundle.json`
+- [WidgetBundleBuilder](https://developer.apple.com/documentation/swiftui/widgetbundlebuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/widgetbundlebuilder.json`
+- [WidgetConfiguration](https://developer.apple.com/documentation/swiftui/widgetconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/widgetconfiguration.json`
+- [Window](https://developer.apple.com/documentation/swiftui/window) — `https://developer.apple.com/tutorials/data/documentation/swiftui/window.json`
+- [WindowGroup](https://developer.apple.com/documentation/swiftui/windowgroup) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowgroup.json`
+- [WindowIdealSize](https://developer.apple.com/documentation/swiftui/windowidealsize) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowidealsize.json`
+- [WindowInteractionBehavior](https://developer.apple.com/documentation/swiftui/windowinteractionbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowinteractionbehavior.json`
+- [WindowLevel](https://developer.apple.com/documentation/swiftui/windowlevel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowlevel.json`
+- [WindowManagerRole](https://developer.apple.com/documentation/swiftui/windowmanagerrole) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowmanagerrole.json`
+- [WindowMenuBarExtraStyle](https://developer.apple.com/documentation/swiftui/windowmenubarextrastyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowmenubarextrastyle.json`
+- [WindowPlacement](https://developer.apple.com/documentation/swiftui/windowplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowplacement.json`
+- [WindowResizability](https://developer.apple.com/documentation/swiftui/windowresizability) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowresizability.json`
+- [WindowStyle](https://developer.apple.com/documentation/swiftui/windowstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowstyle.json`
+- [WindowToolbarFullScreenVisibility](https://developer.apple.com/documentation/swiftui/windowtoolbarfullscreenvisibility) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowtoolbarfullscreenvisibility.json`
+- [WindowToolbarStyle](https://developer.apple.com/documentation/swiftui/windowtoolbarstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowtoolbarstyle.json`
+- [Windows](https://developer.apple.com/documentation/swiftui/windows) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windows.json`
+- [WorldRecenterPhase](https://developer.apple.com/documentation/swiftui/worldrecenterphase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/worldrecenterphase.json`
+- [WorldTrackingLimitation](https://developer.apple.com/documentation/swiftui/worldtrackinglimitation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/worldtrackinglimitation.json`
+- [WritingToolsBehavior](https://developer.apple.com/documentation/swiftui/writingtoolsbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/writingtoolsbehavior.json`
+- [Xcode library customization](https://developer.apple.com/documentation/swiftui/xcode-library-customization) — `https://developer.apple.com/tutorials/data/documentation/swiftui/xcode-library-customization.json`
+
+## Gestures And Input
+
+- [Adding interactivity with gestures](https://developer.apple.com/documentation/swiftui/adding-interactivity-with-gestures) — `https://developer.apple.com/tutorials/data/documentation/swiftui/adding-interactivity-with-gestures.json`
+- [AnyGesture](https://developer.apple.com/documentation/swiftui/anygesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anygesture.json`
+- [Clipboard](https://developer.apple.com/documentation/swiftui/clipboard) — `https://developer.apple.com/tutorials/data/documentation/swiftui/clipboard.json`
+- [Composing SwiftUI gestures](https://developer.apple.com/documentation/swiftui/composing-swiftui-gestures) — `https://developer.apple.com/tutorials/data/documentation/swiftui/composing-swiftui-gestures.json`
+- [DefaultFocusEvaluationPriority](https://developer.apple.com/documentation/swiftui/defaultfocusevaluationpriority) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultfocusevaluationpriority.json`
+- [DragGesture](https://developer.apple.com/documentation/swiftui/draggesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/draggesture.json`
+- [ExclusiveGesture](https://developer.apple.com/documentation/swiftui/exclusivegesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/exclusivegesture.json`
+- [Focus](https://developer.apple.com/documentation/swiftui/focus) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focus.json`
+- [Focus Cookbook: Supporting and enhancing focus-driven interactions in your SwiftUI app](https://developer.apple.com/documentation/swiftui/focus-cookbook-sample) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focus-cookbook-sample.json`
+- [FocusInteractions](https://developer.apple.com/documentation/swiftui/focusinteractions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focusinteractions.json`
+- [FocusedObject](https://developer.apple.com/documentation/swiftui/focusedobject) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focusedobject.json`
+- [FocusedValue](https://developer.apple.com/documentation/swiftui/focusedvalue) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focusedvalue.json`
+- [FocusedValueKey](https://developer.apple.com/documentation/swiftui/focusedvaluekey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focusedvaluekey.json`
+- [FocusedValues](https://developer.apple.com/documentation/swiftui/focusedvalues) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focusedvalues.json`
+- [Gesture](https://developer.apple.com/documentation/swiftui/gesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gesture.json`
+- [GestureInputKinds](https://developer.apple.com/documentation/swiftui/gestureinputkinds) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gestureinputkinds.json`
+- [GestureMask](https://developer.apple.com/documentation/swiftui/gesturemask) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gesturemask.json`
+- [Gestures](https://developer.apple.com/documentation/swiftui/gestures) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gestures.json`
+- [HandGestureShortcut](https://developer.apple.com/documentation/swiftui/handgestureshortcut) — `https://developer.apple.com/tutorials/data/documentation/swiftui/handgestureshortcut.json`
+- [KeyboardShortcut](https://developer.apple.com/documentation/swiftui/keyboardshortcut) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyboardshortcut.json`
+- [LongPressGesture](https://developer.apple.com/documentation/swiftui/longpressgesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/longpressgesture.json`
+- [MagnificationGesture](https://developer.apple.com/documentation/swiftui/magnificationgesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/magnificationgesture.json`
+- [MagnifyGesture](https://developer.apple.com/documentation/swiftui/magnifygesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/magnifygesture.json`
+- [PencilDoubleTapGestureValue](https://developer.apple.com/documentation/swiftui/pencildoubletapgesturevalue) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pencildoubletapgesturevalue.json`
+- [PencilSqueezeGesturePhase](https://developer.apple.com/documentation/swiftui/pencilsqueezegesturephase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pencilsqueezegesturephase.json`
+- [PencilSqueezeGestureValue](https://developer.apple.com/documentation/swiftui/pencilsqueezegesturevalue) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pencilsqueezegesturevalue.json`
+- [ResetFocusAction](https://developer.apple.com/documentation/swiftui/resetfocusaction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/resetfocusaction.json`
+- [RotateGesture](https://developer.apple.com/documentation/swiftui/rotategesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/rotategesture.json`
+- [RotatedShape](https://developer.apple.com/documentation/swiftui/rotatedshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/rotatedshape.json`
+- [RotationGesture](https://developer.apple.com/documentation/swiftui/rotationgesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/rotationgesture.json`
+- [SequenceGesture](https://developer.apple.com/documentation/swiftui/sequencegesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sequencegesture.json`
+- [SimultaneousGesture](https://developer.apple.com/documentation/swiftui/simultaneousgesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/simultaneousgesture.json`
+- [SpatialEventGesture](https://developer.apple.com/documentation/swiftui/spatialeventgesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/spatialeventgesture.json`
+- [SpatialTapGesture](https://developer.apple.com/documentation/swiftui/spatialtapgesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/spatialtapgesture.json`
+- [TapGesture](https://developer.apple.com/documentation/swiftui/tapgesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tapgesture.json`
+- [WindowDragGesture](https://developer.apple.com/documentation/swiftui/windowdraggesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowdraggesture.json`
+
+## Graphics And Drawing
+
+- [AngularGradient](https://developer.apple.com/documentation/swiftui/angulargradient) — `https://developer.apple.com/tutorials/data/documentation/swiftui/angulargradient.json`
+- [AnyGradient](https://developer.apple.com/documentation/swiftui/anygradient) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anygradient.json`
+- [AnyShape](https://developer.apple.com/documentation/swiftui/anyshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anyshape.json`
+- [AnyShapeStyle](https://developer.apple.com/documentation/swiftui/anyshapestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anyshapestyle.json`
+- [Canvas](https://developer.apple.com/documentation/swiftui/canvas) — `https://developer.apple.com/tutorials/data/documentation/swiftui/canvas.json`
+- [ContainerRelativeShape](https://developer.apple.com/documentation/swiftui/containerrelativeshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/containerrelativeshape.json`
+- [ContentShapeKinds](https://developer.apple.com/documentation/swiftui/contentshapekinds) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contentshapekinds.json`
+- [DefaultGlassEffectShape](https://developer.apple.com/documentation/swiftui/defaultglasseffectshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultglasseffectshape.json`
+- [Drawing and graphics](https://developer.apple.com/documentation/swiftui/drawing-and-graphics) — `https://developer.apple.com/tutorials/data/documentation/swiftui/drawing-and-graphics.json`
+- [EllipticalGradient](https://developer.apple.com/documentation/swiftui/ellipticalgradient) — `https://developer.apple.com/tutorials/data/documentation/swiftui/ellipticalgradient.json`
+- [Gradient](https://developer.apple.com/documentation/swiftui/gradient) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gradient.json`
+- [Graphics and rendering modifiers](https://developer.apple.com/documentation/swiftui/view-graphics-and-rendering) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-graphics-and-rendering.json`
+- [GraphicsContext](https://developer.apple.com/documentation/swiftui/graphicscontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/graphicscontext.json`
+- [ImageRenderer](https://developer.apple.com/documentation/swiftui/imagerenderer) — `https://developer.apple.com/tutorials/data/documentation/swiftui/imagerenderer.json`
+- [LinearGradient](https://developer.apple.com/documentation/swiftui/lineargradient) — `https://developer.apple.com/tutorials/data/documentation/swiftui/lineargradient.json`
+- [MeshGradient](https://developer.apple.com/documentation/swiftui/meshgradient) — `https://developer.apple.com/tutorials/data/documentation/swiftui/meshgradient.json`
+- [OffsetShape](https://developer.apple.com/documentation/swiftui/offsetshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/offsetshape.json`
+- [RadialGradient](https://developer.apple.com/documentation/swiftui/radialgradient) — `https://developer.apple.com/tutorials/data/documentation/swiftui/radialgradient.json`
+- [RoundedRectangularShape](https://developer.apple.com/documentation/swiftui/roundedrectangularshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/roundedrectangularshape.json`
+- [RoundedRectangularShapeCorners](https://developer.apple.com/documentation/swiftui/roundedrectangularshapecorners) — `https://developer.apple.com/tutorials/data/documentation/swiftui/roundedrectangularshapecorners.json`
+- [ScaledShape](https://developer.apple.com/documentation/swiftui/scaledshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scaledshape.json`
+- [Shader](https://developer.apple.com/documentation/swiftui/shader) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shader.json`
+- [ShaderFunction](https://developer.apple.com/documentation/swiftui/shaderfunction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shaderfunction.json`
+- [ShaderLibrary](https://developer.apple.com/documentation/swiftui/shaderlibrary) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shaderlibrary.json`
+- [Shape](https://developer.apple.com/documentation/swiftui/shape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shape.json`
+- [ShapeRole](https://developer.apple.com/documentation/swiftui/shaperole) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shaperole.json`
+- [ShapeStyle](https://developer.apple.com/documentation/swiftui/shapestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shapestyle.json`
+- [ShapeView](https://developer.apple.com/documentation/swiftui/shapeview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shapeview.json`
+- [Shapes](https://developer.apple.com/documentation/swiftui/shapes) — `https://developer.apple.com/tutorials/data/documentation/swiftui/shapes.json`
+- [SymbolColorRenderingMode](https://developer.apple.com/documentation/swiftui/symbolcolorrenderingmode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/symbolcolorrenderingmode.json`
+- [SymbolRenderingMode](https://developer.apple.com/documentation/swiftui/symbolrenderingmode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/symbolrenderingmode.json`
+- [SymbolVariableValueMode](https://developer.apple.com/documentation/swiftui/symbolvariablevaluemode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/symbolvariablevaluemode.json`
+- [SymbolVariants](https://developer.apple.com/documentation/swiftui/symbolvariants) — `https://developer.apple.com/tutorials/data/documentation/swiftui/symbolvariants.json`
+- [TransformedShape](https://developer.apple.com/documentation/swiftui/transformedshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/transformedshape.json`
+
+## Layout
+
+- [AXChartDescriptorRepresentable](https://developer.apple.com/documentation/swiftui/axchartdescriptorrepresentable) — `https://developer.apple.com/tutorials/data/documentation/swiftui/axchartdescriptorrepresentable.json`
+- [AdaptableTabBarPlacement](https://developer.apple.com/documentation/swiftui/adaptabletabbarplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/adaptabletabbarplacement.json`
+- [Aligning views across stacks](https://developer.apple.com/documentation/swiftui/aligning-views-across-stacks) — `https://developer.apple.com/tutorials/data/documentation/swiftui/aligning-views-across-stacks.json`
+- [Aligning views within a stack](https://developer.apple.com/documentation/swiftui/aligning-views-within-a-stack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/aligning-views-within-a-stack.json`
+- [Alignment](https://developer.apple.com/documentation/swiftui/alignment) — `https://developer.apple.com/tutorials/data/documentation/swiftui/alignment.json`
+- [AlignmentID](https://developer.apple.com/documentation/swiftui/alignmentid) — `https://developer.apple.com/tutorials/data/documentation/swiftui/alignmentid.json`
+- [Animatable()](https://developer.apple.com/documentation/swiftui/animatable()) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animatable().json`
+- [AnimatableIgnored()](https://developer.apple.com/documentation/swiftui/animatableignored()) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animatableignored().json`
+- [AnimatableValues](https://developer.apple.com/documentation/swiftui/animatablevalues) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animatablevalues.json`
+- [AnyLayout](https://developer.apple.com/documentation/swiftui/anylayout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anylayout.json`
+- [AnyScrollTargetBehavior](https://developer.apple.com/documentation/swiftui/anyscrolltargetbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anyscrolltargetbehavior.json`
+- [AutomaticTableStyle](https://developer.apple.com/documentation/swiftui/automatictablestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automatictablestyle.json`
+- [Building layouts with stack views](https://developer.apple.com/documentation/swiftui/building-layouts-with-stack-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/building-layouts-with-stack-views.json`
+- [Composing custom layouts with SwiftUI](https://developer.apple.com/documentation/swiftui/composing-custom-layouts-with-swiftui) — `https://developer.apple.com/tutorials/data/documentation/swiftui/composing-custom-layouts-with-swiftui.json`
+- [CoordinateSpaceProtocol](https://developer.apple.com/documentation/swiftui/coordinatespaceprotocol) — `https://developer.apple.com/tutorials/data/documentation/swiftui/coordinatespaceprotocol.json`
+- [Creating performant scrollable stacks](https://developer.apple.com/documentation/swiftui/creating-performant-scrollable-stacks) — `https://developer.apple.com/tutorials/data/documentation/swiftui/creating-performant-scrollable-stacks.json`
+- [CubicKeyframe](https://developer.apple.com/documentation/swiftui/cubickeyframe) — `https://developer.apple.com/tutorials/data/documentation/swiftui/cubickeyframe.json`
+- [Custom layout](https://developer.apple.com/documentation/swiftui/custom-layout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/custom-layout.json`
+- [DefaultListStyle](https://developer.apple.com/documentation/swiftui/defaultliststyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultliststyle.json`
+- [DisclosureTableRow](https://developer.apple.com/documentation/swiftui/disclosuretablerow) — `https://developer.apple.com/tutorials/data/documentation/swiftui/disclosuretablerow.json`
+- [Displaying data in lists](https://developer.apple.com/documentation/swiftui/displaying-data-in-lists) — `https://developer.apple.com/tutorials/data/documentation/swiftui/displaying-data-in-lists.json`
+- [DynamicTableRowContent](https://developer.apple.com/documentation/swiftui/dynamictablerowcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dynamictablerowcontent.json`
+- [EditableCollectionContent](https://developer.apple.com/documentation/swiftui/editablecollectioncontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/editablecollectioncontent.json`
+- [EmptyAnimatableData](https://developer.apple.com/documentation/swiftui/emptyanimatabledata) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptyanimatabledata.json`
+- [EmptyTableRowContent](https://developer.apple.com/documentation/swiftui/emptytablerowcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptytablerowcontent.json`
+- [GeometryEffect](https://developer.apple.com/documentation/swiftui/geometryeffect) — `https://developer.apple.com/tutorials/data/documentation/swiftui/geometryeffect.json`
+- [GeometryProxy](https://developer.apple.com/documentation/swiftui/geometryproxy) — `https://developer.apple.com/tutorials/data/documentation/swiftui/geometryproxy.json`
+- [GeometryReader](https://developer.apple.com/documentation/swiftui/geometryreader) — `https://developer.apple.com/tutorials/data/documentation/swiftui/geometryreader.json`
+- [Grid](https://developer.apple.com/documentation/swiftui/grid) — `https://developer.apple.com/tutorials/data/documentation/swiftui/grid.json`
+- [GridItem](https://developer.apple.com/documentation/swiftui/griditem) — `https://developer.apple.com/tutorials/data/documentation/swiftui/griditem.json`
+- [GridLayout](https://developer.apple.com/documentation/swiftui/gridlayout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gridlayout.json`
+- [GridRow](https://developer.apple.com/documentation/swiftui/gridrow) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gridrow.json`
+- [Grouping data with lazy stack views](https://developer.apple.com/documentation/swiftui/grouping-data-with-lazy-stack-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/grouping-data-with-lazy-stack-views.json`
+- [HStack](https://developer.apple.com/documentation/swiftui/hstack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/hstack.json`
+- [HStackLayout](https://developer.apple.com/documentation/swiftui/hstacklayout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/hstacklayout.json`
+- [HorizontalAlignment](https://developer.apple.com/documentation/swiftui/horizontalalignment) — `https://developer.apple.com/tutorials/data/documentation/swiftui/horizontalalignment.json`
+- [InsetListStyle](https://developer.apple.com/documentation/swiftui/insetliststyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/insetliststyle.json`
+- [InsetTableStyle](https://developer.apple.com/documentation/swiftui/insettablestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/insettablestyle.json`
+- [InsettableShape](https://developer.apple.com/documentation/swiftui/insettableshape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/insettableshape.json`
+- [KeyframeAnimator](https://developer.apple.com/documentation/swiftui/keyframeanimator) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyframeanimator.json`
+- [KeyframeTrack](https://developer.apple.com/documentation/swiftui/keyframetrack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyframetrack.json`
+- [KeyframeTrackContent](https://developer.apple.com/documentation/swiftui/keyframetrackcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyframetrackcontent.json`
+- [KeyframeTrackContentBuilder](https://developer.apple.com/documentation/swiftui/keyframetrackcontentbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyframetrackcontentbuilder.json`
+- [Keyframes](https://developer.apple.com/documentation/swiftui/keyframes) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyframes.json`
+- [KeyframesBuilder](https://developer.apple.com/documentation/swiftui/keyframesbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/keyframesbuilder.json`
+- [Landmarks: Extending horizontal scrolling under a sidebar or inspector](https://developer.apple.com/documentation/swiftui/landmarks-extending-horizontal-scrolling-under-a-sidebar-or-inspector) — `https://developer.apple.com/tutorials/data/documentation/swiftui/landmarks-extending-horizontal-scrolling-under-a-sidebar-or-inspector.json`
+- [Layout](https://developer.apple.com/documentation/swiftui/layout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layout.json`
+- [Layout adjustments](https://developer.apple.com/documentation/swiftui/layout-adjustments) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layout-adjustments.json`
+- [Layout fundamentals](https://developer.apple.com/documentation/swiftui/layout-fundamentals) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layout-fundamentals.json`
+- [Layout modifiers](https://developer.apple.com/documentation/swiftui/view-layout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-layout.json`
+- [LayoutDirection](https://developer.apple.com/documentation/swiftui/layoutdirection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layoutdirection.json`
+- [LayoutDirectionBehavior](https://developer.apple.com/documentation/swiftui/layoutdirectionbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layoutdirectionbehavior.json`
+- [LayoutProperties](https://developer.apple.com/documentation/swiftui/layoutproperties) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layoutproperties.json`
+- [LayoutValueKey](https://developer.apple.com/documentation/swiftui/layoutvaluekey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layoutvaluekey.json`
+- [LazyHGrid](https://developer.apple.com/documentation/swiftui/lazyhgrid) — `https://developer.apple.com/tutorials/data/documentation/swiftui/lazyhgrid.json`
+- [LazyHStack](https://developer.apple.com/documentation/swiftui/lazyhstack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/lazyhstack.json`
+- [LazyVGrid](https://developer.apple.com/documentation/swiftui/lazyvgrid) — `https://developer.apple.com/tutorials/data/documentation/swiftui/lazyvgrid.json`
+- [LazyVStack](https://developer.apple.com/documentation/swiftui/lazyvstack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/lazyvstack.json`
+- [LinearKeyframe](https://developer.apple.com/documentation/swiftui/linearkeyframe) — `https://developer.apple.com/tutorials/data/documentation/swiftui/linearkeyframe.json`
+- [List](https://developer.apple.com/documentation/swiftui/list) — `https://developer.apple.com/tutorials/data/documentation/swiftui/list.json`
+- [ListItemTint](https://developer.apple.com/documentation/swiftui/listitemtint) — `https://developer.apple.com/tutorials/data/documentation/swiftui/listitemtint.json`
+- [ListStyle](https://developer.apple.com/documentation/swiftui/liststyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/liststyle.json`
+- [Lists](https://developer.apple.com/documentation/swiftui/lists) — `https://developer.apple.com/tutorials/data/documentation/swiftui/lists.json`
+- [MatchedGeometryProperties](https://developer.apple.com/documentation/swiftui/matchedgeometryproperties) — `https://developer.apple.com/tutorials/data/documentation/swiftui/matchedgeometryproperties.json`
+- [MoveKeyframe](https://developer.apple.com/documentation/swiftui/movekeyframe) — `https://developer.apple.com/tutorials/data/documentation/swiftui/movekeyframe.json`
+- [NSGestureRecognizerRepresentable](https://developer.apple.com/documentation/swiftui/nsgesturerecognizerrepresentable) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsgesturerecognizerrepresentable.json`
+- [NSGestureRecognizerRepresentableCoordinateSpaceConverter](https://developer.apple.com/documentation/swiftui/nsgesturerecognizerrepresentablecoordinatespaceconverter) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsgesturerecognizerrepresentablecoordinatespaceconverter.json`
+- [NavigationStack](https://developer.apple.com/documentation/swiftui/navigationstack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationstack.json`
+- [PagingScrollTargetBehavior](https://developer.apple.com/documentation/swiftui/pagingscrolltargetbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pagingscrolltargetbehavior.json`
+- [PlainListStyle](https://developer.apple.com/documentation/swiftui/plainliststyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/plainliststyle.json`
+- [Reordering items in lists, stacks, grids, and custom layouts](https://developer.apple.com/documentation/swiftui/reordering-items-in-lists-stacks-grids-and-custom-layouts) — `https://developer.apple.com/tutorials/data/documentation/swiftui/reordering-items-in-lists-stacks-grids-and-custom-layouts.json`
+- [ScrollAnchorRole](https://developer.apple.com/documentation/swiftui/scrollanchorrole) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollanchorrole.json`
+- [ScrollBounceBehavior](https://developer.apple.com/documentation/swiftui/scrollbouncebehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollbouncebehavior.json`
+- [ScrollContentOffsetAdjustmentBehavior](https://developer.apple.com/documentation/swiftui/scrollcontentoffsetadjustmentbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollcontentoffsetadjustmentbehavior.json`
+- [ScrollDismissesKeyboardMode](https://developer.apple.com/documentation/swiftui/scrolldismisseskeyboardmode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolldismisseskeyboardmode.json`
+- [ScrollEdgeEffectStyle](https://developer.apple.com/documentation/swiftui/scrolledgeeffectstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolledgeeffectstyle.json`
+- [ScrollGeometry](https://developer.apple.com/documentation/swiftui/scrollgeometry) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollgeometry.json`
+- [ScrollIndicatorVisibility](https://developer.apple.com/documentation/swiftui/scrollindicatorvisibility) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollindicatorvisibility.json`
+- [ScrollInputBehavior](https://developer.apple.com/documentation/swiftui/scrollinputbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollinputbehavior.json`
+- [ScrollInputKind](https://developer.apple.com/documentation/swiftui/scrollinputkind) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollinputkind.json`
+- [ScrollPhase](https://developer.apple.com/documentation/swiftui/scrollphase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollphase.json`
+- [ScrollPosition](https://developer.apple.com/documentation/swiftui/scrollposition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollposition.json`
+- [ScrollTarget](https://developer.apple.com/documentation/swiftui/scrolltarget) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolltarget.json`
+- [ScrollTargetBehavior](https://developer.apple.com/documentation/swiftui/scrolltargetbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolltargetbehavior.json`
+- [ScrollTargetBehaviorProperties](https://developer.apple.com/documentation/swiftui/scrolltargetbehaviorproperties) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolltargetbehaviorproperties.json`
+- [ScrollTransitionPhase](https://developer.apple.com/documentation/swiftui/scrolltransitionphase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolltransitionphase.json`
+- [SidebarListStyle](https://developer.apple.com/documentation/swiftui/sidebarliststyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sidebarliststyle.json`
+- [Spacer](https://developer.apple.com/documentation/swiftui/spacer) — `https://developer.apple.com/tutorials/data/documentation/swiftui/spacer.json`
+- [SpacerSizing](https://developer.apple.com/documentation/swiftui/spacersizing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/spacersizing.json`
+- [Table](https://developer.apple.com/documentation/swiftui/table) — `https://developer.apple.com/tutorials/data/documentation/swiftui/table.json`
+- [TableColumn](https://developer.apple.com/documentation/swiftui/tablecolumn) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablecolumn.json`
+- [TableColumnAlignment](https://developer.apple.com/documentation/swiftui/tablecolumnalignment) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablecolumnalignment.json`
+- [TableColumnBuilder](https://developer.apple.com/documentation/swiftui/tablecolumnbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablecolumnbuilder.json`
+- [TableColumnContent](https://developer.apple.com/documentation/swiftui/tablecolumncontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablecolumncontent.json`
+- [TableColumnCustomization](https://developer.apple.com/documentation/swiftui/tablecolumncustomization) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablecolumncustomization.json`
+- [TableColumnCustomizationBehavior](https://developer.apple.com/documentation/swiftui/tablecolumncustomizationbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablecolumncustomizationbehavior.json`
+- [TableColumnForEach](https://developer.apple.com/documentation/swiftui/tablecolumnforeach) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablecolumnforeach.json`
+- [TableForEachContent](https://developer.apple.com/documentation/swiftui/tableforeachcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tableforeachcontent.json`
+- [TableHeaderRowContent](https://developer.apple.com/documentation/swiftui/tableheaderrowcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tableheaderrowcontent.json`
+- [TableOutlineGroupContent](https://developer.apple.com/documentation/swiftui/tableoutlinegroupcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tableoutlinegroupcontent.json`
+- [TableRow](https://developer.apple.com/documentation/swiftui/tablerow) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablerow.json`
+- [TableRowBuilder](https://developer.apple.com/documentation/swiftui/tablerowbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablerowbuilder.json`
+- [TableRowContent](https://developer.apple.com/documentation/swiftui/tablerowcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablerowcontent.json`
+- [TableStyle](https://developer.apple.com/documentation/swiftui/tablestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablestyle.json`
+- [TableStyleConfiguration](https://developer.apple.com/documentation/swiftui/tablestyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tablestyleconfiguration.json`
+- [Tables](https://developer.apple.com/documentation/swiftui/tables) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tables.json`
+- [ToolbarSpacer](https://developer.apple.com/documentation/swiftui/toolbarspacer) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarspacer.json`
+- [TupleTableRowContent](https://developer.apple.com/documentation/swiftui/tupletablerowcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tupletablerowcontent.json`
+- [Understanding the navigation stack](https://developer.apple.com/documentation/swiftui/understanding-the-navigation-stack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/understanding-the-navigation-stack.json`
+- [VStack](https://developer.apple.com/documentation/swiftui/vstack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/vstack.json`
+- [VStackLayout](https://developer.apple.com/documentation/swiftui/vstacklayout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/vstacklayout.json`
+- [VerticalAlignment](https://developer.apple.com/documentation/swiftui/verticalalignment) — `https://developer.apple.com/tutorials/data/documentation/swiftui/verticalalignment.json`
+- [ViewAlignedScrollTargetBehavior](https://developer.apple.com/documentation/swiftui/viewalignedscrolltargetbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/viewalignedscrolltargetbehavior.json`
+- [VisualEffect](https://developer.apple.com/documentation/swiftui/visualeffect) — `https://developer.apple.com/tutorials/data/documentation/swiftui/visualeffect.json`
+- [WindowLayoutRoot](https://developer.apple.com/documentation/swiftui/windowlayoutroot) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowlayoutroot.json`
+- [WritableDocument](https://developer.apple.com/documentation/swiftui/writabledocument) — `https://developer.apple.com/tutorials/data/documentation/swiftui/writabledocument.json`
+- [ZStack](https://developer.apple.com/documentation/swiftui/zstack) — `https://developer.apple.com/tutorials/data/documentation/swiftui/zstack.json`
+- [ZStackLayout](https://developer.apple.com/documentation/swiftui/zstacklayout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/zstacklayout.json`
+
+## Navigation And Presentation
+
+- [Alert](https://developer.apple.com/documentation/swiftui/alert) — `https://developer.apple.com/tutorials/data/documentation/swiftui/alert.json`
+- [AnyNavigationTransition](https://developer.apple.com/documentation/swiftui/anynavigationtransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anynavigationtransition.json`
+- [AutomaticNavigationTransition](https://developer.apple.com/documentation/swiftui/automaticnavigationtransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticnavigationtransition.json`
+- [AutomaticPresentationSizing](https://developer.apple.com/documentation/swiftui/automaticpresentationsizing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticpresentationsizing.json`
+- [Bringing robust navigation structure to your SwiftUI app](https://developer.apple.com/documentation/swiftui/bringing-robust-navigation-structure-to-your-swiftui-app) — `https://developer.apple.com/tutorials/data/documentation/swiftui/bringing-robust-navigation-structure-to-your-swiftui-app.json`
+- [CustomPresentationDetent](https://developer.apple.com/documentation/swiftui/custompresentationdetent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/custompresentationdetent.json`
+- [Deprecated symbols](https://developer.apple.com/documentation/swiftui/navigationlink-deprecated) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationlink-deprecated.json`
+- [Enhancing your app’s content with tab navigation](https://developer.apple.com/documentation/swiftui/enhancing-your-app-content-with-tab-navigation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/enhancing-your-app-content-with-tab-navigation.json`
+- [FittedPresentationSizing](https://developer.apple.com/documentation/swiftui/fittedpresentationsizing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fittedpresentationsizing.json`
+- [FormPresentationSizing](https://developer.apple.com/documentation/swiftui/formpresentationsizing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/formpresentationsizing.json`
+- [Migrating to new navigation types](https://developer.apple.com/documentation/swiftui/migrating-to-new-navigation-types) — `https://developer.apple.com/tutorials/data/documentation/swiftui/migrating-to-new-navigation-types.json`
+- [Modal presentations](https://developer.apple.com/documentation/swiftui/modal-presentations) — `https://developer.apple.com/tutorials/data/documentation/swiftui/modal-presentations.json`
+- [Navigation](https://developer.apple.com/documentation/swiftui/navigation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigation.json`
+- [NavigationLink](https://developer.apple.com/documentation/swiftui/navigationlink) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationlink.json`
+- [NavigationPath](https://developer.apple.com/documentation/swiftui/navigationpath) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationpath.json`
+- [NavigationTransition](https://developer.apple.com/documentation/swiftui/navigationtransition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationtransition.json`
+- [PagePresentationSizing](https://developer.apple.com/documentation/swiftui/pagepresentationsizing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pagepresentationsizing.json`
+- [PopoverAttachmentAnchor](https://developer.apple.com/documentation/swiftui/popoverattachmentanchor) — `https://developer.apple.com/tutorials/data/documentation/swiftui/popoverattachmentanchor.json`
+- [Presentation modifiers](https://developer.apple.com/documentation/swiftui/view-presentation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-presentation.json`
+- [PresentationAdaptation](https://developer.apple.com/documentation/swiftui/presentationadaptation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationadaptation.json`
+- [PresentationContentInteraction](https://developer.apple.com/documentation/swiftui/presentationcontentinteraction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationcontentinteraction.json`
+- [PresentationDetent](https://developer.apple.com/documentation/swiftui/presentationdetent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationdetent.json`
+- [PresentationMode](https://developer.apple.com/documentation/swiftui/presentationmode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationmode.json`
+- [PresentationSizing](https://developer.apple.com/documentation/swiftui/presentationsizing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationsizing.json`
+- [PresentationSizingRoot](https://developer.apple.com/documentation/swiftui/presentationsizingroot) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationsizingroot.json`
+- [SearchPresentationToolbarBehavior](https://developer.apple.com/documentation/swiftui/searchpresentationtoolbarbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/searchpresentationtoolbarbehavior.json`
+
+## State And Data
+
+- [AnimationState](https://developer.apple.com/documentation/swiftui/animationstate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animationstate.json`
+- [AnimationStateKey](https://developer.apple.com/documentation/swiftui/animationstatekey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animationstatekey.json`
+- [AppStorage](https://developer.apple.com/documentation/swiftui/appstorage) — `https://developer.apple.com/tutorials/data/documentation/swiftui/appstorage.json`
+- [Binding](https://developer.apple.com/documentation/swiftui/binding) — `https://developer.apple.com/tutorials/data/documentation/swiftui/binding.json`
+- [Customizing window styles and state-restoration behavior in macOS](https://developer.apple.com/documentation/swiftui/customizing-window-styles-and-state-restoration-behavior-in-macos) — `https://developer.apple.com/tutorials/data/documentation/swiftui/customizing-window-styles-and-state-restoration-behavior-in-macos.json`
+- [Environment](https://developer.apple.com/documentation/swiftui/environment) — `https://developer.apple.com/tutorials/data/documentation/swiftui/environment.json`
+- [Environment values](https://developer.apple.com/documentation/swiftui/environment-values) — `https://developer.apple.com/tutorials/data/documentation/swiftui/environment-values.json`
+- [EnvironmentKey](https://developer.apple.com/documentation/swiftui/environmentkey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/environmentkey.json`
+- [EnvironmentObject](https://developer.apple.com/documentation/swiftui/environmentobject) — `https://developer.apple.com/tutorials/data/documentation/swiftui/environmentobject.json`
+- [EnvironmentValues](https://developer.apple.com/documentation/swiftui/environmentvalues) — `https://developer.apple.com/tutorials/data/documentation/swiftui/environmentvalues.json`
+- [EnvironmentalModifier](https://developer.apple.com/documentation/swiftui/environmentalmodifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/environmentalmodifier.json`
+- [FetchRequest](https://developer.apple.com/documentation/swiftui/fetchrequest) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fetchrequest.json`
+- [FocusState](https://developer.apple.com/documentation/swiftui/focusstate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focusstate.json`
+- [FocusedBinding](https://developer.apple.com/documentation/swiftui/focusedbinding) — `https://developer.apple.com/tutorials/data/documentation/swiftui/focusedbinding.json`
+- [GestureState](https://developer.apple.com/documentation/swiftui/gesturestate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gesturestate.json`
+- [GestureStateGesture](https://developer.apple.com/documentation/swiftui/gesturestategesture) — `https://developer.apple.com/tutorials/data/documentation/swiftui/gesturestategesture.json`
+- [LazyState](https://developer.apple.com/documentation/swiftui/lazystate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/lazystate.json`
+- [Managing user interface state](https://developer.apple.com/documentation/swiftui/managing-user-interface-state) — `https://developer.apple.com/tutorials/data/documentation/swiftui/managing-user-interface-state.json`
+- [Migrating from the Observable Object protocol to the Observable macro](https://developer.apple.com/documentation/swiftui/migrating-from-the-observable-object-protocol-to-the-observable-macro) — `https://developer.apple.com/tutorials/data/documentation/swiftui/migrating-from-the-observable-object-protocol-to-the-observable-macro.json`
+- [ObservedObject](https://developer.apple.com/documentation/swiftui/observedobject) — `https://developer.apple.com/tutorials/data/documentation/swiftui/observedobject.json`
+- [PreferenceKey](https://developer.apple.com/documentation/swiftui/preferencekey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/preferencekey.json`
+- [Preferences](https://developer.apple.com/documentation/swiftui/preferences) — `https://developer.apple.com/tutorials/data/documentation/swiftui/preferences.json`
+- [SectionedFetchRequest](https://developer.apple.com/documentation/swiftui/sectionedfetchrequest) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sectionedfetchrequest.json`
+- [State](https://developer.apple.com/documentation/swiftui/state) — `https://developer.apple.com/tutorials/data/documentation/swiftui/state.json`
+- [State modifiers](https://developer.apple.com/documentation/swiftui/view-state) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-state.json`
+- [State()](https://developer.apple.com/documentation/swiftui/state()) — `https://developer.apple.com/tutorials/data/documentation/swiftui/state().json`
+- [State(initialValue:)](https://developer.apple.com/documentation/swiftui/state(initialvalue:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/state(initialvalue:).json`
+- [State(wrappedValue:)](https://developer.apple.com/documentation/swiftui/state(wrappedvalue:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/state(wrappedvalue:).json`
+- [StateObject](https://developer.apple.com/documentation/swiftui/stateobject) — `https://developer.apple.com/tutorials/data/documentation/swiftui/stateobject.json`
+
+## View Modifiers
+
+- [AccessibilityAttachmentModifier](https://developer.apple.com/documentation/swiftui/accessibilityattachmentmodifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilityattachmentmodifier.json`
+- [Adding a background to your view](https://developer.apple.com/documentation/swiftui/adding-a-background-to-your-view) — `https://developer.apple.com/tutorials/data/documentation/swiftui/adding-a-background-to-your-view.json`
+- [AlternatingRowBackgroundBehavior](https://developer.apple.com/documentation/swiftui/alternatingrowbackgroundbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/alternatingrowbackgroundbehavior.json`
+- [BackgroundProminence](https://developer.apple.com/documentation/swiftui/backgroundprominence) — `https://developer.apple.com/tutorials/data/documentation/swiftui/backgroundprominence.json`
+- [BackgroundTask](https://developer.apple.com/documentation/swiftui/backgroundtask) — `https://developer.apple.com/tutorials/data/documentation/swiftui/backgroundtask.json`
+- [BorderedListStyle](https://developer.apple.com/documentation/swiftui/borderedliststyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/borderedliststyle.json`
+- [BorderedTableStyle](https://developer.apple.com/documentation/swiftui/borderedtablestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/borderedtablestyle.json`
+- [ContainerBackgroundPlacement](https://developer.apple.com/documentation/swiftui/containerbackgroundplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/containerbackgroundplacement.json`
+- [EmptyModifier](https://developer.apple.com/documentation/swiftui/emptymodifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptymodifier.json`
+- [EventModifiers](https://developer.apple.com/documentation/swiftui/eventmodifiers) — `https://developer.apple.com/tutorials/data/documentation/swiftui/eventmodifiers.json`
+- [Font](https://developer.apple.com/documentation/swiftui/font) — `https://developer.apple.com/tutorials/data/documentation/swiftui/font.json`
+- [Glass](https://developer.apple.com/documentation/swiftui/glass) — `https://developer.apple.com/tutorials/data/documentation/swiftui/glass.json`
+- [Landmarks: Applying a background extension effect](https://developer.apple.com/documentation/swiftui/landmarks-applying-a-background-extension-effect) — `https://developer.apple.com/tutorials/data/documentation/swiftui/landmarks-applying-a-background-extension-effect.json`
+- [PresentationBackgroundInteraction](https://developer.apple.com/documentation/swiftui/presentationbackgroundinteraction) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationbackgroundinteraction.json`
+- [StrokeBorderShapeView](https://developer.apple.com/documentation/swiftui/strokebordershapeview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/strokebordershapeview.json`
+- [Technology-specific modifiers](https://developer.apple.com/documentation/swiftui/view-technology-modifiers) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-technology-modifiers.json`
+
+## Views And Controls
+
+- [Accessibility modifiers](https://developer.apple.com/documentation/swiftui/view-accessibility) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-accessibility.json`
+- [AccessibilityLabeledPairRole](https://developer.apple.com/documentation/swiftui/accessibilitylabeledpairrole) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitylabeledpairrole.json`
+- [AccessibilityTextContentType](https://developer.apple.com/documentation/swiftui/accessibilitytextcontenttype) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessibilitytextcontenttype.json`
+- [Accessible controls](https://developer.apple.com/documentation/swiftui/accessible-controls) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessible-controls.json`
+- [AccessoryBarActionButtonStyle](https://developer.apple.com/documentation/swiftui/accessorybaractionbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessorybaractionbuttonstyle.json`
+- [AccessoryBarButtonStyle](https://developer.apple.com/documentation/swiftui/accessorybarbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/accessorybarbuttonstyle.json`
+- [AnimationContext](https://developer.apple.com/documentation/swiftui/animationcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/animationcontext.json`
+- [AnyView](https://developer.apple.com/documentation/swiftui/anyview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/anyview.json`
+- [Appearance modifiers](https://developer.apple.com/documentation/swiftui/view-appearance) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-appearance.json`
+- [Applying Liquid Glass to custom views](https://developer.apple.com/documentation/swiftui/applying-liquid-glass-to-custom-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/applying-liquid-glass-to-custom-views.json`
+- [Applying custom fonts to text](https://developer.apple.com/documentation/swiftui/applying-custom-fonts-to-text) — `https://developer.apple.com/tutorials/data/documentation/swiftui/applying-custom-fonts-to-text.json`
+- [AsyncImage](https://developer.apple.com/documentation/swiftui/asyncimage) — `https://developer.apple.com/tutorials/data/documentation/swiftui/asyncimage.json`
+- [AsyncImagePhase](https://developer.apple.com/documentation/swiftui/asyncimagephase) — `https://developer.apple.com/tutorials/data/documentation/swiftui/asyncimagephase.json`
+- [AttributedTextFormatting](https://developer.apple.com/documentation/swiftui/attributedtextformatting) — `https://developer.apple.com/tutorials/data/documentation/swiftui/attributedtextformatting.json`
+- [AttributedTextFormattingDefinition](https://developer.apple.com/documentation/swiftui/attributedtextformattingdefinition) — `https://developer.apple.com/tutorials/data/documentation/swiftui/attributedtextformattingdefinition.json`
+- [AttributedTextSelection](https://developer.apple.com/documentation/swiftui/attributedtextselection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/attributedtextselection.json`
+- [AttributedTextValueConstraint](https://developer.apple.com/documentation/swiftui/attributedtextvalueconstraint) — `https://developer.apple.com/tutorials/data/documentation/swiftui/attributedtextvalueconstraint.json`
+- [AutomaticControlGroupStyle](https://developer.apple.com/documentation/swiftui/automaticcontrolgroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticcontrolgroupstyle.json`
+- [AutomaticLabeledContentStyle](https://developer.apple.com/documentation/swiftui/automaticlabeledcontentstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticlabeledcontentstyle.json`
+- [AutomaticNavigationSplitViewStyle](https://developer.apple.com/documentation/swiftui/automaticnavigationsplitviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automaticnavigationsplitviewstyle.json`
+- [AutomaticTextEditorStyle](https://developer.apple.com/documentation/swiftui/automatictexteditorstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/automatictexteditorstyle.json`
+- [Auxiliary view modifiers](https://developer.apple.com/documentation/swiftui/view-auxiliary-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-auxiliary-views.json`
+- [BalancedNavigationSplitViewStyle](https://developer.apple.com/documentation/swiftui/balancednavigationsplitviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/balancednavigationsplitviewstyle.json`
+- [BorderedButtonMenuStyle](https://developer.apple.com/documentation/swiftui/borderedbuttonmenustyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/borderedbuttonmenustyle.json`
+- [BorderedButtonStyle](https://developer.apple.com/documentation/swiftui/borderedbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/borderedbuttonstyle.json`
+- [BorderedProminentButtonStyle](https://developer.apple.com/documentation/swiftui/borderedprominentbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/borderedprominentbuttonstyle.json`
+- [BorderlessButtonMenuStyle](https://developer.apple.com/documentation/swiftui/borderlessbuttonmenustyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/borderlessbuttonmenustyle.json`
+- [BorderlessButtonStyle](https://developer.apple.com/documentation/swiftui/borderlessbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/borderlessbuttonstyle.json`
+- [Building and customizing the menu bar with SwiftUI](https://developer.apple.com/documentation/swiftui/building-and-customizing-the-menu-bar-with-swiftui) — `https://developer.apple.com/tutorials/data/documentation/swiftui/building-and-customizing-the-menu-bar-with-swiftui.json`
+- [Button](https://developer.apple.com/documentation/swiftui/button) — `https://developer.apple.com/tutorials/data/documentation/swiftui/button.json`
+- [ButtonBorderShape](https://developer.apple.com/documentation/swiftui/buttonbordershape) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttonbordershape.json`
+- [ButtonMenuStyle](https://developer.apple.com/documentation/swiftui/buttonmenustyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttonmenustyle.json`
+- [ButtonRepeatBehavior](https://developer.apple.com/documentation/swiftui/buttonrepeatbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttonrepeatbehavior.json`
+- [ButtonRole](https://developer.apple.com/documentation/swiftui/buttonrole) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttonrole.json`
+- [ButtonSizing](https://developer.apple.com/documentation/swiftui/buttonsizing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttonsizing.json`
+- [ButtonStyle](https://developer.apple.com/documentation/swiftui/buttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttonstyle.json`
+- [ButtonStyleConfiguration](https://developer.apple.com/documentation/swiftui/buttonstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttonstyleconfiguration.json`
+- [ButtonToggleStyle](https://developer.apple.com/documentation/swiftui/buttontogglestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/buttontogglestyle.json`
+- [Chart view modifiers](https://developer.apple.com/documentation/swiftui/view-chart-view) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-chart-view.json`
+- [CheckboxToggleStyle](https://developer.apple.com/documentation/swiftui/checkboxtogglestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/checkboxtogglestyle.json`
+- [CircularProgressViewStyle](https://developer.apple.com/documentation/swiftui/circularprogressviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/circularprogressviewstyle.json`
+- [Color](https://developer.apple.com/documentation/swiftui/color) — `https://developer.apple.com/tutorials/data/documentation/swiftui/color.json`
+- [ColorMatrix](https://developer.apple.com/documentation/swiftui/colormatrix) — `https://developer.apple.com/tutorials/data/documentation/swiftui/colormatrix.json`
+- [ColorPicker](https://developer.apple.com/documentation/swiftui/colorpicker) — `https://developer.apple.com/tutorials/data/documentation/swiftui/colorpicker.json`
+- [ColorRenderingMode](https://developer.apple.com/documentation/swiftui/colorrenderingmode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/colorrenderingmode.json`
+- [ColorScheme](https://developer.apple.com/documentation/swiftui/colorscheme) — `https://developer.apple.com/tutorials/data/documentation/swiftui/colorscheme.json`
+- [ColorSchemeContrast](https://developer.apple.com/documentation/swiftui/colorschemecontrast) — `https://developer.apple.com/tutorials/data/documentation/swiftui/colorschemecontrast.json`
+- [CommandMenu](https://developer.apple.com/documentation/swiftui/commandmenu) — `https://developer.apple.com/tutorials/data/documentation/swiftui/commandmenu.json`
+- [CompactDatePickerStyle](https://developer.apple.com/documentation/swiftui/compactdatepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/compactdatepickerstyle.json`
+- [CompactMenuControlGroupStyle](https://developer.apple.com/documentation/swiftui/compactmenucontrolgroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/compactmenucontrolgroupstyle.json`
+- [Configuring views](https://developer.apple.com/documentation/swiftui/configuring-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/configuring-views.json`
+- [ContentBuilder](https://developer.apple.com/documentation/swiftui/contentbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contentbuilder.json`
+- [ContentUnavailableView](https://developer.apple.com/documentation/swiftui/contentunavailableview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contentunavailableview.json`
+- [ContextMenu](https://developer.apple.com/documentation/swiftui/contextmenu) — `https://developer.apple.com/tutorials/data/documentation/swiftui/contextmenu.json`
+- [ControlActiveState](https://developer.apple.com/documentation/swiftui/controlactivestate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlactivestate.json`
+- [ControlGroup](https://developer.apple.com/documentation/swiftui/controlgroup) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlgroup.json`
+- [ControlGroupStyle](https://developer.apple.com/documentation/swiftui/controlgroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlgroupstyle.json`
+- [ControlGroupStyleConfiguration](https://developer.apple.com/documentation/swiftui/controlgroupstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlgroupstyleconfiguration.json`
+- [ControlSize](https://developer.apple.com/documentation/swiftui/controlsize) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlsize.json`
+- [ControlWidgetTemplate](https://developer.apple.com/documentation/swiftui/controlwidgettemplate) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controlwidgettemplate.json`
+- [Controls and indicators](https://developer.apple.com/documentation/swiftui/controls-and-indicators) — `https://developer.apple.com/tutorials/data/documentation/swiftui/controls-and-indicators.json`
+- [DatePicker](https://developer.apple.com/documentation/swiftui/datepicker) — `https://developer.apple.com/tutorials/data/documentation/swiftui/datepicker.json`
+- [DatePickerComponents](https://developer.apple.com/documentation/swiftui/datepickercomponents) — `https://developer.apple.com/tutorials/data/documentation/swiftui/datepickercomponents.json`
+- [DatePickerStyle](https://developer.apple.com/documentation/swiftui/datepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/datepickerstyle.json`
+- [DatePickerStyleConfiguration](https://developer.apple.com/documentation/swiftui/datepickerstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/datepickerstyleconfiguration.json`
+- [DebugReplaceableView](https://developer.apple.com/documentation/swiftui/debugreplaceableview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/debugreplaceableview.json`
+- [Declaring a custom view](https://developer.apple.com/documentation/swiftui/declaring-a-custom-view) — `https://developer.apple.com/tutorials/data/documentation/swiftui/declaring-a-custom-view.json`
+- [DefaultButtonLabel](https://developer.apple.com/documentation/swiftui/defaultbuttonlabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultbuttonlabel.json`
+- [DefaultButtonStyle](https://developer.apple.com/documentation/swiftui/defaultbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultbuttonstyle.json`
+- [DefaultDatePickerStyle](https://developer.apple.com/documentation/swiftui/defaultdatepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultdatepickerstyle.json`
+- [DefaultDateProgressLabel](https://developer.apple.com/documentation/swiftui/defaultdateprogresslabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultdateprogresslabel.json`
+- [DefaultLabelStyle](https://developer.apple.com/documentation/swiftui/defaultlabelstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultlabelstyle.json`
+- [DefaultMenuStyle](https://developer.apple.com/documentation/swiftui/defaultmenustyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultmenustyle.json`
+- [DefaultNewDocumentButtonLabel](https://developer.apple.com/documentation/swiftui/defaultnewdocumentbuttonlabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultnewdocumentbuttonlabel.json`
+- [DefaultPickerStyle](https://developer.apple.com/documentation/swiftui/defaultpickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultpickerstyle.json`
+- [DefaultProgressViewStyle](https://developer.apple.com/documentation/swiftui/defaultprogressviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultprogressviewstyle.json`
+- [DefaultShareLinkLabel](https://developer.apple.com/documentation/swiftui/defaultsharelinklabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultsharelinklabel.json`
+- [DefaultTabLabel](https://developer.apple.com/documentation/swiftui/defaulttablabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaulttablabel.json`
+- [DefaultTabViewStyle](https://developer.apple.com/documentation/swiftui/defaulttabviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaulttabviewstyle.json`
+- [DefaultTextFieldStyle](https://developer.apple.com/documentation/swiftui/defaulttextfieldstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaulttextfieldstyle.json`
+- [DefaultToggleStyle](https://developer.apple.com/documentation/swiftui/defaulttogglestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaulttogglestyle.json`
+- [DefaultWindowVisibilityToggleLabel](https://developer.apple.com/documentation/swiftui/defaultwindowvisibilitytogglelabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/defaultwindowvisibilitytogglelabel.json`
+- [Deprecated initializers](https://developer.apple.com/documentation/swiftui/textfield-deprecated) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textfield-deprecated.json`
+- [Deprecated modifiers](https://developer.apple.com/documentation/swiftui/view-deprecated) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-deprecated.json`
+- [DisabledTextSelectability](https://developer.apple.com/documentation/swiftui/disabledtextselectability) — `https://developer.apple.com/tutorials/data/documentation/swiftui/disabledtextselectability.json`
+- [DisclosureGroup](https://developer.apple.com/documentation/swiftui/disclosuregroup) — `https://developer.apple.com/tutorials/data/documentation/swiftui/disclosuregroup.json`
+- [DismissBehavior](https://developer.apple.com/documentation/swiftui/dismissbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dismissbehavior.json`
+- [DocumentCreationContext](https://developer.apple.com/documentation/swiftui/documentcreationcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/documentcreationcontext.json`
+- [DragDropPreviewsFormation](https://developer.apple.com/documentation/swiftui/dragdroppreviewsformation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dragdroppreviewsformation.json`
+- [DynamicViewContent](https://developer.apple.com/documentation/swiftui/dynamicviewcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/dynamicviewcontent.json`
+- [EmptyView](https://developer.apple.com/documentation/swiftui/emptyview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/emptyview.json`
+- [EnabledTextSelectability](https://developer.apple.com/documentation/swiftui/enabledtextselectability) — `https://developer.apple.com/tutorials/data/documentation/swiftui/enabledtextselectability.json`
+- [EquatableView](https://developer.apple.com/documentation/swiftui/equatableview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/equatableview.json`
+- [FieldDatePickerStyle](https://developer.apple.com/documentation/swiftui/fielddatepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fielddatepickerstyle.json`
+- [FillShapeView](https://developer.apple.com/documentation/swiftui/fillshapeview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fillshapeview.json`
+- [FindContext](https://developer.apple.com/documentation/swiftui/findcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/findcontext.json`
+- [Fitting images into available space](https://developer.apple.com/documentation/swiftui/fitting-images-into-available-space) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fitting-images-into-available-space.json`
+- [FixedTextVariant](https://developer.apple.com/documentation/swiftui/fixedtextvariant) — `https://developer.apple.com/tutorials/data/documentation/swiftui/fixedtextvariant.json`
+- [ForEachSubviewCollection](https://developer.apple.com/documentation/swiftui/foreachsubviewcollection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/foreachsubviewcollection.json`
+- [Form](https://developer.apple.com/documentation/swiftui/form) — `https://developer.apple.com/tutorials/data/documentation/swiftui/form.json`
+- [GlassButtonStyle](https://developer.apple.com/documentation/swiftui/glassbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/glassbuttonstyle.json`
+- [GlassProminentButtonStyle](https://developer.apple.com/documentation/swiftui/glassprominentbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/glassprominentbuttonstyle.json`
+- [GraphicalDatePickerStyle](https://developer.apple.com/documentation/swiftui/graphicaldatepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/graphicaldatepickerstyle.json`
+- [GroupBox](https://developer.apple.com/documentation/swiftui/groupbox) — `https://developer.apple.com/tutorials/data/documentation/swiftui/groupbox.json`
+- [GroupedFormStyle](https://developer.apple.com/documentation/swiftui/groupedformstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/groupedformstyle.json`
+- [GroupedTabViewStyle](https://developer.apple.com/documentation/swiftui/groupedtabviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/groupedtabviewstyle.json`
+- [HSplitView](https://developer.apple.com/documentation/swiftui/hsplitview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/hsplitview.json`
+- [IconOnlyLabelStyle](https://developer.apple.com/documentation/swiftui/icononlylabelstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/icononlylabelstyle.json`
+- [Image](https://developer.apple.com/documentation/swiftui/image) — `https://developer.apple.com/tutorials/data/documentation/swiftui/image.json`
+- [Images](https://developer.apple.com/documentation/swiftui/images) — `https://developer.apple.com/tutorials/data/documentation/swiftui/images.json`
+- [ImmersionChangeContext](https://developer.apple.com/documentation/swiftui/immersionchangecontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/immersionchangecontext.json`
+- [InlinePickerStyle](https://developer.apple.com/documentation/swiftui/inlinepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/inlinepickerstyle.json`
+- [Input and event modifiers](https://developer.apple.com/documentation/swiftui/view-input-and-events) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-input-and-events.json`
+- [Inspecting view layout](https://developer.apple.com/documentation/swiftui/inspecting-view-layout) — `https://developer.apple.com/tutorials/data/documentation/swiftui/inspecting-view-layout.json`
+- [Label](https://developer.apple.com/documentation/swiftui/label) — `https://developer.apple.com/tutorials/data/documentation/swiftui/label.json`
+- [LabelStyle](https://developer.apple.com/documentation/swiftui/labelstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/labelstyle.json`
+- [LabelStyleConfiguration](https://developer.apple.com/documentation/swiftui/labelstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/labelstyleconfiguration.json`
+- [LabeledContent](https://developer.apple.com/documentation/swiftui/labeledcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/labeledcontent.json`
+- [LabeledContentStyle](https://developer.apple.com/documentation/swiftui/labeledcontentstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/labeledcontentstyle.json`
+- [LabeledContentStyleConfiguration](https://developer.apple.com/documentation/swiftui/labeledcontentstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/labeledcontentstyleconfiguration.json`
+- [LabeledControlGroupContent](https://developer.apple.com/documentation/swiftui/labeledcontrolgroupcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/labeledcontrolgroupcontent.json`
+- [LabeledToolbarItemGroupContent](https://developer.apple.com/documentation/swiftui/labeledtoolbaritemgroupcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/labeledtoolbaritemgroupcontent.json`
+- [Laying out a simple view](https://developer.apple.com/documentation/swiftui/laying-out-a-simple-view) — `https://developer.apple.com/tutorials/data/documentation/swiftui/laying-out-a-simple-view.json`
+- [LayoutSubview](https://developer.apple.com/documentation/swiftui/layoutsubview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layoutsubview.json`
+- [LayoutSubviews](https://developer.apple.com/documentation/swiftui/layoutsubviews) — `https://developer.apple.com/tutorials/data/documentation/swiftui/layoutsubviews.json`
+- [LinearProgressViewStyle](https://developer.apple.com/documentation/swiftui/linearprogressviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/linearprogressviewstyle.json`
+- [Link](https://developer.apple.com/documentation/swiftui/link) — `https://developer.apple.com/tutorials/data/documentation/swiftui/link.json`
+- [LinkButtonStyle](https://developer.apple.com/documentation/swiftui/linkbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/linkbuttonstyle.json`
+- [LocalizedStringKey](https://developer.apple.com/documentation/swiftui/localizedstringkey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/localizedstringkey.json`
+- [Making a view into a drag source](https://developer.apple.com/documentation/swiftui/making-a-view-into-a-drag-source) — `https://developer.apple.com/tutorials/data/documentation/swiftui/making-a-view-into-a-drag-source.json`
+- [Making fine adjustments to a view’s position](https://developer.apple.com/documentation/swiftui/making-fine-adjustments-to-a-view-s-position) — `https://developer.apple.com/tutorials/data/documentation/swiftui/making-fine-adjustments-to-a-view-s-position.json`
+- [Managing search interface activation](https://developer.apple.com/documentation/swiftui/managing-search-interface-activation) — `https://developer.apple.com/tutorials/data/documentation/swiftui/managing-search-interface-activation.json`
+- [Menu](https://developer.apple.com/documentation/swiftui/menu) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menu.json`
+- [MenuActionDismissBehavior](https://developer.apple.com/documentation/swiftui/menuactiondismissbehavior) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menuactiondismissbehavior.json`
+- [MenuButton](https://developer.apple.com/documentation/swiftui/menubutton) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menubutton.json`
+- [MenuButtonStyle](https://developer.apple.com/documentation/swiftui/menubuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menubuttonstyle.json`
+- [MenuControlGroupStyle](https://developer.apple.com/documentation/swiftui/menucontrolgroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menucontrolgroupstyle.json`
+- [MenuOrder](https://developer.apple.com/documentation/swiftui/menuorder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menuorder.json`
+- [MenuPickerStyle](https://developer.apple.com/documentation/swiftui/menupickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menupickerstyle.json`
+- [MenuStyle](https://developer.apple.com/documentation/swiftui/menustyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menustyle.json`
+- [MenuStyleConfiguration](https://developer.apple.com/documentation/swiftui/menustyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/menustyleconfiguration.json`
+- [NSGestureRecognizerRepresentableContext](https://developer.apple.com/documentation/swiftui/nsgesturerecognizerrepresentablecontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsgesturerecognizerrepresentablecontext.json`
+- [NSHostingController](https://developer.apple.com/documentation/swiftui/nshostingcontroller) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nshostingcontroller.json`
+- [NSHostingMenu](https://developer.apple.com/documentation/swiftui/nshostingmenu) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nshostingmenu.json`
+- [NSHostingView](https://developer.apple.com/documentation/swiftui/nshostingview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nshostingview.json`
+- [NSViewControllerRepresentable](https://developer.apple.com/documentation/swiftui/nsviewcontrollerrepresentable) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsviewcontrollerrepresentable.json`
+- [NSViewControllerRepresentableContext](https://developer.apple.com/documentation/swiftui/nsviewcontrollerrepresentablecontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsviewcontrollerrepresentablecontext.json`
+- [NSViewRepresentable](https://developer.apple.com/documentation/swiftui/nsviewrepresentable) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsviewrepresentable.json`
+- [NSViewRepresentableContext](https://developer.apple.com/documentation/swiftui/nsviewrepresentablecontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/nsviewrepresentablecontext.json`
+- [NavigationControlGroupStyle](https://developer.apple.com/documentation/swiftui/navigationcontrolgroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationcontrolgroupstyle.json`
+- [NavigationSplitView](https://developer.apple.com/documentation/swiftui/navigationsplitview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationsplitview.json`
+- [NavigationSplitViewColumn](https://developer.apple.com/documentation/swiftui/navigationsplitviewcolumn) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationsplitviewcolumn.json`
+- [NavigationSplitViewStyle](https://developer.apple.com/documentation/swiftui/navigationsplitviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationsplitviewstyle.json`
+- [NavigationSplitViewStyleConfiguration](https://developer.apple.com/documentation/swiftui/navigationsplitviewstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationsplitviewstyleconfiguration.json`
+- [NavigationSplitViewVisibility](https://developer.apple.com/documentation/swiftui/navigationsplitviewvisibility) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationsplitviewvisibility.json`
+- [NavigationView](https://developer.apple.com/documentation/swiftui/navigationview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationview.json`
+- [NavigationViewStyle](https://developer.apple.com/documentation/swiftui/navigationviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/navigationviewstyle.json`
+- [NewDocumentButton](https://developer.apple.com/documentation/swiftui/newdocumentbutton) — `https://developer.apple.com/tutorials/data/documentation/swiftui/newdocumentbutton.json`
+- [NewDocumentButtonDataSource](https://developer.apple.com/documentation/swiftui/newdocumentbuttondatasource) — `https://developer.apple.com/tutorials/data/documentation/swiftui/newdocumentbuttondatasource.json`
+- [PaletteControlGroupStyle](https://developer.apple.com/documentation/swiftui/palettecontrolgroupstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/palettecontrolgroupstyle.json`
+- [PalettePickerStyle](https://developer.apple.com/documentation/swiftui/palettepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/palettepickerstyle.json`
+- [PasteButton](https://developer.apple.com/documentation/swiftui/pastebutton) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pastebutton.json`
+- [Picker](https://developer.apple.com/documentation/swiftui/picker) — `https://developer.apple.com/tutorials/data/documentation/swiftui/picker.json`
+- [PickerStyle](https://developer.apple.com/documentation/swiftui/pickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pickerstyle.json`
+- [Picking container views for your content](https://developer.apple.com/documentation/swiftui/picking-container-views-for-your-content) — `https://developer.apple.com/tutorials/data/documentation/swiftui/picking-container-views-for-your-content.json`
+- [PinnedScrollableViews](https://developer.apple.com/documentation/swiftui/pinnedscrollableviews) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pinnedscrollableviews.json`
+- [PlaceholderContentView](https://developer.apple.com/documentation/swiftui/placeholdercontentview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/placeholdercontentview.json`
+- [PlainButtonStyle](https://developer.apple.com/documentation/swiftui/plainbuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/plainbuttonstyle.json`
+- [PlainTextEditorStyle](https://developer.apple.com/documentation/swiftui/plaintexteditorstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/plaintexteditorstyle.json`
+- [PlainTextFieldStyle](https://developer.apple.com/documentation/swiftui/plaintextfieldstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/plaintextfieldstyle.json`
+- [PopUpButtonPickerStyle](https://developer.apple.com/documentation/swiftui/popupbuttonpickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/popupbuttonpickerstyle.json`
+- [Populating SwiftUI menus with adaptive controls](https://developer.apple.com/documentation/swiftui/populating-swiftui-menus-with-adaptive-controls) — `https://developer.apple.com/tutorials/data/documentation/swiftui/populating-swiftui-menus-with-adaptive-controls.json`
+- [PreferredColorSchemeKey](https://developer.apple.com/documentation/swiftui/preferredcolorschemekey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/preferredcolorschemekey.json`
+- [Preparing views for localization](https://developer.apple.com/documentation/swiftui/preparing-views-for-localization) — `https://developer.apple.com/tutorials/data/documentation/swiftui/preparing-views-for-localization.json`
+- [PresentationSizingContext](https://developer.apple.com/documentation/swiftui/presentationsizingcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/presentationsizingcontext.json`
+- [Preview(_:body:)](https://developer.apple.com/documentation/swiftui/preview(_:body:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/preview(_:body:).json`
+- [Preview(_:traits:_:body:)](https://developer.apple.com/documentation/swiftui/preview(_:traits:_:body:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/preview(_:traits:_:body:).json`
+- [Preview(_:traits:arguments:body:)](https://developer.apple.com/documentation/swiftui/preview(_:traits:arguments:body:)) — `https://developer.apple.com/tutorials/data/documentation/swiftui/preview(_:traits:arguments:body:).json`
+- [PreviewContext](https://developer.apple.com/documentation/swiftui/previewcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewcontext.json`
+- [PreviewContextKey](https://developer.apple.com/documentation/swiftui/previewcontextkey) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewcontextkey.json`
+- [PreviewDevice](https://developer.apple.com/documentation/swiftui/previewdevice) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewdevice.json`
+- [PreviewModifier](https://developer.apple.com/documentation/swiftui/previewmodifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewmodifier.json`
+- [PreviewModifierContent](https://developer.apple.com/documentation/swiftui/previewmodifiercontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewmodifiercontent.json`
+- [PreviewPlatform](https://developer.apple.com/documentation/swiftui/previewplatform) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewplatform.json`
+- [PreviewProvider](https://developer.apple.com/documentation/swiftui/previewprovider) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewprovider.json`
+- [Previewable()](https://developer.apple.com/documentation/swiftui/previewable()) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previewable().json`
+- [Previews in Xcode](https://developer.apple.com/documentation/swiftui/previews-in-xcode) — `https://developer.apple.com/tutorials/data/documentation/swiftui/previews-in-xcode.json`
+- [PrimitiveButtonStyle](https://developer.apple.com/documentation/swiftui/primitivebuttonstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/primitivebuttonstyle.json`
+- [PrimitiveButtonStyleConfiguration](https://developer.apple.com/documentation/swiftui/primitivebuttonstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/primitivebuttonstyleconfiguration.json`
+- [ProgressView](https://developer.apple.com/documentation/swiftui/progressview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/progressview.json`
+- [ProgressViewStyle](https://developer.apple.com/documentation/swiftui/progressviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/progressviewstyle.json`
+- [ProgressViewStyleConfiguration](https://developer.apple.com/documentation/swiftui/progressviewstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/progressviewstyleconfiguration.json`
+- [ProminentDetailNavigationSplitViewStyle](https://developer.apple.com/documentation/swiftui/prominentdetailnavigationsplitviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/prominentdetailnavigationsplitviewstyle.json`
+- [ProposedViewSize](https://developer.apple.com/documentation/swiftui/proposedviewsize) — `https://developer.apple.com/tutorials/data/documentation/swiftui/proposedviewsize.json`
+- [Protecting sensitive content when screen sharing and remote control are active](https://developer.apple.com/documentation/swiftui/protecting-sensitive-content-when-screen-sharing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/protecting-sensitive-content-when-screen-sharing.json`
+- [PullDownButton](https://developer.apple.com/documentation/swiftui/pulldownbutton) — `https://developer.apple.com/tutorials/data/documentation/swiftui/pulldownbutton.json`
+- [RadioGroupPickerStyle](https://developer.apple.com/documentation/swiftui/radiogrouppickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/radiogrouppickerstyle.json`
+- [Reducing view modifier maintenance](https://developer.apple.com/documentation/swiftui/reducing-view-modifier-maintenance) — `https://developer.apple.com/tutorials/data/documentation/swiftui/reducing-view-modifier-maintenance.json`
+- [RenameButton](https://developer.apple.com/documentation/swiftui/renamebutton) — `https://developer.apple.com/tutorials/data/documentation/swiftui/renamebutton.json`
+- [RoundedBorderTextFieldStyle](https://developer.apple.com/documentation/swiftui/roundedbordertextfieldstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/roundedbordertextfieldstyle.json`
+- [Scroll views](https://developer.apple.com/documentation/swiftui/scroll-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scroll-views.json`
+- [ScrollPhaseChangeContext](https://developer.apple.com/documentation/swiftui/scrollphasechangecontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollphasechangecontext.json`
+- [ScrollTargetBehaviorContext](https://developer.apple.com/documentation/swiftui/scrolltargetbehaviorcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolltargetbehaviorcontext.json`
+- [ScrollTargetBehaviorPropertiesContext](https://developer.apple.com/documentation/swiftui/scrolltargetbehaviorpropertiescontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrolltargetbehaviorpropertiescontext.json`
+- [ScrollView](https://developer.apple.com/documentation/swiftui/scrollview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollview.json`
+- [ScrollViewProxy](https://developer.apple.com/documentation/swiftui/scrollviewproxy) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollviewproxy.json`
+- [ScrollViewReader](https://developer.apple.com/documentation/swiftui/scrollviewreader) — `https://developer.apple.com/tutorials/data/documentation/swiftui/scrollviewreader.json`
+- [Search modifiers](https://developer.apple.com/documentation/swiftui/view-search) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-search.json`
+- [SecureField](https://developer.apple.com/documentation/swiftui/securefield) — `https://developer.apple.com/tutorials/data/documentation/swiftui/securefield.json`
+- [SegmentedPickerStyle](https://developer.apple.com/documentation/swiftui/segmentedpickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/segmentedpickerstyle.json`
+- [ShareLink](https://developer.apple.com/documentation/swiftui/sharelink) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sharelink.json`
+- [SharePreview](https://developer.apple.com/documentation/swiftui/sharepreview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sharepreview.json`
+- [SidebarAdaptableTabViewStyle](https://developer.apple.com/documentation/swiftui/sidebaradaptabletabviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sidebaradaptabletabviewstyle.json`
+- [SizeDependentTextVariant](https://developer.apple.com/documentation/swiftui/sizedependenttextvariant) — `https://developer.apple.com/tutorials/data/documentation/swiftui/sizedependenttextvariant.json`
+- [Slider](https://developer.apple.com/documentation/swiftui/slider) — `https://developer.apple.com/tutorials/data/documentation/swiftui/slider.json`
+- [SliderTick](https://developer.apple.com/documentation/swiftui/slidertick) — `https://developer.apple.com/tutorials/data/documentation/swiftui/slidertick.json`
+- [SliderTickBuilder](https://developer.apple.com/documentation/swiftui/slidertickbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/slidertickbuilder.json`
+- [SliderTickContent](https://developer.apple.com/documentation/swiftui/slidertickcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/slidertickcontent.json`
+- [SliderTickContentForEach](https://developer.apple.com/documentation/swiftui/slidertickcontentforeach) — `https://developer.apple.com/tutorials/data/documentation/swiftui/slidertickcontentforeach.json`
+- [SquareBorderTextFieldStyle](https://developer.apple.com/documentation/swiftui/squarebordertextfieldstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/squarebordertextfieldstyle.json`
+- [Stepper](https://developer.apple.com/documentation/swiftui/stepper) — `https://developer.apple.com/tutorials/data/documentation/swiftui/stepper.json`
+- [StepperFieldDatePickerStyle](https://developer.apple.com/documentation/swiftui/stepperfielddatepickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/stepperfielddatepickerstyle.json`
+- [StrokeShapeView](https://developer.apple.com/documentation/swiftui/strokeshapeview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/strokeshapeview.json`
+- [Style modifiers](https://developer.apple.com/documentation/swiftui/view-style-modifiers) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-style-modifiers.json`
+- [SubmitLabel](https://developer.apple.com/documentation/swiftui/submitlabel) — `https://developer.apple.com/tutorials/data/documentation/swiftui/submitlabel.json`
+- [SubscriptionView](https://developer.apple.com/documentation/swiftui/subscriptionview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/subscriptionview.json`
+- [Subview](https://developer.apple.com/documentation/swiftui/subview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/subview.json`
+- [SubviewsCollection](https://developer.apple.com/documentation/swiftui/subviewscollection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/subviewscollection.json`
+- [SubviewsCollectionSlice](https://developer.apple.com/documentation/swiftui/subviewscollectionslice) — `https://developer.apple.com/tutorials/data/documentation/swiftui/subviewscollectionslice.json`
+- [SwitchToggleStyle](https://developer.apple.com/documentation/swiftui/switchtogglestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/switchtogglestyle.json`
+- [Tab](https://developer.apple.com/documentation/swiftui/tab) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tab.json`
+- [TabBarOnlyTabViewStyle](https://developer.apple.com/documentation/swiftui/tabbaronlytabviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabbaronlytabviewstyle.json`
+- [TabView](https://developer.apple.com/documentation/swiftui/tabview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabview.json`
+- [TabViewBottomAccessoryPlacement](https://developer.apple.com/documentation/swiftui/tabviewbottomaccessoryplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabviewbottomaccessoryplacement.json`
+- [TabViewCustomization](https://developer.apple.com/documentation/swiftui/tabviewcustomization) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabviewcustomization.json`
+- [TabViewStyle](https://developer.apple.com/documentation/swiftui/tabviewstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabviewstyle.json`
+- [TabsPickerStyle](https://developer.apple.com/documentation/swiftui/tabspickerstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tabspickerstyle.json`
+- [Technology-specific views](https://developer.apple.com/documentation/swiftui/technology-specific-views) — `https://developer.apple.com/tutorials/data/documentation/swiftui/technology-specific-views.json`
+- [Text](https://developer.apple.com/documentation/swiftui/text) — `https://developer.apple.com/tutorials/data/documentation/swiftui/text.json`
+- [Text and symbol modifiers](https://developer.apple.com/documentation/swiftui/view-text-and-symbols) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-text-and-symbols.json`
+- [Text input and output](https://developer.apple.com/documentation/swiftui/text-input-and-output) — `https://developer.apple.com/tutorials/data/documentation/swiftui/text-input-and-output.json`
+- [TextAlignment](https://developer.apple.com/documentation/swiftui/textalignment) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textalignment.json`
+- [TextAttribute](https://developer.apple.com/documentation/swiftui/textattribute) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textattribute.json`
+- [TextEditor](https://developer.apple.com/documentation/swiftui/texteditor) — `https://developer.apple.com/tutorials/data/documentation/swiftui/texteditor.json`
+- [TextEditorStyle](https://developer.apple.com/documentation/swiftui/texteditorstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/texteditorstyle.json`
+- [TextEditorStyleConfiguration](https://developer.apple.com/documentation/swiftui/texteditorstyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/texteditorstyleconfiguration.json`
+- [TextField](https://developer.apple.com/documentation/swiftui/textfield) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textfield.json`
+- [TextFieldStyle](https://developer.apple.com/documentation/swiftui/textfieldstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textfieldstyle.json`
+- [TextInputFormattingControlPlacement](https://developer.apple.com/documentation/swiftui/textinputformattingcontrolplacement) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textinputformattingcontrolplacement.json`
+- [TextProxy](https://developer.apple.com/documentation/swiftui/textproxy) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textproxy.json`
+- [TextRenderer](https://developer.apple.com/documentation/swiftui/textrenderer) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textrenderer.json`
+- [TextSelectability](https://developer.apple.com/documentation/swiftui/textselectability) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textselectability.json`
+- [TextSelection](https://developer.apple.com/documentation/swiftui/textselection) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textselection.json`
+- [TextSelectionAffinity](https://developer.apple.com/documentation/swiftui/textselectionaffinity) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textselectionaffinity.json`
+- [TextVariantPreference](https://developer.apple.com/documentation/swiftui/textvariantpreference) — `https://developer.apple.com/tutorials/data/documentation/swiftui/textvariantpreference.json`
+- [TimelineView](https://developer.apple.com/documentation/swiftui/timelineview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/timelineview.json`
+- [TimelineViewDefaultContext](https://developer.apple.com/documentation/swiftui/timelineviewdefaultcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/timelineviewdefaultcontext.json`
+- [TitleAndIconLabelStyle](https://developer.apple.com/documentation/swiftui/titleandiconlabelstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/titleandiconlabelstyle.json`
+- [TitleOnlyLabelStyle](https://developer.apple.com/documentation/swiftui/titleonlylabelstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/titleonlylabelstyle.json`
+- [Toggle](https://developer.apple.com/documentation/swiftui/toggle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toggle.json`
+- [ToggleStyle](https://developer.apple.com/documentation/swiftui/togglestyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/togglestyle.json`
+- [ToggleStyleConfiguration](https://developer.apple.com/documentation/swiftui/togglestyleconfiguration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/togglestyleconfiguration.json`
+- [ToolbarItemVisibilityPriority](https://developer.apple.com/documentation/swiftui/toolbaritemvisibilitypriority) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbaritemvisibilitypriority.json`
+- [ToolbarLabelStyle](https://developer.apple.com/documentation/swiftui/toolbarlabelstyle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbarlabelstyle.json`
+- [ToolbarTitleMenu](https://developer.apple.com/documentation/swiftui/toolbartitlemenu) — `https://developer.apple.com/tutorials/data/documentation/swiftui/toolbartitlemenu.json`
+- [TupleSliderTickContent](https://developer.apple.com/documentation/swiftui/tupleslidertickcontent) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tupleslidertickcontent.json`
+- [TupleView](https://developer.apple.com/documentation/swiftui/tupleview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/tupleview.json`
+- [VSplitView](https://developer.apple.com/documentation/swiftui/vsplitview) — `https://developer.apple.com/tutorials/data/documentation/swiftui/vsplitview.json`
+- [View](https://developer.apple.com/documentation/swiftui/view) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view.json`
+- [View configuration](https://developer.apple.com/documentation/swiftui/view-configuration) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-configuration.json`
+- [View fundamentals](https://developer.apple.com/documentation/swiftui/view-fundamentals) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-fundamentals.json`
+- [View groupings](https://developer.apple.com/documentation/swiftui/view-groupings) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-groupings.json`
+- [View styles](https://developer.apple.com/documentation/swiftui/view-styles) — `https://developer.apple.com/tutorials/data/documentation/swiftui/view-styles.json`
+- [ViewBuilder](https://developer.apple.com/documentation/swiftui/viewbuilder) — `https://developer.apple.com/tutorials/data/documentation/swiftui/viewbuilder.json`
+- [ViewDimensions](https://developer.apple.com/documentation/swiftui/viewdimensions) — `https://developer.apple.com/tutorials/data/documentation/swiftui/viewdimensions.json`
+- [ViewModifier](https://developer.apple.com/documentation/swiftui/viewmodifier) — `https://developer.apple.com/tutorials/data/documentation/swiftui/viewmodifier.json`
+- [ViewSpacing](https://developer.apple.com/documentation/swiftui/viewspacing) — `https://developer.apple.com/tutorials/data/documentation/swiftui/viewspacing.json`
+- [ViewThatFits](https://developer.apple.com/documentation/swiftui/viewthatfits) — `https://developer.apple.com/tutorials/data/documentation/swiftui/viewthatfits.json`
+- [WindowPlacementContext](https://developer.apple.com/documentation/swiftui/windowplacementcontext) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowplacementcontext.json`
+- [WindowVisibilityToggle](https://developer.apple.com/documentation/swiftui/windowvisibilitytoggle) — `https://developer.apple.com/tutorials/data/documentation/swiftui/windowvisibilitytoggle.json`

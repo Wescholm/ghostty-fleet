@@ -58,17 +58,24 @@ the day Zig links the macOS 26 SDK natively. The Zig std patch and overlay SDK l
 | `make lint` / `fmt` | SwiftLint. |
 | `make sync` | Fetch `upstream` (ghostty-org) + report how far behind. |
 | `make xcode` | Open the project in Xcode (needed for previews / the MCP bridge). |
+| `make skills` | (Re)link committed `.agents/skills/` into gitignored `.claude/skills/` so Claude Code loads them. Run once after a fresh clone. |
 
 The app lands at `macos/build/Debug/Ghostty.app` (overwritten in place; bundle id
 `com.wescholm.ghostty-fleet`). Override paths via `make build XCODE_DEV=… ZIG_DIR=… CONFIG=Release`.
 
 ### Dev tooling (MCP servers, `.mcp.json`)
 - **`xcode`** (`mcpbridge`) — Xcode bridge for SwiftUI `#Preview` rendering / navigator issues (see `VALIDATION.md`).
-- **`xcode-build`** (XcodeBuildMCP) — wraps `xcodebuild` for the **Swift app** loop (build/test/run/logs).
-  `DEVELOPER_DIR` is pinned to real Xcode in `.mcp.json` because `xcode-select` here points at
-  CommandLineTools. It **cannot** build `GhosttyKit.xcframework` (that's Zig) — run `make build` for
-  that first; it only drives the Swift side. (`npx …@latest` auto-installs on first launch.)
+- **`XcodeBuildMCP`** — wraps `xcodebuild` for the **Swift app** loop (build/test/run/logs).
+  Launched via the brew-global `xcodebuildmcp` binary, with `DEVELOPER_DIR` pinned to real Xcode in
+  `.mcp.json` so it works regardless of where the global `xcode-select` points (today it points at
+  real Xcode, but the pin keeps it robust if that ever flips to CommandLineTools). It **cannot** build
+  `GhosttyKit.xcframework` (that's Zig) — run `make build` for that first; it only drives the Swift
+  side. (Install/update with `brew upgrade xcodebuildmcp`.)
 - **`peekaboo`** — screen capture / window inspection, for verifying the live UI.
+
+**Project skills** live canonically in **`.agents/skills/`** (committed, shareable). Since all of
+`.claude/` is gitignored, `make skills` symlinks each one into `.claude/skills/` (where Claude Code
+actually loads them) — run it once after a fresh clone. Edit the real files under `.agents/skills/`.
 
 > **Build rule:** the xcframework is owned by `make build` / `build-macos.sh` (Zig + the macOS-26
 > toolchain workaround). No `xcodebuild` wrapper can produce it — don't re-debug the toolchain wall.
@@ -162,3 +169,4 @@ git push --force-with-lease origin dev                    # publish the rebased 
 - macOS app: `macos/`
 - GTK (Linux and FreeBSD) app: `src/apprt/gtk`
 - Fork build wrapper: `./build-macos.sh` · dev helpers: `Makefile` · CLI: `cli/ghosttyctl`
+- If using XcodeBuildMCP, use the installed XcodeBuildMCP skill before calling XcodeBuildMCP tools.

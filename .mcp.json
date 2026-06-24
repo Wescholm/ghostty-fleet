@@ -4,11 +4,9 @@
       "type": "stdio",
       "command": "/Applications/Xcode.app/Contents/Developer/usr/bin/mcpbridge"
     },
-    "xcode-build": {
-      "command": "npx",
+    "XcodeBuildMCP": {
+      "command": "xcodebuildmcp",
       "args": [
-        "-y",
-        "xcodebuildmcp@latest",
         "mcp"
       ],
       "env": {

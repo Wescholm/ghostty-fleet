@@ -54,7 +54,7 @@ DERIVED     := $(HOME)/Library/Developer/Xcode/DerivedData
 LSREGISTER  := /System/Library/Frameworks/CoreServices.framework/Versions/A/Frameworks/LaunchServices.framework/Versions/A/Support/lsregister
 
 .DEFAULT_GOAL := help
-.PHONY: help doctor build app run dev quit prune-apps test lint fmt sync xcode install-cli clean-app
+.PHONY: help doctor build app run dev quit prune-apps test lint fmt sync xcode skills install-cli clean-app
 
 help: ## Show this help
 	@awk 'BEGIN{FS=":.*##"; printf "\nGhostty sidebar fork — make targets:\n\n"} /^[a-zA-Z0-9_.-]+:.*##/{printf "  \033[36m%-12s\033[0m%s\n",$$1,$$2} END{printf "\n  (upstream targets also available: init, glad, clean)\n\n"}' $(MAKEFILE_LIST)
@@ -115,6 +115,14 @@ sync: ## Fetch ghostty-org (upstream) and report how far behind this branch is
 
 xcode: ## Open the project in Xcode (needed for previews / the MCP bridge)
 	open macos/$(PROJECT)
+
+skills: ## (Re)link committed .agents/skills into gitignored .claude/skills so Claude Code loads them
+	@mkdir -p .claude/skills
+	@for d in .agents/skills/*/; do \
+		name=$$(basename "$$d"); \
+		ln -snf "../../.agents/skills/$$name" ".claude/skills/$$name"; \
+		echo "linked .claude/skills/$$name -> ../../.agents/skills/$$name"; \
+	done
 
 install-cli: ## Symlink ghosttyctl into PREFIX/bin (default /usr/local; override PREFIX=~/.local)
 	@mkdir -p "$(PREFIX)/bin"
