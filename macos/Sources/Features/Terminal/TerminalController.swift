@@ -18,6 +18,16 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             return defaultValue
         }
 
+        // Sidebar fork: with native tabs disabled (the default), the `tabs` titlebar style is
+        // meaningless — the sidebar provides the tab UI and no native `NSWindowTabGroup` ever forms. On
+        // macOS 26 the `tabs` style still installs an `NSToolbar` to host native tabs, which then renders
+        // as an empty ~40pt band above the sidebar (the fork's `NSTabBar` hider doesn't catch a toolbar).
+        // Fall back to the transparent titlebar so there's no empty toolbar. Release Ghostty keeps its
+        // native tabs (`nativeTabsDisabled == false`), so this only affects the fork.
+        if config.macosTitlebarStyle == .tabs && BaseTerminalController.nativeTabsDisabled {
+            return "TerminalTransparentTitlebar"
+        }
+
         let nib = switch config.macosTitlebarStyle {
         case .native: "Terminal"
         case .hidden: "TerminalHiddenTitlebar"
