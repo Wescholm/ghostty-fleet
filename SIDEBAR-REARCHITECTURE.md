@@ -154,13 +154,25 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
 - **Step 1:** introduce the `Session` model (wrap one `SplitTree<SurfaceView>` + metadata) without removing
   `surfaceTree` yet.
 - **Step 2:** generalize `BaseTerminalController` to `[Session]` + `activeSessionIndex` + `activeSurfaceTree`.
-- **Step 3:** implement session switching (mount active tree, per-session occlusion, mount-then-focus).
-- **Step 4:** reimplement tab lifecycle (new/close/goto/move) as `[Session]` array ops; `newWindow` stays a
-  real window; Cmd+T → new in-app session.
+- **Step 3 (done):** `selectSession(at:)` — mount the active tree, occlude the outgoing session's
+  surfaces, mount-then-focus. Hardened per adversarial review: rebinds the title listener via
+  `focusedSurfaceDidChange(to:)`, resigns the outgoing first responder via `moveFocus(to:from:)`,
+  re-syncs focus after the async settles, and re-applies the color scheme to the newly mounted surfaces.
+- **Step 4 (partial — `newSession` done):** `newSession(baseConfig:)` creates a fresh surface + Session
+  and switches to it. Remaining for Step 5+: route Cmd+T (and Cmd+N) to `newSession`, and implement
+  close/goto/move as `[Session]` array ops.
 - **Step 5:** rewrite `SidebarTabManager` to read `controller.sessions` (delete the `tabbedWindows` /
-  `refreshAllSidebars` machinery); add the `Session.status` model here.
-- **Step 6:** migrate IPC resolvers to iterate `controller.sessions`; replace `handleTabFocus`'s
-  `makeKeyAndOrderFront` with a `selectSession()` API (`GHOSTTY_TAB_ID` is already a per-surface UUID).
+  `refreshAllSidebars` machinery); wire sidebar selection → `selectSession`, Cmd+T/Cmd+N → `newSession`;
+  flip `FleetDisableNativeTabs` on by default; add the `Session.status` model. **Review-mandated wiring
+  (else multi-session breaks):** drive per-session **bell/status from each `Session`'s own surfaces**,
+  not the controller-level mounted-tree publisher (which only sees the active tree — G2); and the
+  **close path must switch to a sibling *before* the active tree empties** (TerminalController closes the
+  window on an empty mounted tree — E1).
+- **Step 6 (BLOCKER, land with Step 5):** migrate `GhosttyIPCServer.surfaceForId` /
+  `controllerForSurfaceId` to iterate `controller.sessions[].surfaceTree`, not just the mounted
+  `surfaceTree` — otherwise `ghosttyctl set-status/focus/rename/notify` can't reach **background**
+  sessions, which is the fork's core feature (G1). Replace `handleTabFocus`'s `makeKeyAndOrderFront`
+  with `selectSession()` (`GHOSTTY_TAB_ID` is already a per-surface UUID).
 - **Step 7:** reimplement undo/redo in terms of `(controller, sessionIndex)` (net-new code).
 - **Step 8:** new single-window multi-session `TerminalRestorableState` (serialize the array of
   `SplitTree`s + `activeSessionIndex`); bump the format version and raise `minimumVersion` to **reject
