@@ -70,7 +70,13 @@ The app lands at `macos/build/Debug/Ghostty.app` (overwritten in place; bundle i
   `.mcp.json` so it works regardless of where the global `xcode-select` points (today it points at
   real Xcode, but the pin keeps it robust if that ever flips to CommandLineTools). It **cannot** build
   `GhosttyKit.xcframework` (that's Zig) — run `make build` for that first; it only drives the Swift
-  side. (Install/update with `brew upgrade xcodebuildmcp`.)
+  side. (Install/update with `brew upgrade xcodebuildmcp`.) **It is iOS-simulator-centric:** for this
+  macOS-only app only the enabled `macos`, `utilities`, `project-discovery`, `swift-package`,
+  `coverage`, `xcode-ide`, `doctor` workflows (`.xcodebuildmcp/config.yaml`) do anything. `debugging`
+  (its `attach` is **sim-only** — there is no macOS LLDB), `ui-automation` (sim/device runtime),
+  `simulator*`, `device`, `project-scaffolding` give **zero** macOS capability — don't enable them
+  expecting macOS debug/UI features. Confirm a workflow's real tools with `xcodebuildmcp <workflow>`
+  before relying on them.
 - **`peekaboo`** — screen capture / window inspection, for verifying the live UI.
 
 **Project skills** live canonically in **`.agents/skills/`** (committed, shareable). Since all of
@@ -79,6 +85,24 @@ actually loads them) — run it once after a fresh clone. Edit the real files un
 
 > **Build rule:** the xcframework is owned by `make build` / `build-macos.sh` (Zig + the macOS-26
 > toolchain workaround). No `xcodebuild` wrapper can produce it — don't re-debug the toolchain wall.
+
+### Which tool for which job (it's a macOS app — most iOS/sim MCP tooling is dead weight here)
+
+Don't assume a tool/skill/agent applies; this table is the source of truth. Verify, don't guess.
+
+| Goal | Use | Not |
+|---|---|---|
+| Build `GhosttyKit.xcframework` | `make build` (Zig) | any `xcodebuild`/MCP wrapper — it physically can't |
+| Incremental Swift rebuild | `make app`, or XcodeBuildMCP `macos build` | `make build` (full + slow) |
+| Run the app with a real window | `make run` / `make dev` (or `open`) | a detached/background launch (makes no window) |
+| Capture runtime logs/errors | `/usr/bin/log show --predicate 'processImagePath CONTAINS "ghostty-sidebar"'` | bare `log` (shell-aliased here) |
+| macOS crash backtrace | plain `lldb -p <pid>` / `lldb …/Contents/MacOS/ghostty`, or Xcode | XcodeBuildMCP `debugging` (sim-only) |
+| Inspect / drive the live macOS UI | `peekaboo` MCP | XcodeBuildMCP `ui-automation` (sim/device) |
+| Render a SwiftUI `#Preview` | `xcode` MCP `RenderPreview` (see `VALIDATION.md`) | — |
+| Broad multi-file search of the Zig core (`src/`) | the `Explore` subagent (keeps context lean) | reading dozens of files inline |
+| Read fork code | direct — it's small, in `Sidebar/` `IPC/` `cli/` | spawning a subagent (overkill) |
+| Write a commit message | the `writing-commit-messages` skill | freehand |
+| SwiftUI view / modifier / layout / glass work | the `swiftui-components` skill | guessing the API |
 
 ### Upstream commands (still valid; the macOS app specifically needs the workaround above)
 - **Build:** `zig build` (`-Demit-macos-app=false` to skip the app bundle). **Test:** `zig build test`
@@ -134,6 +158,17 @@ any `AppIcon` case to taste. Applied on launch via Ghostty's `AppIconUpdater` (`
 - **Visual UI checks via the Xcode MCP bridge** (Xcode 26.3+): with the project open in Xcode,
   `RenderPreview` on `SidebarView.swift` renders the `#Preview` to an image; `BuildProject`,
   `ExecuteSnippet` (Swift REPL), and `XcodeListNavigatorIssues` are also useful. See `VALIDATION.md`.
+- **`log` is shell-aliased here** — bare `log …` fails with `(eval):log:1: too many arguments`. Use
+  **`/usr/bin/log`**, scoped to the fork by image path/PID so a release Ghostty's logs don't bleed in:
+  `/usr/bin/log show --last 10m --predicate 'processImagePath CONTAINS "ghostty-sidebar"' --style compact`.
+- **Crash reports live in `~/.local/state/ghostty/crash/*.ghosttycrash`** (a Sentry envelope — the
+  JSON header carries `timestamp`/`level`/`release` + the offending dylibs). A startup `sentry: crash
+  report written to disk` line is the handler **finalizing an earlier crash**, not proof of one this
+  run — check the envelope `timestamp` first. (Much of the backlog there is Xcode `#Preview` crashes —
+  `__preview.dylib`/`libPlaygrounds.dylib` in the stack — not the app proper.)
+- **MCP config changes don't apply live.** Edits to `.mcp.json` (server/env) or
+  `.xcodebuildmcp/config.yaml` (`enabledWorkflows`, session defaults) only take effect after the MCP
+  server **reconnects** (`/mcp`). Verify a tool's capability against the binary, never its name.
 
 ---
 
