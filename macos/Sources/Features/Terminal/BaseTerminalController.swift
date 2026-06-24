@@ -331,15 +331,30 @@ class BaseTerminalController: NSWindowController,
             view.isWindowVisible = false
         }
 
+        // Remember the outgoing focused surface so we can resign its first responder below.
+        let outgoing = focusedSurface
+
         // Mount the incoming session's tree (triggers surfaceTreeDidChange → occlusion sync).
         activeSessionIndex = index
         surfaceTree = sessions[index].surfaceTree
 
-        // Mount-then-focus: the view is now in surfaceTree, so focusSurface's containment check passes.
-        // (Do NOT rely on the window==nil moveFocus retry — it never fires for a mounted view.)
+        // The color-scheme cache is keyed per mounted tree; invalidate it so the newly mounted
+        // surfaces get the current scheme applied (the controller-level cache would otherwise skip them).
+        appliedColorScheme = nil
+        updateColorSchemeForSurfaceTree()
+
+        // Mount-then-focus. focusedSurfaceDidChange rebinds the title/bell listener to the incoming
+        // surface (it requires the view to already be in surfaceTree — it is, post-mount). Then, on the
+        // next runloop turn (after SwiftUI attaches the view), move focus from the outgoing surface to
+        // the new one — which resigns the outgoing first responder — and re-sync focus state once the
+        // first responder has settled. (Do NOT rely on the window==nil moveFocus retry.)
         if let view = surfaceTree.root?.leftmostLeaf() {
-            focusedSurface = view
-            focusSurface(view)
+            focusedSurfaceDidChange(to: view)
+            DispatchQueue.main.async { [weak self] in
+                Ghostty.moveFocus(to: view, from: outgoing)
+                view.window?.makeKeyAndOrderFront(nil)
+                self?.syncFocusToSurfaceTree()
+            }
         }
     }
 
