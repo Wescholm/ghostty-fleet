@@ -89,11 +89,7 @@ class SidebarTabManager: ObservableObject {
         self.bellTriggersAttention = bellTriggersAttention
         setupObservers()
         observeController(controller)
-        refresh()
-        startGitPolling()
-        activityTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
-            self?.sampleActivity()
-        }
+        startPolling() // refreshes + starts the refresh/CPU/git pollers (occlusion-gated, audit M6)
     }
 
     deinit {
@@ -185,10 +181,46 @@ class SidebarTabManager: ObservableObject {
         }
         observers.append(ipcNotifObserver)
 
-        // Poll periodically for session changes, title changes, pwd changes, metadata changes.
+        // Pause the pollers when the window is fully occluded / minimized / on another Space, per
+        // Apple's "Work When Visible" energy guidance (audit M6): nothing on screen ⇒ no refresh, CPU
+        // sampling, or git subprocesses. Re-arm (and immediately refresh) when it becomes visible again.
+        let occlusionObserver = center.addObserver(
+            forName: NSWindow.didChangeOcclusionStateNotification,
+            object: nil,
+            queue: .main
+        ) { [weak self] note in
+            guard let self,
+                  let window = note.object as? NSWindow,
+                  window == self.controller?.window else { return }
+            if window.occlusionState.contains(.visible) {
+                self.startPolling()
+            } else {
+                self.suspendPolling()
+            }
+        }
+        observers.append(occlusionObserver)
+    }
+
+    /// (Re)start the three pollers — 0.5 s refresh, 1 s CPU-activity sample, and the git-status poll —
+    /// after tearing down any existing ones, plus one immediate refresh so the UI is current. Called at
+    /// init and whenever the window becomes visible again (audit M6).
+    private func startPolling() {
+        suspendPolling()
+        refresh()
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.refresh()
         }
+        activityTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
+            self?.sampleActivity()
+        }
+        startGitPolling()
+    }
+
+    /// Stop the pollers while the window isn't visible (audit M6).
+    private func suspendPolling() {
+        timer?.invalidate(); timer = nil
+        activityTimer?.invalidate(); activityTimer = nil
+        gitPollTask?.cancel(); gitPollTask = nil
     }
 
     // MARK: - Attention
