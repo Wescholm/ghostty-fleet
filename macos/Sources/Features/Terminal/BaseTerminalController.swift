@@ -308,6 +308,58 @@ class BaseTerminalController: NSWindowController,
         }
     }
 
+    // MARK: Sessions (sidebar re-architecture, Step 3/4)
+
+    /// Switch the active/mounted session to the one at `index`. Persists the outgoing session's tree,
+    /// occludes its surfaces (so a hidden session stops doing GPU work), mounts the incoming session's
+    /// tree, and moves focus into it (mount-then-focus). No-op if already active or out of range.
+    /// Not yet wired to UI — Step 5 connects the sidebar + Cmd+T.
+    func selectSession(at index: Int) {
+        guard sessions.indices.contains(index), index != activeSessionIndex else { return }
+
+        // Persist the current mounted tree into the outgoing session. surfaceTreeDidChange keeps this
+        // current on every mutation, but be explicit at the switch boundary.
+        if sessions.indices.contains(activeSessionIndex) {
+            sessions[activeSessionIndex].surfaceTree = surfaceTree
+        }
+
+        // Occlude the outgoing session's surfaces so they stop rendering while hidden. The incoming
+        // surfaces are un-occluded by syncSurfaceTreeOcclusionState() via surfaceTreeDidChange below.
+        for view in surfaceTree {
+            guard let surface = view.surface, view.isWindowVisible else { continue }
+            ghostty_surface_set_occlusion(surface, false)
+            view.isWindowVisible = false
+        }
+
+        // Mount the incoming session's tree (triggers surfaceTreeDidChange → occlusion sync).
+        activeSessionIndex = index
+        surfaceTree = sessions[index].surfaceTree
+
+        // Mount-then-focus: the view is now in surfaceTree, so focusSurface's containment check passes.
+        // (Do NOT rely on the window==nil moveFocus retry — it never fires for a mounted view.)
+        if let view = surfaceTree.root?.leftmostLeaf() {
+            focusedSurface = view
+            focusSurface(view)
+        }
+    }
+
+    /// Create a new in-app session in this window (a single fresh surface, no splits) and switch to
+    /// it. Mirrors the initial-surface creation in `init`. Returns the new session.
+    /// Not yet wired to UI — Step 5 connects Cmd+T / the sidebar.
+    @discardableResult
+    func newSession(baseConfig base: Ghostty.SurfaceConfiguration? = nil) -> Session? {
+        guard let ghostty_app = ghostty.app else { return nil }
+        var config = base ?? Ghostty.SurfaceConfiguration()
+        config.environmentVariables["GHOSTTY_SOCKET"] = "/tmp/ghostty-\(getuid()).sock"
+        let surfaceUUID = UUID()
+        config.environmentVariables["GHOSTTY_TAB_ID"] = surfaceUUID.uuidString
+        let view = Ghostty.SurfaceView(ghostty_app, baseConfig: config, uuid: surfaceUUID)
+        let session = Session(surfaceTree: .init(view: view))
+        sessions.append(session)
+        selectSession(at: sessions.count - 1)
+        return session
+    }
+
     /// Called when the surfaceTree variable changed.
     ///
     /// Subclasses should call super first.
