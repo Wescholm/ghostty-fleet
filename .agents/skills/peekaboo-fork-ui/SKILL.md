@@ -55,7 +55,9 @@ peekaboo inspect-ui --app PID:$PID    # AX tree: sidebar list, card title, dir, 
 ```
 Prefer this for assertions ("does the card show branch X / the dirty dot") — it returns text, so
 it's stable and diffable, unlike eyeballing pixels. Also available as the `mcp__peekaboo__inspect_ui`
-MCP tool.
+MCP tool. If a long sidebar (this fork is built for *many* parallel sessions) gets truncated, raise
+the AX traversal limits: `--max-elements` / `--max-depth` / `--max-children` (or set
+`PEEKABOO_AX_MAX_ELEMENTS` / `PEEKABOO_AX_MAX_DEPTH` / `PEEKABOO_AX_MAX_CHILDREN`).
 
 **Capture pixels (when you actually need an image):**
 ```bash
