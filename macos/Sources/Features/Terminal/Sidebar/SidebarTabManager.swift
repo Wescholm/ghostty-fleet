@@ -138,26 +138,22 @@ class SidebarTabManager: ObservableObject {
         ) { [weak self] _ in self?.refresh() }
         observers.append(resignObserver)
 
-        // Bell: respect bell-features config
+        // Bell → attention, per-session (respects the bell-features config). G2: use the per-surface
+        // `.ghosttyBellDidRing` notification, which carries the *originating surface* (object), instead
+        // of the controller-level `.terminalWindowBellDidChangeNotification`. The controller aggregate
+        // only watches the *mounted* tree (`surfaceValuesPublisher` over `$surfaceTree`), so a bell in
+        // a background session was invisible to it; the per-surface signal fires regardless of which
+        // session the surface lives in, so attention attributes to the right card — including a
+        // background one — exactly like desktop notifications.
         if bellTriggersAttention {
             let bellObserver = center.addObserver(
-                forName: .terminalWindowBellDidChangeNotification,
+                forName: .ghosttyBellDidRing,
                 object: nil,
                 queue: .main
             ) { [weak self] notification in
                 guard let self,
-                      let bellController = notification.object as? BaseTerminalController,
-                      bellController === self.controller else { return }
-                let hasBell = notification.userInfo?[Notification.Name.terminalWindowHasBellKey] as? Bool ?? false
-                if hasBell {
-                    // TODO(Step 5 follow-up): precise per-session bell attribution (review item G2).
-                    // The bell notification carries the controller, not the originating surface, so we
-                    // best-effort attribute to the focused surface's session, falling back to active.
-                    let surface = self.controller?.focusedSurface
-                    self.markAttention(sessionId: self.sessionId(for: surface) ?? self.controller?.activeSession?.id)
-                } else {
-                    self.refresh()
-                }
+                      let surfaceView = notification.object as? Ghostty.SurfaceView else { return }
+                self.markAttention(sessionId: self.sessionId(for: surfaceView))
             }
             observers.append(bellObserver)
         }
