@@ -152,8 +152,13 @@ Don't assume a tool/skill/agent applies; this table is the source of truth. Veri
 - **`cli/ghosttyctl`** — the CLI. `ghosttyctl list` (incl. `foreground_pid`), `focus <tab_id>`,
   `set-status k v --icon sf.symbol`, `rename`, `notify`.
 
-**Sidebar dot legend:** 🟠 needs attention (bell/notify) · 🟢 working (foreground process busy) ·
-gray ● dirty (uncommitted) · `↑n ↓m` ahead/behind upstream. Orange beats green.
+**Sidebar status dot** (one dot after the title; color = the session's lifecycle state, computed in
+`SidebarTabManager.effectiveStatus`): 🟠 attention (bell/notify) · 🔴 error · 🟡 waiting (blocked on you) ·
+🟢 running (agent-reported *or* foreground-CPU busy) · 🔵 done · none = idle. Precedence **attention >
+error > waiting > running > done > idle**. Lifecycle states are agent-reported via `ghosttyctl state
+<idle|running|waiting|done|error>` (→ `tab.set-state` → `Session.status`; built for Claude Code hooks,
+see `cli/claude-hooks.example.json`), with the CPU heuristic as fallback. Separately on the branch line:
+gray ● dirty (uncommitted) · `↑n ↓m` ahead/behind upstream.
 
 **Distinct icon:** `AppDelegate.updateAppIcon` forces `.blueprint` under `#if DEBUG`, so the fork's
 icon differs from a release Ghostty everywhere (Dock/Finder/Spotlight/⌘-Tab). Swap `.blueprint` to

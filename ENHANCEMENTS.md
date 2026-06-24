@@ -5,14 +5,26 @@ turn the sidebar into an at-a-glance **dashboard for many parallel Claude Code s
 
 ## Sidebar legend (what the dots/marks mean)
 
+A single **status dot** after the title encodes the session's lifecycle state (color = state):
+
+| Dot | State | Source |
+|---|---|---|
+| 🟠 orange | **Attention** | bell / desktop notification / `ghosttyctl notify` |
+| 🔴 red | **Error** | agent-reported (`ghosttyctl state error`) |
+| 🟡 yellow | **Waiting** — blocked on you (e.g. an agent asking) | agent-reported (`ghosttyctl state waiting`) |
+| 🟢 green | **Running/working** | agent-reported (`ghosttyctl state running`) *or* the foreground process is using CPU |
+| 🔵 blue | **Done** | agent-reported (`ghosttyctl state done`) |
+| (none) | **Idle** | shell at the prompt, nothing reported |
+
+Precedence: **attention > error > waiting > running > done > idle** — CPU activity counts as *running* and
+outranks a stale *done*/*idle*, but an agent's *error*/*waiting* outranks CPU. The lifecycle state is fed
+by `ghosttyctl state …` (built for Claude Code hooks — see `cli/claude-hooks.example.json`), falling back
+to the CPU heuristic when nothing reports.
+
 | Mark | Meaning |
 |---|---|
-| 🟠 orange dot (after title) | **Needs attention** — bell / desktop notification / `ghosttyctl notify` |
-| 🟢 green dot (after title) | **Working** — the tab's foreground process is actively using CPU |
 | ● small gray dot (after branch) | **Dirty** — uncommitted changes in the working tree |
 | `↑2 ↓1` (after branch) | **Ahead/behind** the upstream branch |
-
-Orange takes priority over green (a session that needs you isn't "busy working").
 
 ## The five changes
 

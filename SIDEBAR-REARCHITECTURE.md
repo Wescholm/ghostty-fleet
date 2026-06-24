@@ -2,8 +2,8 @@
 
 > Status: **Steps 0–6 landed & verified** (in-app sessions are the live default; native window
 > tabbing is off by default; IPC-over-sessions / G1 reaches background sessions; per-session bell
-> attribution / G2 done). Next: render `Session.status` on the cards (+ Claude Code hooks), then
-> restoration/undo. This is the architecture direction for the sidebar fork.
+> attribution / G2 done; per-session lifecycle status dot + Claude Code hooks done). Next: undo/redo
+> (Step 7) and multi-session restoration (Step 8). This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
 >
@@ -140,9 +140,11 @@ positioned for because it already has the `ghosttyctl` IPC + `TabMetadataStore`.
 - **Stop** hook (finished) → `ghosttyctl set-status state done` (+ optional `notify`)
 - tool start/stop → `running` / back to `waiting`/`idle`
 
-Ship a ready-made hook snippet so a Claude Code user gets live "running / waiting / done" per session out of
-the box, with the CPU/OSC-133 heuristics as fallback for non-reporting sessions. This is the differentiator
-over cmux: deep, agent-aware, per-session state because the fork owns both the cards and the IPC.
+**Shipped** as `cli/claude-hooks.example.json` (`ghosttyctl state running|waiting|done`), so a Claude Code
+user gets live "running / waiting / done" per session out of the box, with the CPU heuristic as fallback
+for non-reporting sessions (OSC-133 still a future source). This is the differentiator over cmux: deep,
+agent-aware, per-session state because the fork owns both the cards and the IPC. (Note: lifecycle state
+uses the dedicated `tab.set-state` verb / `Session.status`, **not** the key/value `tab.set-status` store.)
 
 ## Migration plan
 
@@ -172,7 +174,18 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
   `moveSession`. `FleetDisableNativeTabs` is **flipped on by default**. The `Session.status` model
   exists. **Verified e2e** (peekaboo-fork-ui): Cmd+T makes an in-app session, switching both
   directions works, the off-screen session stays live (keep-alive), and no native tab bar / no crash.
-  **Still pending in Step 5's scope:** render `Session.status` on the cards. The two review-mandated
+  **`Session.status` rendering — done & verified:** the card shows one **status dot** colored by the
+  session's effective state (`SidebarTabManager.effectiveStatus` merges agent-reported `Session.status`
+  with the bell/notify attention flag and the CPU "working" heuristic; precedence **attention > error >
+  waiting > running > done > idle**; idle = no dot). Colors: orange/red/yellow/green/blue
+  (`SidebarTabCard.statusColor`). Fed by a new IPC verb `tab.set-state` → `Session.status`, exposed as
+  `ghosttyctl state <idle|running|waiting|done|attention|error>`, with a ready-made Claude Code hooks
+  snippet at `cli/claude-hooks.example.json` (UserPromptSubmit→running, Notification→waiting,
+  Stop→done; each hook inherits `GHOSTTY_TAB_ID` so it targets its own session, background included).
+  Verified e2e: each state renders the right color on the right (incl. background) card, idle shows no
+  dot, CPU activity overrides a stale done/idle to running. **Future:** richer OSC-133 signals (error
+  on non-zero exit, prompt-mark idle/running) as an additional non-agent source.
+  **Still pending in Step 5's scope:** nothing — the two review-mandated
   wirings are now **done**: IPC-over-sessions (G1, see Step 6) and per-session **bell attribution**
   (G2) — the sidebar drives attention from the per-surface `.ghosttyBellDidRing` notification (which
   carries the originating surface) instead of the controller-level `.terminalWindowBellDidChange`
