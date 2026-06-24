@@ -17,12 +17,19 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
             name: .fullscreenDidExit,
             object: nil)
 
-        // macOS re-lays the traffic lights to their default (corner-hugging) spot on resize, so
-        // re-inset them whenever the window resizes.
+        // macOS re-lays the traffic lights to their default (corner-hugging) spot on various relayouts —
+        // window resize, and notably a tab/session switch (which would otherwise flash the buttons back to
+        // the default for a moment). Re-inset on resize and on the window's update cycle; the reposition is
+        // a no-op once they're in place, so the didUpdate firing is cheap.
         NotificationCenter.default.addObserver(
             self,
-            selector: #selector(windowDidResizeNotification(_:)),
+            selector: #selector(relayoutTrafficLights(_:)),
             name: NSWindow.didResizeNotification,
+            object: self)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(relayoutTrafficLights(_:)),
+            name: NSWindow.didUpdateNotification,
             object: self)
     }
 
@@ -105,10 +112,17 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
             standardWindowButton(.miniaturizeButton),
             standardWindowButton(.zoomButton),
         ].compactMap { $0 }
-        guard let container = buttons.first?.superview, !buttons.isEmpty else { return }
+        guard let container = buttons.first?.superview, let first = buttons.first else { return }
 
         let minX = buttons.map(\.frame.minX).min() ?? 0
         let dx = Self.trafficLightInset.x - minX
+        let targetY = container.bounds.height - Self.trafficLightInset.y - first.frame.height
+
+        // Skip if already positioned. This is the loop guard *and* what makes it cheap to call from the
+        // frequent didUpdate notification: once the buttons are at the inset, re-runs are no-ops, and we
+        // only do work the moment macOS resets them to the default corner (e.g. on a tab/session switch).
+        if abs(dx) < 0.5 && abs(first.frame.minY - targetY) < 0.5 { return }
+
         for button in buttons {
             let y = container.bounds.height - Self.trafficLightInset.y - button.frame.height
             button.setFrameOrigin(NSPoint(x: button.frame.minX + dx, y: y))
@@ -147,7 +161,7 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
         reapplyHiddenStyle()
     }
 
-    @objc private func windowDidResizeNotification(_ notification: Notification) {
+    @objc private func relayoutTrafficLights(_ notification: Notification) {
         repositionTrafficLights()
     }
 }
