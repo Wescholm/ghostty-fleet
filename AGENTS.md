@@ -176,6 +176,12 @@ on-disk bundle stays `Ghostty.app` (PRODUCT_NAME unchanged).
 - **MCP config changes don't apply live.** Edits to `.mcp.json` (server/env) or
   `.xcodebuildmcp/config.yaml` (`enabledWorkflows`, session defaults) only take effect after the MCP
   server **reconnects** (`/mcp`). Verify a tool's capability against the binary, never its name.
+- **Custom icon ⇒ codesign detritus.** The fork sets its Dock icon at runtime via `NSWorkspace.setIcon`
+  on the bundle, which writes `com.apple.FinderInfo` + an `Icon\r` resource fork onto
+  `…/Debug/Ghostty.app`. The next in-place codesign then fails with *"resource fork, Finder
+  information, or similar detritus not allowed"*. `make app`/`dev` now auto-`xattr -cr "$(APP)"` to
+  prevent this; if you build another way and hit it, run `xattr -cr macos/build/Debug/Ghostty.app`
+  (and quit the running instance — it locks the bundle), then rebuild.
 
 ---
 

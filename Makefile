@@ -74,6 +74,7 @@ $(XCFRAMEWORK):
 	./build-macos.sh
 
 app: $(XCFRAMEWORK) ## Fast incremental rebuild of the macOS app (Swift only)
+	@[ -d "$(APP)" ] && xattr -cr "$(APP)" || true   # strip runtime-icon FinderInfo so in-place codesign won't reject the bundle
 	cd macos && $(XCODEBUILD) -project $(PROJECT) -target $(TARGET) -configuration $(CONFIG) -arch arm64 ONLY_ACTIVE_ARCH=YES build
 
 run: quit prune-apps ## Launch the built app (quits the old instance + prunes stale copies first)
