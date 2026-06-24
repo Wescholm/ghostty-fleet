@@ -17,12 +17,16 @@ Replaces the native tab bar with a left sidebar of rich tab cards:
 
 - **Title, directory, git branch** — branch detected automatically (worktree-aware), no setup.
 - **Custom status entries** — show ports, environments, or any metadata via the CLI.
-- **Live indicators** — attention, working (foreground process busy), and git dirty/ahead-behind.
+- **Per-session status dot** — a single lifecycle indicator (agent-reported via the CLI, with a
+  CPU/bell fallback), plus git dirty/ahead-behind.
 - **Drag-and-drop** — reorder tabs by dragging.
 - **Theme-aware** — colors derived from your terminal theme (light & dark).
 
-**Dot legend:** 🟠 needs attention (bell/notify) · 🟢 working (foreground process busy) ·
-gray ● dirty (uncommitted) · `↑n ↓m` ahead/behind upstream. Orange beats green.
+**Status dot** (one per card; color = state): 🟠 attention (bell/notify) · 🔴 error · 🟡 waiting (blocked
+on you) · 🟢 running (agent-reported *or* foreground-CPU busy) · 🔵 done · none = idle. Precedence:
+attention > error > waiting > running > done > idle. Set the lifecycle state from your tools with
+`ghosttyctl state <running|waiting|done|…>` (a Claude Code hooks example ships in `cli/claude-hooks.example.json`).
+Separately, on the branch line: gray ● dirty (uncommitted) · `↑n ↓m` ahead/behind upstream.
 
 ### Config
 

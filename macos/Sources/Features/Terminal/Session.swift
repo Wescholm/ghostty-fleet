@@ -32,11 +32,10 @@ enum SessionStatus: String, Codable, CaseIterable {
 
 /// A single in-window terminal **session**: one split tree plus the metadata the sidebar renders.
 ///
-/// Part of the sidebar re-architecture (`SIDEBAR-REARCHITECTURE.md`). The plan is for one
-/// `TerminalController` to own an ordered `[Session]` and switch the *active* one — replacing native
-/// `NSWindow` tabbing, which is the root of the macOS-26 tab-bar bug class. This type is introduced
-/// **additively in Step 1**: it is not yet referenced by the controller or the sidebar (that is
-/// Steps 2+), so defining it changes no behavior.
+/// Part of the sidebar re-architecture (`SIDEBAR-REARCHITECTURE.md`). One `TerminalController` owns an
+/// ordered `[Session]` and switches the *active* one — replacing native `NSWindow` tabbing, the root of
+/// the macOS-26 tab-bar bug class. The controller, the sidebar, the IPC server, and restoration all
+/// build on this type.
 ///
 /// It is a reference type so a session has a stable identity shared by the controller, the sidebar,
 /// and the live-surface store. It uses the Observation framework's `@Observable` (the app's baseline

@@ -9,14 +9,16 @@ working dots), built for managing many parallel **Claude Code / agent sessions**
 and enhancements. The vision: **cmux-like, but lightweight, high-performance, and stable** — *be*
 Ghostty (minimally patched), not a new app on libghostty.
 
-> **⚠️ In flight — read `SIDEBAR-REARCHITECTURE.md`.** The fork is migrating off native `NSWindow`
-> tabbing onto **in-app "sessions"**: one window/`TerminalController` owns N `Session`s (each a
-> `SplitTree`), the sidebar switches the *active* one (mount swap + per-session occlusion), and native
-> window tabbing is **disabled by default** (`FleetDisableNativeTabs`, so Cmd+T makes an in-app
-> session, not a native tab/window — this kills the macOS-26 tab-bar bug class). **Done & verified:**
-> macOS 26+ baseline, the `Session` model + controller API, and Step 5 (sidebar ← `controller.sessions`).
-> **Still in progress:** IPC-over-sessions (so `ghosttyctl` reaches background sessions), per-session
-> bell/status, undo, and restoration. Some notes below pre-date this and are flagged.
+> **Architecture — read `SIDEBAR-REARCHITECTURE.md`.** The fork runs on **in-app "sessions"**: one
+> window/`TerminalController` owns N `Session`s (each a `SplitTree`), the sidebar switches the *active*
+> one (mount swap + per-session occlusion), and native window tabbing is **disabled by default**
+> (`FleetDisableNativeTabs`, so Cmd+T / Cmd+N / "Close Tab" / `goto_tab` all act on in-app sessions —
+> this kills the macOS-26 tab-bar bug class). **Done & verified (Steps 0–8):** macOS 26+ baseline, the
+> `Session` model + controller API, sidebar ← `controller.sessions`, IPC-over-sessions (G1), per-session
+> bell (G2) + lifecycle status dot, multi-session restoration, undo/redo. A full audit (2026-06-24,
+> `AUDIT-REPORT.md`) then fixed the close/quit data-loss cluster, the flag default, IPC socket race,
+> background-session cleanup, keyboard session switching, and occlusion-gated polling. **Remaining** is
+> cleanup/polish — see the "Next steps" / "Audit follow-ups" in `SIDEBAR-REARCHITECTURE.md`.
 
 > Branches: **`dev`** = the working branch (pushed to the fork; the GitHub **default** branch) ·
 > **`main`** = pristine mirror of upstream · `sidebar` = the minimal rebased base (local checkpoint).
@@ -24,7 +26,7 @@ Ghostty (minimally patched), not a new app on libghostty.
 >
 > **Deeper docs in the repo:** `SIDEBAR-FORK-REPORT.md` (rebase + toolchain), `ENHANCEMENTS.md`
 > (the sidebar features + dot legend), `VALIDATION.md` (how the UI was verified),
-> `SIDEBAR-REARCHITECTURE.md` (the in-app-sessions direction + migration plan; Step 0 landed).
+> `SIDEBAR-REARCHITECTURE.md` (the in-app-sessions architecture + migration plan; Steps 0–8 landed).
 
 ---
 
@@ -63,7 +65,7 @@ the day Zig links the macOS 26 SDK natively. The Zig std patch and overlay SDK l
 | `make app` | Fast **incremental** Swift-only rebuild (`xcodebuild`, reuses the existing xcframework). The inner loop. |
 | `make dev` | `app` + quit old instance + prune stale copies + relaunch fresh. |
 | `make run` | Launch the built app (quits old + prunes first). |
-| `make test [TEST_FILTER=GhosttyTests/SplitTreeTests]` | Run the GhosttyTests suite (229 tests). |
+| `make test [TEST_FILTER=GhosttyTests/SplitTreeTests]` | Run the GhosttyTests suite (~260 tests). |
 | `make prune-apps` | Delete stale fork `Ghostty.app` copies in Xcode DerivedData (disk + Launch Services). |
 | `make quit` | Quit the fork app only. |
 | `make lint` / `fmt` | SwiftLint. |
@@ -142,7 +144,7 @@ Don't assume a tool/skill/agent applies; this table is the source of truth. Veri
 - **`Sidebar/SidebarView.swift`** — the SwiftUI sidebar (cards, drag-reorder, context menu, dot/
   branch rendering). Has a `#Preview` ("Sidebar — states") + a `previewTabs:` mock init for rendering.
 - **`IPC/GhosttyIPCServer.swift`** — Unix-socket server (`/tmp/ghostty-<uid>.sock`, 0600) for the CLI:
-  `tab.rename/notify/set-status/clear-status/list/current/focus`. Since G1 it is **session-aware**:
+  `tab.rename/notify/set-status/clear-status/set-state/list/current/focus`. Since G1 it is **session-aware**:
   `resolve(surfaceId:)` / `resolveTarget(params:)` search **every session's** tree (not just the mounted
   one), so the CLI reaches **background** sessions; `tab.list` emits one entry per in-app session;
   `tab.focus` calls `selectSession()`; `tab.rename` sets the *session's* title; `tab.notify` posts the
@@ -150,7 +152,8 @@ Don't assume a tool/skill/agent applies; this table is the source of truth. Veri
 - **`IPC/TabMetadataStore.swift`** — per-**session** status entries (set via IPC, keyed by `Session.id`).
 - **`Window Styles/TerminalWindow.swift`** — hides the native tab bar when `sidebarActive` (see gotcha).
 - **`cli/ghosttyctl`** — the CLI. `ghosttyctl list` (incl. `foreground_pid`), `focus <tab_id>`,
-  `set-status k v --icon sf.symbol`, `rename`, `notify`.
+  `set-status k v --icon sf.symbol`, `state <idle|running|waiting|done|attention|error>`, `rename`,
+  `notify`. (`state` → the per-session lifecycle dot; see `cli/claude-hooks.example.json`.)
 
 **Sidebar status dot** (one dot after the title; color = the session's lifecycle state, computed in
 `SidebarTabManager.effectiveStatus`): 🟠 attention (bell/notify) · 🔴 error · 🟡 waiting (blocked on you) ·

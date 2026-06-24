@@ -1,4 +1,4 @@
-# Sidebar enhancements (`sidebar-enhancements` branch)
+# Sidebar enhancements
 
 Built on top of the rebased + polished `sidebar` branch. Five focused improvements that
 turn the sidebar into an at-a-glance **dashboard for many parallel Claude Code sessions**.

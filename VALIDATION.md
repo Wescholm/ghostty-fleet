@@ -53,7 +53,7 @@ multi-file module.)
 
 ## Not done (deliberate, low-risk follow-ups)
 
-- **Committed unit test for the parser.** There's a `GhosttyTests` target (229 tests). A durable
+- **Committed unit test for the parser.** There's a `GhosttyTests` target (~260 tests). A durable
   test would mean extracting the pure parse into an `internal` function + a test file — a small
   refactor of a shipped feature. Validated via REPL instead to avoid changing the feature
   unattended; easy to add on request.

@@ -42,18 +42,18 @@ class BaseTerminalController: NSWindowController,
 
     /// The tree of splits within this terminal window. This is the *mounted* (active) tree — what
     /// `TerminalView` renders. Under the sidebar re-architecture it mirrors the active session's tree
-    /// (see ``sessions``); Step 3 makes switching swap which session's tree is mounted here.
+    /// (see ``sessions``); ``selectSession(at:focus:)`` swaps which session's tree is mounted here.
     @Published var surfaceTree: SplitTree<Ghostty.SurfaceView> = .init() {
         didSet { surfaceTreeDidChange(from: oldValue, to: surfaceTree) }
     }
 
-    /// In-app sessions owned by this controller (sidebar re-architecture, Step 2). Each ``Session``
-    /// holds one split tree. Today there is exactly one session whose `surfaceTree` mirrors
-    /// ``surfaceTree``; multi-session switching arrives in Step 3. Kept current by
-    /// ``surfaceTreeDidChange(from:to:)``.
+    /// In-app sessions owned by this controller (sidebar re-architecture). Each ``Session`` holds one
+    /// split tree; the active session's tree mirrors ``surfaceTree``, kept current by
+    /// ``surfaceTreeDidChange(from:to:)``. Mutated by ``newSession(baseConfig:)`` / ``closeSession(at:)``
+    /// / ``moveSession(from:to:)`` / ``restoreSessions(_:activeIndex:)``.
     @Published private(set) var sessions: [Session] = []
 
-    /// Index of the active session within ``sessions``. Always 0 until Step 3 adds switching.
+    /// Index of the active session within ``sessions`` (changed by ``selectSession(at:focus:)``).
     @Published private(set) var activeSessionIndex: Int = 0
 
     /// The active session, or nil before ``sessions`` is initialized.
@@ -170,8 +170,8 @@ class BaseTerminalController: NSWindowController,
         config.environmentVariables["GHOSTTY_TAB_ID"] = surfaceUUID.uuidString
         self.surfaceTree = tree ?? .init(view: Ghostty.SurfaceView(ghostty_app, baseConfig: config, uuid: surfaceUUID))
 
-        // Sidebar re-architecture (Step 2): wrap the initial tree in a single Session. The active
-        // session's surfaceTree mirrors `self.surfaceTree`; multi-session switching arrives in Step 3.
+        // Sidebar re-architecture: wrap the initial tree in a single Session. The active session's
+        // surfaceTree mirrors `self.surfaceTree`; selectSession swaps which session is mounted.
         self.sessions = [Session(surfaceTree: self.surfaceTree)]
 
         // Setup our bell state for the window
@@ -317,12 +317,12 @@ class BaseTerminalController: NSWindowController,
         }
     }
 
-    // MARK: Sessions (sidebar re-architecture, Step 3/4)
+    // MARK: Sessions (sidebar re-architecture)
 
     /// Switch the active/mounted session to the one at `index`. Persists the outgoing session's tree,
     /// occludes its surfaces (so a hidden session stops doing GPU work), mounts the incoming session's
     /// tree, and moves focus into it (mount-then-focus). No-op if already active or out of range.
-    /// Not yet wired to UI — Step 5 connects the sidebar + Cmd+T.
+    /// Driven by the sidebar (tap), `goto_tab` keybinds, and IPC `tab.focus`.
     /// `focus` optionally names which surface in the incoming session should take focus (e.g. undo
     /// restoring a session that was focused on a non-leftmost split); defaults to the leftmost leaf.
     func selectSession(at index: Int, focus desiredFocus: UUID? = nil) {
@@ -372,8 +372,8 @@ class BaseTerminalController: NSWindowController,
     }
 
     /// Create a new in-app session in this window (a single fresh surface, no splits) and switch to
-    /// it. Mirrors the initial-surface creation in `init`. Returns the new session.
-    /// Not yet wired to UI — Step 5 connects Cmd+T / the sidebar.
+    /// it. Mirrors the initial-surface creation in `init`. Returns the new session. Driven by Cmd+T /
+    /// Cmd+N and the new-tab menu/IBActions.
     @discardableResult
     func newSession(baseConfig base: Ghostty.SurfaceConfiguration? = nil) -> Session? {
         guard let ghostty_app = ghostty.app else { return nil }
@@ -501,7 +501,7 @@ class BaseTerminalController: NSWindowController,
     }
 
     /// Reorder sessions (sidebar drag-reorder), preserving which session is active by identity. Does
-    /// not remount — the active session's tree is unchanged. Not yet wired (Step 5).
+    /// not remount — the active session's tree is unchanged.
     func moveSession(from source: Int, to destination: Int) {
         guard sessions.indices.contains(source), sessions.indices.contains(destination),
               source != destination else { return }
@@ -538,8 +538,8 @@ class BaseTerminalController: NSWindowController,
     ///
     /// Subclasses should call super first.
     func surfaceTreeDidChange(from: SplitTree<Ghostty.SurfaceView>, to: SplitTree<Ghostty.SurfaceView>) {
-        // Keep the active session's tree in sync with the mounted tree (sidebar re-architecture,
-        // Step 2). Guarded so the init-time assignment (before `sessions` is populated) is a no-op.
+        // Keep the active session's tree in sync with the mounted tree (sidebar re-architecture).
+        // Guarded so the init-time assignment (before `sessions` is populated) is a no-op.
         if sessions.indices.contains(activeSessionIndex) {
             sessions[activeSessionIndex].surfaceTree = to
         }

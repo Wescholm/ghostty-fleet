@@ -98,12 +98,14 @@ is not a fork issue.
   files (`Sidebar/`, `IPC/`, `cli/`) don't conflict. Then `./build-macos.sh`.
 - **The `build:` commit** (`786dff263`) is intentionally separate so you can `git rebase --onto` to drop
   it once Zig catches up to the SDK.
-- **Security posture** (from the audit): no network egress, no shell-out, no telemetry; the only caveat
-  is the unauthenticated local IPC socket (UI-spoofing only, same-uid). Fine for a single-user Mac.
+- **Security posture**: no network egress, no telemetry. It *does* shell out to `/usr/bin/git` for the
+  sidebar's branch/dirty info (fixed absolute path, fixed argv, no shell interpolation,
+  `GIT_OPTIONAL_LOCKS=0`/`GIT_TERMINAL_PROMPT=0`, off the main thread). The only real caveat is the
+  unauthenticated local IPC socket (UI-spoofing only, same-uid). Fine for a single-user Mac.
 
-## 6. Known follow-ups (not done — low priority)
+## 6. Known follow-ups
 
-- `controllerForSurfaceId` only resolves the *focused* surface, so IPC `tab_id` targeting can't address a
-  background split within a tab (behavioral, not a bug).
-- The "View" menu lookup for the Tab Color submenu is English-only (pre-existing; silently no-ops under
-  other locales).
+Both of the items previously listed here are **resolved**: IPC `tab_id` targeting now resolves across
+*every* session's whole tree (G1, `GhosttyIPCServer.resolve`), and the Tab Color submenu is anchored to
+its outlet rather than the English "View" title. For the current backlog see the "Next steps" / "Audit
+follow-ups" in `SIDEBAR-REARCHITECTURE.md` and the full `AUDIT-REPORT.md`.
