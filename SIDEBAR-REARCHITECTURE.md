@@ -19,7 +19,9 @@
 ## Next steps (remaining work)
 
 Steps 0–8 are done; the core in-app-sessions feature set works. What's left is **cleanup + polish**,
-not core function. Roughly in priority order:
+not core function. A full audit ran 2026-06-24 (**`AUDIT-REPORT.md`**); its close/quit data-loss cluster
+(H3/H4/H5), the `FleetDisableNativeTabs` chokepoint default (M3), and the shared new-tab routing (M4) are
+**fixed** — remaining audit items are folded into "Audit follow-ups" below. Roughly in priority order:
 
 - [ ] **Step 9 — audit & remove dead native-tab code.** With `FleetDisableNativeTabs` default-on, the
       native-tab paths are unreachable but still present. Remove or gate them:
@@ -27,11 +29,12 @@ not core function. Roughly in priority order:
     and their `UndoState`/`tabGroup`-based undo (superseded by `closeSession` + Step 7 undo).
   - The native New-Tab / New-Window undo registration (the `ghostty.newTab` / `addTabbedWindowSafely`
     paths) — `newTab` already routes to `newSession`.
-  - The `closeTab` / `closeOtherTabs` / `closeTabsOnTheRight` IBActions and the **`Close Tab [⌘⌥W]`**
-    menu item: they branch on `window.tabGroup` and fall through to `closeWindow` for a single window —
-    route them to `closeSession` (active / others / right) so the menu matches the keybind behavior.
+  - ~~route the `closeTab`/`closeOtherTabs`/`closeTabsOnTheRight` IBActions to `closeSession`~~ —
+    **done** (audit H4/L2). What remains is *deleting* the now-unused native-tab `*Immediately` variants
+    + their `tabGroup`/`UndoState` undo, once the flag is permanent.
   - AppleScript (`ScriptTab` / `ScriptWindow`), `Fullscreen.swift`, `TabTitleEditor`,
-    `TabGroupCloseCoordinator`, `NSWindow+Extension` — audit for native-tab assumptions.
+    `TabGroupCloseCoordinator` — audit for native-tab assumptions. (`NSWindow+Extension` chokepoint is
+    done — M3.)
 - [ ] **Step 10 — drop the moot native-tab menu items** (Show All Tabs, Merge All Windows) — Scope
       decision 3; the sidebar replaces them.
 - [ ] **Step 11 — full UI pass + `make test`.** Exercise switch/IME, off-screen keep-alive, restoration
@@ -53,6 +56,41 @@ not core function. Roughly in priority order:
 - [ ] **Confirm `⌘⇧Z` redo with a physical keypress.** It didn't reproduce through peekaboo's synthetic
       events; the redo *action* (menu) and the undo keybinds all work, so this is almost certainly a
       harness artifact — verify once by hand.
+
+### Audit follow-ups (remaining, 2026-06-24 — see `AUDIT-REPORT.md` for full detail)
+
+Fixed already: H3/H4/H5 (close/quit data-loss), M3 (flag default), M4 (new-tab routing). Remaining,
+by the report's priority:
+
+- [ ] **H2 — IPC stale-socket race (recoverable).** `GhosttyIPCServer.start()` unlinks+binds with no
+      liveness check; overlapping quit/relaunch orphans the listener (path → dead inode while the process
+      LISTENs on an unlinked one; `connect()` → ECONNREFUSED). Probe-connect before unlink; in `stop()`
+      only unlink if we still own the inode. *(H1 "ghosttyctl hangs" was a verified **false positive** —
+      it returns in ~10 ms; do not chase it.)*
+- [ ] **M1 — background session surface death.** `ghosttyDidCloseSurface` only matches the mounted tree,
+      so a background session whose process exits leaves a zombie card. Search all sessions; remove the
+      node from its session (drop the session if its tree empties).
+- [ ] **M5 — keyboard session switching.** `onGotoTab` bails on the absent `tabGroup` → `goto_tab`
+      (ctrl+1…/next/prev/last) is dead. Route to `selectSession(at:)` when the flag is on.
+- [ ] **M6 — occlusion-gate the sidebar pollers.** The 0.5 s refresh + 1 s CPU + 1 s git poll run even
+      when the window is occluded/minimized (Apple *Work When Visible* divergence). Suspend on
+      `windowDidChangeOcclusionState`/`didResignActive`; re-arm + refresh on becoming visible. (Subsumes
+      the git-spawn-per-second and "rebuild tabs every tick" LOWs.)
+- [ ] **M7 — `ghosttyctl` `json_escape` misses C0 controls** (VT/FF/ESC in titles/output) → the server's
+      strict `JSONSerialization` rejects the request. Build the payload with a real encoder (`jq -Rs` /
+      `python3 -c 'json.dumps'`). Robustness, not injection.
+- [ ] **Tests** for the now-untested pure logic: `effectiveStatus` precedence; extract the session
+      index-math (`closeSession`/`restoreClosedSession`/`moveSession`/`restoreSessions`) into pure helpers
+      + `SessionIndexMathTests`; `SessionStatus` rawValues/`allCases`; `TabMetadataStore`; an explicit
+      pre-v8 `sessions == nil` back-compat assertion; an IPC dispatch/resolver seam.
+- [ ] **Docs sweep** (will mislead the next agent): AGENTS.md "In flight" callout still says Steps are in
+      progress; README dot legend still shows the obsolete two-dot model + omits `ghosttyctl state`;
+      SIDEBAR-FORK-REPORT.md "no shell-out"/resolved follow-ups; stale "not yet referenced" / "Step 5"
+      comments in `Session.swift` / `BaseTerminalController.swift`; the "229 tests" count (~251).
+- [ ] **Lower-value:** `@Observable`/event-driven sidebar instead of the 0.5 s republish-all poll (Apple
+      Observation guidance; L4/L11); `selectSession` async-focus generation token (L1); `ClosedSession.index`
+      anchored to a neighbor's identity, not a raw index (L5); prune `gitInfoCache` (L8); `FD_CLOEXEC` on
+      IPC fds (L13); v8→v7 downgrade keeps the active tree top-level for older readers (L16).
 
 ## Vision
 
