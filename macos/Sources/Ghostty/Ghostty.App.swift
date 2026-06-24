@@ -1132,8 +1132,14 @@ extension Ghostty {
                     guard let surface = target.target.surface else { return false }
                     guard let surfaceView = self.surfaceView(from: surface) else { return false }
 
-                    // See gotoTab for notes on this check.
-                    guard (surfaceView.window?.tabGroup?.windows.count ?? 0) > 1 else { return false }
+                    // See gotoTab for notes on this check. In-app sessions (sidebar re-architecture):
+                    // move_tab is performable when the window has more than one in-app session, not only
+                    // a native tab group (audit Step 9, parity with the gotoTab guard / M5). Without this
+                    // the emitter never posts ghosttyMoveTab with the flag on, so onMoveTab's session
+                    // branch could never fire.
+                    let sessionCount = (surfaceView.window?.windowController as? BaseTerminalController)?.sessions.count ?? 0
+                    let tabCount = surfaceView.window?.tabGroup?.windows.count ?? 0
+                    guard sessionCount > 1 || tabCount > 1 else { return false }
 
                     NotificationCenter.default.post(
                         name: .ghosttyMoveTab,

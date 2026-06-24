@@ -1669,6 +1669,19 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         guard let action = notification.userInfo?[Notification.Name.GhosttyMoveTabKey] as? Ghostty.Action.MoveTab else { return }
         guard action.amount != 0 else { return }
 
+        // In-app sessions (default): reorder the active session within the sidebar (audit Step 9, parity
+        // with onGotoTab/M5). The native tabGroup path below is dead with the flag on (window.tabGroup is
+        // nil), so move_tab was a silent no-op for sessions. Mirrors the sidebar drag-reorder: moveSession
+        // preserves the active session by identity and registers no undo (matching drag).
+        if BaseTerminalController.nativeTabsDisabled {
+            let count = sessions.count
+            guard count > 1 else { return }
+            let dest = SessionIndexMath.clamped(activeSessionIndex + action.amount, count: count)
+            guard dest != activeSessionIndex else { return }
+            moveSession(from: activeSessionIndex, to: dest)
+            return
+        }
+
         // Determine our current selected index
         guard let windowController = window.windowController else { return }
         guard let tabGroup = windowController.window?.tabGroup else { return }
