@@ -715,6 +715,15 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             return
         }
 
+        // Closing the whole active session. With in-app sessions (Step 7), close just that session
+        // rather than the window — it's undoable (the process survives until the undo expires), so we
+        // skip the running-process confirmation here. The last session falls through to closing the
+        // window.
+        if sessions.count > 1 {
+            closeSession(at: activeSessionIndex)
+            return
+        }
+
         // More than 1 window means we have tabs and we're closing a tab
         if window?.tabGroup?.windows.count ?? 0 > 1 {
             closeTab(nil)

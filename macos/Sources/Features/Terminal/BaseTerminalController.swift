@@ -314,7 +314,9 @@ class BaseTerminalController: NSWindowController,
     /// occludes its surfaces (so a hidden session stops doing GPU work), mounts the incoming session's
     /// tree, and moves focus into it (mount-then-focus). No-op if already active or out of range.
     /// Not yet wired to UI — Step 5 connects the sidebar + Cmd+T.
-    func selectSession(at index: Int) {
+    /// `focus` optionally names which surface in the incoming session should take focus (e.g. undo
+    /// restoring a session that was focused on a non-leftmost split); defaults to the leftmost leaf.
+    func selectSession(at index: Int, focus desiredFocus: UUID? = nil) {
         guard sessions.indices.contains(index), index != activeSessionIndex else { return }
 
         // Persist the current mounted tree into the outgoing session. surfaceTreeDidChange keeps this
@@ -348,7 +350,9 @@ class BaseTerminalController: NSWindowController,
         // next runloop turn (after SwiftUI attaches the view), move focus from the outgoing surface to
         // the new one — which resigns the outgoing first responder — and re-sync focus state once the
         // first responder has settled. (Do NOT rely on the window==nil moveFocus retry.)
-        if let view = surfaceTree.root?.leftmostLeaf() {
+        let target = desiredFocus.flatMap { id in surfaceTree.first(where: { $0.id == id }) }
+            ?? surfaceTree.root?.leftmostLeaf()
+        if let view = target {
             focusedSurfaceDidChange(to: view)
             DispatchQueue.main.async { [weak self] in
                 Ghostty.moveFocus(to: view, from: outgoing)
@@ -377,33 +381,112 @@ class BaseTerminalController: NSWindowController,
 
     /// Close the session at `index`. If it's the last session, close the window instead. If it's the
     /// active session, switch to a neighbor *first* so the mounted tree is never empty (E1:
-    /// TerminalController closes the window on an empty mounted tree). Releasing the Session frees its
-    /// surfaces. Not yet wired — Step 5 connects the sidebar's close actions and adds running-process
-    /// confirmation (today's closeTab confirmation is window/tab-scoped).
+    /// TerminalController closes the window on an empty mounted tree).
+    ///
+    /// Registers an **undo** (sidebar re-architecture, Step 7): the closing session's tree is captured
+    /// by the undo closure, which keeps its surfaces alive (occluded) until the undo is invoked or
+    /// expires (`undoExpiration`). So closing a session is fully reversible — its running process and
+    /// scrollback included — within the undo window, after which the surfaces are released and the
+    /// ptys die. That makes a running-process confirmation prompt unnecessary for session close.
     func closeSession(at index: Int) {
         guard sessions.indices.contains(index) else { return }
 
-        // Last session: closing it means closing the window.
+        // Last session: closing it means closing the window (window-level undo lives elsewhere).
         guard sessions.count > 1 else {
             window?.close()
             return
         }
 
+        // Snapshot the closing session for undo BEFORE mutating anything. The closure captured by
+        // `registerSessionCloseUndo` retains this tree, keeping the session's surfaces (and ptys)
+        // alive but occluded until undo/expiry.
+        let closing = sessions[index]
+        let wasActive = (index == activeSessionIndex)
+        let closed = ClosedSession(
+            surfaceTree: closing.surfaceTree,
+            status: closing.status,
+            titleOverride: closing.titleOverride,
+            tabColor: closing.tabColor,
+            index: index,
+            wasActive: wasActive,
+            focusedSurface: wasActive ? focusedSurface?.id : nil
+        )
+
         // If closing the active session, mount a neighbor before removing it so we never mount empty.
-        if index == activeSessionIndex {
+        if wasActive {
             let neighbor = (index == sessions.count - 1) ? index - 1 : index + 1
             selectSession(at: neighbor) // sets activeSessionIndex = neighbor, mounts its tree
         }
 
-        // Occlude the closing session's surfaces (it isn't mounted now), then drop it — releasing the
-        // Session releases its surfaceTree and the SurfaceViews, freeing the libghostty surfaces.
-        for view in sessions[index].surfaceTree {
+        // Occlude the closing session's surfaces (it isn't mounted now). They stay alive — held by the
+        // undo closure — rather than being freed immediately, so undo can bring them back intact.
+        for view in closing.surfaceTree {
             if let surface = view.surface { ghostty_surface_set_occlusion(surface, false) }
+            view.isWindowVisible = false
         }
         sessions.remove(at: index)
 
         // Keep activeSessionIndex pointing at the same (active) session after the removal shift.
         if activeSessionIndex > index { activeSessionIndex -= 1 }
+
+        registerSessionCloseUndo(closed)
+    }
+
+    /// Snapshot of a closed in-app session — enough for ``restoreClosedSession(_:)`` to bring it back.
+    private struct ClosedSession {
+        let surfaceTree: SplitTree<Ghostty.SurfaceView>
+        let status: SessionStatus
+        let titleOverride: String?
+        let tabColor: TerminalTabColor?
+        let index: Int
+        let wasActive: Bool
+        let focusedSurface: UUID?
+    }
+
+    /// Register the undo that restores a just-closed session (Step 7). The closure retains `closed`
+    /// (hence the session's surfaceTree), keeping its ptys alive until undo/expiry.
+    private func registerSessionCloseUndo(_ closed: ClosedSession) {
+        guard let undoManager else { return }
+        undoManager.setActionName("Close Tab")
+        undoManager.registerUndo(withTarget: self, expiresAfter: undoExpiration) { target in
+            target.restoreClosedSession(closed)
+        }
+    }
+
+    /// Re-insert a closed session at its original index (undo of ``closeSession(at:)``), re-selecting
+    /// it if it was active, and register the matching **redo** (re-close). Called inside an undo, so
+    /// `registerUndo` here lands on the redo stack.
+    private func restoreClosedSession(_ closed: ClosedSession) {
+        let session = Session(
+            surfaceTree: closed.surfaceTree,
+            status: closed.status,
+            titleOverride: closed.titleOverride,
+            tabColor: closed.tabColor
+        )
+        let insertAt = min(max(0, closed.index), sessions.count)
+        sessions.insert(session, at: insertAt)
+        if insertAt <= activeSessionIndex { activeSessionIndex += 1 }
+
+        if closed.wasActive {
+            // Mount + focus in one shot, restoring the originally-focused surface (handles splits).
+            selectSession(at: insertAt, focus: closed.focusedSurface)
+        } else {
+            // Restored as a background session: keep it occluded.
+            for view in session.surfaceTree {
+                if let surface = view.surface { ghostty_surface_set_occlusion(surface, false) }
+                view.isWindowVisible = false
+            }
+        }
+
+        window?.makeKeyAndOrderFront(nil)
+
+        guard let undoManager else { return }
+        undoManager.setActionName("Close Tab")
+        undoManager.registerUndo(withTarget: self, expiresAfter: undoExpiration) { target in
+            if let idx = target.sessions.firstIndex(where: { $0.id == session.id }) {
+                target.closeSession(at: idx)
+            }
+        }
     }
 
     /// Reorder sessions (sidebar drag-reorder), preserving which session is active by identity. Does
