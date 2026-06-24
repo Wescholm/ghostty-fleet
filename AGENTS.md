@@ -182,18 +182,21 @@ on-disk bundle stays `Ghostty.app` (PRODUCT_NAME unchanged).
   **hosts the running Claude Code session** — killing it ends the session. Always scope to the fork's
   **absolute** path (`…/ghostty-sidebar/macos/build/Debug/Ghostty.app/Contents/MacOS/ghostty`), as the
   Makefile's `quit`/`dev`/`prune-apps` do.
-- **macOS 26 "Tahoe" titlebar tabs aren't suppressed** *(now moot by default — only bites if you
-  re-enable native tabbing).* Since `FleetDisableNativeTabs` defaults **on**, no `NSWindowTabGroup`
-  ever forms (Cmd+T makes an in-app session), so the tab strip below never renders. The rest applies
-  only if you set `FleetDisableNativeTabs=false`: the sidebar hides the *old* `NSTabBar`
-  accessory, but `macos-titlebar-style = tabs` on macOS 26 renders tabs as an `NSToolbar`
-  (`TitlebarTabsTahoeTerminalWindow`) the fork doesn't catch → a horizontal bar appears above the
-  sidebar. Default `transparent` shows only the normal titlebar (no tab row with ≤1 tab). For a clean
-  sidebar-only look use `macos-titlebar-style = hidden` (per-fork via launch arg
-  `--macos-titlebar-style=hidden`, since the fork shares the global `~/.config/ghostty/config`).
-  Unlike upstream, the fork's `hidden` style **keeps the traffic-light window controls** (floating
-  top-left; the sidebar insets its first card below them) — see `HiddenTitlebarTerminalWindow` +
-  `TerminalController.sidebarTopInset`.
+- **macOS 26 "Tahoe" `tabs` titlebar → empty toolbar band (handled).** `macos-titlebar-style = tabs`
+  on macOS 26 makes the window a `TitlebarTabsTahoeTerminalWindow`, which installs an `NSToolbar`
+  (`.unifiedCompact`, ~40pt) to host native tabs. With `FleetDisableNativeTabs` **on** (the default) no
+  `NSWindowTabGroup` ever forms, so that toolbar has nothing to show and renders as an empty ~40pt band
+  *above the sidebar* — and the fork's `NSTabBar` hider (`sidebarActive`) does **not** catch a toolbar.
+  This bit even with the flag on whenever the *titlebar style* was `tabs` (common, because the fork
+  shares the global `~/.config/ghostty/config` / `…Application Support/com.mitchellh.ghostty/config*`
+  with a release Ghostty that wants native tabs). **Fix:** `TerminalController.windowNibName` now falls
+  back to the **transparent** nib when the style is `tabs` *and* `nativeTabsDisabled` — the tabs style is
+  meaningless without native tabs, so no toolbar is built and no band appears (release Ghostty keeps its
+  tabs since its flag is false). The `NSTabBar` (non-toolbar) leak only remains if you set
+  `FleetDisableNativeTabs=false`. For a clean sidebar-only look use `macos-titlebar-style = hidden`
+  (per-fork via `--macos-titlebar-style=hidden`); unlike upstream, the fork's `hidden` style **keeps the
+  traffic-light controls** (floating top-left; the sidebar insets its first card below them) — see
+  `HiddenTitlebarTerminalWindow` + `TerminalController.sidebarTopInset`.
 - **Trust the build, not SourceKit.** Live SourceKit diagnostics for this multi-file module are
   unreliable (false "cannot find type X", "No such module 'Sparkle'"). Confirm with a real build.
 - **macOS 26 is the baseline — deployment target is 26.0** (all three app configs in `project.pbxproj`;
