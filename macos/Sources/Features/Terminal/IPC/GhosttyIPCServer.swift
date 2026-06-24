@@ -252,12 +252,14 @@ final class GhosttyIPCServer {
             return
         }
 
-        guard let controller = resolveController(params: params) else {
+        guard let target = resolveTarget(params: params) else {
             sendError("tab not found", to: client)
             return
         }
 
-        controller.titleOverride = title.isEmpty ? nil : title
+        // Per-session title (matches the sidebar's own rename) — so renaming a *background* session
+        // updates that session's card, not the controller/window title of whatever is visible.
+        target.session.titleOverride = title.isEmpty ? nil : title
         sendOk(["renamed": true], to: client)
     }
 
@@ -282,12 +284,13 @@ final class GhosttyIPCServer {
             }
         }
 
-        // Sidebar attention indicator (visible when app is focused)
-        if let controller = resolveController(params: params),
-           let window = controller.window {
+        // Sidebar attention indicator (visible when app is focused). Post the originating *surface*
+        // (like `.ghosttyDesktopNotificationDidFire`) so the sidebar can attribute attention to the
+        // owning session — including a background one — instead of just the active window (G1).
+        if let target = resolveTarget(params: params) {
             NotificationCenter.default.post(
                 name: .ghosttyIPCNotification,
-                object: window
+                object: target.surface
             )
         }
 
@@ -301,13 +304,15 @@ final class GhosttyIPCServer {
             return
         }
 
-        guard let surface = resolveSurface(params: params) else {
+        guard let target = resolveTarget(params: params) else {
             sendError("tab not found", to: client)
             return
         }
 
+        // Keyed by session id (not surface id) so status set from any surface in the session — and
+        // from a *background* session — lands on that session's card. The sidebar reads by session id.
         let icon = params["icon"] as? String
-        TabMetadataStore.shared.setStatus(tabId: surface.id, key: key, value: value, icon: icon)
+        TabMetadataStore.shared.setStatus(tabId: target.session.id, key: key, value: value, icon: icon)
         sendOk(["status_set": true], to: client)
     }
 
@@ -317,12 +322,12 @@ final class GhosttyIPCServer {
             return
         }
 
-        guard let surface = resolveSurface(params: params) else {
+        guard let target = resolveTarget(params: params) else {
             sendError("tab not found", to: client)
             return
         }
 
-        TabMetadataStore.shared.clearStatus(tabId: surface.id, key: key)
+        TabMetadataStore.shared.clearStatus(tabId: target.session.id, key: key)
         sendOk(["status_cleared": true], to: client)
     }
 
@@ -331,16 +336,23 @@ final class GhosttyIPCServer {
 
         let keyWindow = NSApp.keyWindow
 
+        // One entry per in-app session (not per window). Under the old native-tab model each window
+        // was one tab; now a single window owns N sessions, and `ghosttyctl list` must surface all of
+        // them — including background sessions — so an agent can discover and target them (G1).
         for window in NSApp.windows {
             guard let controller = window.windowController as? BaseTerminalController else { continue }
-            guard let surface = controller.focusedSurface else { continue }
-
-            tabInfos.append(tabInfo(
-                surface: surface,
-                controller: controller,
-                window: window,
-                isActive: window === keyWindow
-            ))
+            let isKey = (window === keyWindow)
+            for session in controller.sessions {
+                guard let surface = representativeSurface(for: session, in: controller) else { continue }
+                let isActive = isKey && session.id == controller.activeSession?.id
+                tabInfos.append(tabInfo(
+                    session: session,
+                    surface: surface,
+                    controller: controller,
+                    window: window,
+                    isActive: isActive
+                ))
+            }
         }
 
         sendOk(["tabs": tabInfos], to: client)
@@ -349,85 +361,96 @@ final class GhosttyIPCServer {
     private func handleTabCurrent(client: ClientConnection) {
         guard let window = NSApp.keyWindow,
               let controller = window.windowController as? BaseTerminalController,
-              let surface = controller.focusedSurface else {
+              let session = controller.activeSession,
+              let surface = representativeSurface(for: session, in: controller) else {
             sendError("no active tab", to: client)
             return
         }
 
-        sendOk(tabInfo(surface: surface, controller: controller, window: window, isActive: true), to: client)
+        sendOk(tabInfo(session: session, surface: surface, controller: controller, window: window, isActive: true), to: client)
     }
 
     private func handleTabFocus(params: [String: Any], client: ClientConnection) {
-        guard let controller = resolveController(params: params),
-              let window = controller.window else {
+        guard let target = resolveTarget(params: params),
+              let window = target.controller.window else {
             sendError("tab not found", to: client)
             return
         }
+        // Bring the window forward first (covers the already-active-session case, where selectSession
+        // is a no-op), then switch the in-app session to the one that owns the surface (G1: focus a
+        // *background* session, not just raise a window). selectSession no-ops if already active.
         NSApp.activate(ignoringOtherApps: true)
         window.makeKeyAndOrderFront(nil)
+        if let index = target.controller.sessions.firstIndex(where: { $0.id == target.session.id }) {
+            target.controller.selectSession(at: index)
+        }
         sendOk(["focused": true], to: client)
     }
 
     // MARK: - Tab Resolution
 
-    /// Resolve a `BaseTerminalController` from params. If `tab_id` is provided, finds the
-    /// matching tab; otherwise returns the key window's controller.
-    private func resolveController(params: [String: Any]) -> BaseTerminalController? {
+    /// A resolved IPC target: the controller, the in-app ``Session``, and the specific surface the
+    /// `tab_id` matched. A "tab" is an in-app session (sidebar re-architecture); `tab_id` is a
+    /// per-surface UUID (`GHOSTTY_TAB_ID`).
+    private typealias Target = (controller: BaseTerminalController, session: Session, surface: Ghostty.SurfaceView)
+
+    /// Resolve params to the targeted session. With `tab_id`, finds the session whose tree contains
+    /// that surface across **every** session of **every** window — crucially including *background*
+    /// (non-mounted) sessions, which is the whole point of G1: `ghosttyctl` must reach a session even
+    /// when it isn't the visible one. Without `tab_id`, defaults to the key window's active session.
+    private func resolveTarget(params: [String: Any]) -> Target? {
         if let tabIdStr = params["tab_id"] as? String,
            let tabId = UUID(uuidString: tabIdStr) {
-            return controllerForSurfaceId(tabId)
+            return resolve(surfaceId: tabId)
         }
 
-        // Default: key window
-        return NSApp.keyWindow?.windowController as? BaseTerminalController
-    }
-
-    /// Resolve a `Ghostty.SurfaceView` from params.
-    private func resolveSurface(params: [String: Any]) -> Ghostty.SurfaceView? {
-        if let tabIdStr = params["tab_id"] as? String,
-           let tabId = UUID(uuidString: tabIdStr) {
-            return surfaceForId(tabId)
+        // Default: the key window's active session (and its focused surface).
+        guard let controller = NSApp.keyWindow?.windowController as? BaseTerminalController,
+              let session = controller.activeSession,
+              let surface = controller.focusedSurface ?? session.surfaceTree.root?.leftmostLeaf() else {
+            return nil
         }
-
-        // Default: key window's focused surface
-        return (NSApp.keyWindow?.windowController as? BaseTerminalController)?.focusedSurface
+        return (controller, session, surface)
     }
 
-    /// Find the controller that owns a surface with the given UUID.
-    private func controllerForSurfaceId(_ id: UUID) -> BaseTerminalController? {
+    /// Find the (controller, session, surface) owning a surface UUID — searching every session's
+    /// split tree, not just the mounted one, so background sessions are reachable.
+    private func resolve(surfaceId id: UUID) -> Target? {
         for window in NSApp.windows {
             guard let controller = window.windowController as? BaseTerminalController else { continue }
-            // Search the whole split tree, not just the focused surface, so IPC
-            // can target a tab even when the matching surface is a background split.
-            for surface in controller.surfaceTree where surface.id == id {
-                return controller
+            for session in controller.sessions {
+                for surface in session.surfaceTree where surface.id == id {
+                    return (controller, session, surface)
+                }
             }
         }
         return nil
     }
 
-    /// Find a surface by UUID across all windows (searches every split, not just focused).
-    private func surfaceForId(_ id: UUID) -> Ghostty.SurfaceView? {
-        for window in NSApp.windows {
-            guard let controller = window.windowController as? BaseTerminalController else { continue }
-            for surface in controller.surfaceTree where surface.id == id {
-                return surface
-            }
+    /// The surface that represents a session for IPC (the one whose id becomes the listed `tab_id`).
+    /// For the controller's active session this is the focused surface; otherwise the tree's leftmost
+    /// leaf — matching how `SidebarTabManager` picks each card's representative surface.
+    private func representativeSurface(for session: Session, in controller: BaseTerminalController) -> Ghostty.SurfaceView? {
+        if session.id == controller.activeSession?.id, let focused = controller.focusedSurface {
+            return focused
         }
-        return nil
+        return session.surfaceTree.root?.leftmostLeaf()
     }
 
     // MARK: - Tab Info
 
     private func tabInfo(
+        session: Session,
         surface: Ghostty.SurfaceView,
         controller: BaseTerminalController,
         window: NSWindow,
         isActive: Bool
     ) -> [String: Any] {
+        // `tab_id` is the representative surface's id, so it round-trips back through
+        // `resolve(surfaceId:)` for focus / set-status / rename.
         var info: [String: Any] = [
             "tab_id": surface.id.uuidString,
-            "title": controller.titleOverride ?? window.title,
+            "title": session.titleOverride ?? (surface.title.isEmpty ? window.title : surface.title),
             "is_active": isActive,
         ]
         if let pwd = surface.pwd {

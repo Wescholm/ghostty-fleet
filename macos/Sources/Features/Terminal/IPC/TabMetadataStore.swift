@@ -2,7 +2,11 @@ import Foundation
 import Cocoa
 
 /// Stores per-tab metadata (status entries) that can be set via IPC.
-/// Each tab is identified by its surface UUID.
+///
+/// Keyed by the in-app ``Session``'s UUID. (`ghosttyctl set-status` passes a per-surface `GHOSTTY_TAB_ID`;
+/// `GhosttyIPCServer` resolves that surface to its owning session and stores under the *session* id, so
+/// status follows the session across surface swaps/splits and shows for background sessions — G1. The
+/// `tabId:` parameter name is kept for source stability.)
 @MainActor
 final class TabMetadataStore: ObservableObject {
     static let shared = TabMetadataStore()

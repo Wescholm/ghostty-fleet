@@ -180,10 +180,11 @@ class SidebarTabManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self else { return }
-            // TODO(Step 5 follow-up): the IPC notification carries an NSWindow, not a surface/session
-            // (review item G1 — IPC-over-sessions). Best-effort: attribute to the active session.
-            self.markAttention(sessionId: self.controller?.activeSession?.id)
+            guard let self,
+                  let surfaceView = notification.object as? Ghostty.SurfaceView else { return }
+            // The IPC notification now carries the originating surface (G1), so attribute attention to
+            // the owning session — including a background one — exactly like desktop notifications.
+            self.markAttention(sessionId: self.sessionId(for: surfaceView))
         }
         observers.append(ipcNotifObserver)
 
@@ -371,12 +372,18 @@ class SidebarTabManager: ObservableObject {
         let metadataStore = TabMetadataStore.shared
         let activeId = controller.activeSession?.id
 
+        // Whatever made a session active — sidebar tap, Cmd+T, or an IPC `tab.focus` that bypasses
+        // selectTab — clears its pending attention, so a stale dot can't reappear on switch-away.
+        if let activeId { attentionSessions.remove(activeId) }
+
         let newTabs = controller.sessions.enumerated().map { (i, session) -> TabItem in
             let surface = representativeSurface(for: session, at: i)
             let sid = surface?.id
             let pwd = surface?.pwd
             let title = session.titleOverride ?? surface?.title ?? ""
-            let entries = sid.map { metadataStore.statusEntries(for: $0) } ?? []
+            // Status is keyed by session id (set via IPC `tab.set-status`), so it follows the session
+            // across surface swaps/splits and shows for background sessions too (G1).
+            let entries = metadataStore.statusEntries(for: session.id)
             let gitInfo = pwd.flatMap { gitInfoCache[$0] } ?? .none
             let isSelected = i == controller.activeSessionIndex
             let color = session.tabColor ?? .none
