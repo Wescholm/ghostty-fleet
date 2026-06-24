@@ -857,10 +857,34 @@ class BaseTerminalController: NSWindowController,
 
     @objc private func ghosttyDidCloseSurface(_ notification: Notification) {
         guard let target = notification.object as? Ghostty.SurfaceView else { return }
-        guard let node = surfaceTree.root?.node(view: target) else { return }
-        closeSurface(
-            node,
-            withConfirmation: (notification.userInfo?["process_alive"] as? Bool) ?? false)
+        let withConfirmation = (notification.userInfo?["process_alive"] as? Bool) ?? false
+
+        // Active session (the mounted tree): the existing split-aware close path.
+        if let node = surfaceTree.root?.node(view: target) {
+            closeSurface(node, withConfirmation: withConfirmation)
+            return
+        }
+
+        // Background session: the surface isn't in the mounted tree, so the path above never saw it —
+        // its process exited and the dead surface would otherwise linger as a zombie card (audit M1).
+        // Remove the node from its owning session's tree; drop the session if its tree empties. No
+        // confirmation/undo: a background close fires because the process is already gone.
+        guard let sessionIndex = sessions.firstIndex(where: { $0.surfaceTree.root?.node(view: target) != nil }),
+              let node = sessions[sessionIndex].surfaceTree.root?.node(view: target) else { return }
+        let newTree = sessions[sessionIndex].surfaceTree.removing(node)
+        if newTree.isEmpty {
+            // The whole background session is gone. (A background session implies an active sibling, so
+            // sessions.count > 1 here — but guard anyway.)
+            guard sessions.count > 1 else { window?.performClose(nil); return }
+            for view in sessions[sessionIndex].surfaceTree {
+                if let surface = view.surface { ghostty_surface_set_occlusion(surface, false) }
+            }
+            sessions.remove(at: sessionIndex)
+            if activeSessionIndex > sessionIndex { activeSessionIndex -= 1 }
+        } else {
+            // The session survives with its remaining splits.
+            sessions[sessionIndex].surfaceTree = newTree
+        }
     }
 
     @objc private func ghosttyDidNewSplit(_ notification: Notification) {
