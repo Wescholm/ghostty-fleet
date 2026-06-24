@@ -16,6 +16,14 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
             selector: #selector(fullscreenDidExit(_:)),
             name: .fullscreenDidExit,
             object: nil)
+
+        // macOS re-lays the traffic lights to their default (corner-hugging) spot on resize, so
+        // re-inset them whenever the window resizes.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(windowDidResizeNotification(_:)),
+            name: NSWindow.didResizeNotification,
+            object: self)
     }
 
     deinit {
@@ -75,6 +83,35 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
            let titleBarContainer = themeFrame.firstDescendant(withClassName: "NSTitlebarContainerView") {
             titleBarContainer.isHidden = false
         }
+
+        // Inset the floating traffic lights so they don't crowd the rounded corner / sidebar. macOS may
+        // finish laying them out after this returns, so re-apply on the next runloop tick too.
+        repositionTrafficLights()
+        DispatchQueue.main.async { [weak self] in self?.repositionTrafficLights() }
+    }
+
+    /// Floating-traffic-light inset from the window's top-left corner (matches the comfortable spacing of
+    /// system apps like Messages, rather than the default corner-hugging position the full-size content
+    /// view produces).
+    private static let trafficLightInset = CGPoint(x: 19, y: 16)
+
+    /// Re-positions the close/miniaturize/zoom buttons as a group, preserving their spacing, with a
+    /// comfortable top-left inset. Used because the hidden titlebar's full-size content view otherwise
+    /// places them hard against the window corner.
+    private func repositionTrafficLights() {
+        let buttons = [
+            standardWindowButton(.closeButton),
+            standardWindowButton(.miniaturizeButton),
+            standardWindowButton(.zoomButton),
+        ].compactMap { $0 }
+        guard let container = buttons.first?.superview, !buttons.isEmpty else { return }
+
+        let minX = buttons.map(\.frame.minX).min() ?? 0
+        let dx = Self.trafficLightInset.x - minX
+        for button in buttons {
+            let y = container.bounds.height - Self.trafficLightInset.y - button.frame.height
+            button.setFrameOrigin(NSPoint(x: button.frame.minX + dx, y: y))
+        }
     }
 
     // MARK: NSWindow
@@ -107,5 +144,9 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
         // On exit we need to reapply the style because macOS breaks it usually.
         // This is safe to call repeatedly so if its not broken its still safe.
         reapplyHiddenStyle()
+    }
+
+    @objc private func windowDidResizeNotification(_ notification: Notification) {
+        repositionTrafficLights()
     }
 }
