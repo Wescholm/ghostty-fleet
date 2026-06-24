@@ -642,7 +642,7 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         // (see windowNibName), so treat that as hidden too — otherwise the first card tucks under the lights.
         let usesHiddenTitlebar = config.macosTitlebarStyle == .hidden ||
             (config.macosTitlebarStyle == .tabs && BaseTerminalController.nativeTabsDisabled)
-        return usesHiddenTitlebar ? 34 : 0
+        return usesHiddenTitlebar ? 26 : 0
     }
 
     /// Whether the sidebar should adopt a Liquid Glass pane: macOS 26+ with Reduce Transparency off.
