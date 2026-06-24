@@ -60,6 +60,10 @@ struct TerminalRestorableTests {
         #expect(v5.effectiveFullscreenMode == nil)
         #expect(v5.tabColor == nil)
         #expect(v5.titleOverride == nil)
+        // Pre-v8 archives have no `sessions` key → decode as nil, which routes restoreWindow to the
+        // legacy single-tree path (the in-app-sessions back-compat contract).
+        #expect(v5.sessions == nil)
+        #expect(v5.activeSessionIndex == nil)
         #expect(v5.surfaceTree.contains(where: { $0.id.uuidString == "926F3F2A-824C-40C9-87CA-2CDCA4E11049" }))
         #expect(v5.surfaceTree.contains(where: { $0.id.uuidString == "AC5E829B-85FD-4C69-B196-2EE469C72A90" }))
 
