@@ -375,6 +375,50 @@ class BaseTerminalController: NSWindowController,
         return session
     }
 
+    /// Close the session at `index`. If it's the last session, close the window instead. If it's the
+    /// active session, switch to a neighbor *first* so the mounted tree is never empty (E1:
+    /// TerminalController closes the window on an empty mounted tree). Releasing the Session frees its
+    /// surfaces. Not yet wired — Step 5 connects the sidebar's close actions and adds running-process
+    /// confirmation (today's closeTab confirmation is window/tab-scoped).
+    func closeSession(at index: Int) {
+        guard sessions.indices.contains(index) else { return }
+
+        // Last session: closing it means closing the window.
+        guard sessions.count > 1 else {
+            window?.close()
+            return
+        }
+
+        // If closing the active session, mount a neighbor before removing it so we never mount empty.
+        if index == activeSessionIndex {
+            let neighbor = (index == sessions.count - 1) ? index - 1 : index + 1
+            selectSession(at: neighbor) // sets activeSessionIndex = neighbor, mounts its tree
+        }
+
+        // Occlude the closing session's surfaces (it isn't mounted now), then drop it — releasing the
+        // Session releases its surfaceTree and the SurfaceViews, freeing the libghostty surfaces.
+        for view in sessions[index].surfaceTree {
+            if let surface = view.surface { ghostty_surface_set_occlusion(surface, false) }
+        }
+        sessions.remove(at: index)
+
+        // Keep activeSessionIndex pointing at the same (active) session after the removal shift.
+        if activeSessionIndex > index { activeSessionIndex -= 1 }
+    }
+
+    /// Reorder sessions (sidebar drag-reorder), preserving which session is active by identity. Does
+    /// not remount — the active session's tree is unchanged. Not yet wired (Step 5).
+    func moveSession(from source: Int, to destination: Int) {
+        guard sessions.indices.contains(source), sessions.indices.contains(destination),
+              source != destination else { return }
+        let activeId = activeSession?.id
+        let moving = sessions.remove(at: source)
+        sessions.insert(moving, at: destination)
+        if let activeId, let newIndex = sessions.firstIndex(where: { $0.id == activeId }) {
+            activeSessionIndex = newIndex
+        }
+    }
+
     /// Called when the surfaceTree variable changed.
     ///
     /// Subclasses should call super first.
