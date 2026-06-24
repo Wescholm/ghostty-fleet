@@ -77,7 +77,9 @@ The app lands at `macos/build/Debug/Ghostty.app` (overwritten in place; bundle i
   `simulator*`, `device`, `project-scaffolding` give **zero** macOS capability — don't enable them
   expecting macOS debug/UI features. Confirm a workflow's real tools with `xcodebuildmcp <workflow>`
   before relying on them.
-- **`peekaboo`** — screen capture / window inspection, for verifying the live UI.
+- **`peekaboo`** — macOS window / accessibility inspection + control, for verifying the live fork
+  UI. Its screenshot tools (`see`/`image`) don't work on the fork — use the **`peekaboo-fork-ui`**
+  skill (AX tools + `screencapture -l`).
 
 **Project skills** live canonically in **`.agents/skills/`** (committed, shareable). Since all of
 `.claude/` is gitignored, `make skills` symlinks each one into `.claude/skills/` (where Claude Code
@@ -97,7 +99,7 @@ Don't assume a tool/skill/agent applies; this table is the source of truth. Veri
 | Run the app with a real window | `make run` / `make dev` (or `open`) | a detached/background launch (makes no window) |
 | Capture runtime logs/errors | `/usr/bin/log show --predicate 'processImagePath CONTAINS "ghostty-sidebar"'` | bare `log` (shell-aliased here) |
 | macOS crash backtrace | plain `lldb -p <pid>` / `lldb …/Contents/MacOS/ghostty`, or Xcode | XcodeBuildMCP `debugging` (sim-only) |
-| Inspect / drive the live macOS UI | `peekaboo` MCP | XcodeBuildMCP `ui-automation` (sim/device) |
+| Inspect / drive the live macOS UI | the **`peekaboo-fork-ui`** skill (AX tools; `screencapture -l` for pixels) | `peekaboo` `see`/`image` (time out / "off-screen" on the fork) |
 | Render a SwiftUI `#Preview` | `xcode` MCP `RenderPreview` (see `VALIDATION.md`) | — |
 | Broad multi-file search of the Zig core (`src/`) | the `Explore` subagent (keeps context lean) | reading dozens of files inline |
 | Read fork code | direct — it's small, in `Sidebar/` `IPC/` `cli/` | spawning a subagent (overkill) |
