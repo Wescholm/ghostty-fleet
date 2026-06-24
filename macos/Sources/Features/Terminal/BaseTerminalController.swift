@@ -40,9 +40,25 @@ class BaseTerminalController: NSWindowController,
         didSet { syncFocusToSurfaceTree() }
     }
 
-    /// The tree of splits within this terminal window.
+    /// The tree of splits within this terminal window. This is the *mounted* (active) tree — what
+    /// `TerminalView` renders. Under the sidebar re-architecture it mirrors the active session's tree
+    /// (see ``sessions``); Step 3 makes switching swap which session's tree is mounted here.
     @Published var surfaceTree: SplitTree<Ghostty.SurfaceView> = .init() {
         didSet { surfaceTreeDidChange(from: oldValue, to: surfaceTree) }
+    }
+
+    /// In-app sessions owned by this controller (sidebar re-architecture, Step 2). Each ``Session``
+    /// holds one split tree. Today there is exactly one session whose `surfaceTree` mirrors
+    /// ``surfaceTree``; multi-session switching arrives in Step 3. Kept current by
+    /// ``surfaceTreeDidChange(from:to:)``.
+    @Published private(set) var sessions: [Session] = []
+
+    /// Index of the active session within ``sessions``. Always 0 until Step 3 adds switching.
+    @Published private(set) var activeSessionIndex: Int = 0
+
+    /// The active session, or nil before ``sessions`` is initialized.
+    var activeSession: Session? {
+        sessions.indices.contains(activeSessionIndex) ? sessions[activeSessionIndex] : nil
     }
 
     /// This can be set to show/hide the command palette.
@@ -144,6 +160,10 @@ class BaseTerminalController: NSWindowController,
         let surfaceUUID = UUID()
         config.environmentVariables["GHOSTTY_TAB_ID"] = surfaceUUID.uuidString
         self.surfaceTree = tree ?? .init(view: Ghostty.SurfaceView(ghostty_app, baseConfig: config, uuid: surfaceUUID))
+
+        // Sidebar re-architecture (Step 2): wrap the initial tree in a single Session. The active
+        // session's surfaceTree mirrors `self.surfaceTree`; multi-session switching arrives in Step 3.
+        self.sessions = [Session(surfaceTree: self.surfaceTree)]
 
         // Setup our bell state for the window
         setupBellNotificationPublisher()
@@ -292,6 +312,12 @@ class BaseTerminalController: NSWindowController,
     ///
     /// Subclasses should call super first.
     func surfaceTreeDidChange(from: SplitTree<Ghostty.SurfaceView>, to: SplitTree<Ghostty.SurfaceView>) {
+        // Keep the active session's tree in sync with the mounted tree (sidebar re-architecture,
+        // Step 2). Guarded so the init-time assignment (before `sessions` is populated) is a no-op.
+        if sessions.indices.contains(activeSessionIndex) {
+            sessions[activeSessionIndex].surfaceTree = to
+        }
+
         // If our surface tree becomes empty then we have no focused surface.
         if to.isEmpty {
             focusedSurface = nil
