@@ -69,6 +69,12 @@ struct SidebarView: View {
     /// already sits below a real titlebar. Set by TerminalController.sidebarTopInset(for:).
     var topInset: CGFloat = 0
 
+    /// When true, the sidebar is hosted on a Liquid Glass pane (an `NSGlassEffectView` whose
+    /// `contentView` is this view's host), so the view draws a CLEAR background and lets the glass
+    /// material show through — the macOS-26 navigation layer. False (Reduce Transparency, or a
+    /// pre-26 fallback) keeps the opaque solid `theme.background`. Set by TerminalController.
+    var glassActive: Bool = false
+
     @AppStorage("SidebarShowCardBorder") private var showCardBorder: Bool = true
     @AppStorage("SidebarDimInactiveColors") private var dimInactiveColors: Bool = false
     @State private var draggingTabID: UUID?
@@ -78,7 +84,7 @@ struct SidebarView: View {
         ScrollView {
             LazyVStack(alignment: .leading, spacing: 4) {
                 ForEach(Array(tabManager.tabs.enumerated()), id: \.element.id) { index, tab in
-                    SidebarTabCard(tab: tab, theme: theme, fields: fields, showCardBorder: showCardBorder, dimInactive: dimInactiveColors)
+                    SidebarTabCard(tab: tab, theme: theme, fields: fields, showCardBorder: showCardBorder, dimInactive: dimInactiveColors, glassActive: glassActive)
                         .contentShape(Rectangle())
                         .opacity(draggingTabID == tab.id ? 0.4 : 1.0)
                         .overlay(alignment: .top) {
@@ -152,7 +158,11 @@ struct SidebarView: View {
             .padding(.top, max(8, topInset))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .background(theme.background)
+        .background {
+            // On a Liquid Glass pane the glass provides the backdrop, so stay clear and let it show
+            // through. Under Reduce Transparency / fallback, paint the opaque solid theme background.
+            if !glassActive { theme.background }
+        }
     }
 }
 
@@ -204,6 +214,10 @@ private struct SidebarTabCard: View {
     var showCardBorder: Bool = true
     var dimInactive: Bool = false
 
+    var glassActive: Bool = false
+
+    @State private var isHovered = false
+
     private static let cardRadius: CGFloat = 8
 
     /// Compact "↑2 ↓1" upstream divergence label.
@@ -214,15 +228,32 @@ private struct SidebarTabCard: View {
         return s
     }
 
-    /// The accent color for the left border strip.
-    /// When dimming is enabled, inactive tabs use reduced opacity for a gentle dim.
-    /// When no color is set (.none), the strip is fully transparent.
-    private var accentColor: Color {
-        if let nsColor = tab.tabColor.displayColor {
-            let base = Color(nsColor: nsColor)
-            return (dimInactive && !tab.isSelected) ? base.opacity(0.55) : base
-        }
+    /// The fill for the SELECTED row — a bold rounded highlight in the macOS sidebar style (Notes /
+    /// Finder / Xcode): the tab's own color when set, otherwise the system accent.
+    private var selectionFill: Color {
+        if let nsColor = tab.tabColor.displayColor { return Color(nsColor: nsColor) }
+        return .accentColor
+    }
+
+    /// Card background: the bold selection fill when selected, a faint wash on hover, otherwise clear so
+    /// the sidebar material shows through.
+    private var cardFill: Color {
+        if tab.isSelected { return selectionFill }
+        if isHovered { return Color.primary.opacity(glassActive ? 0.10 : 0.06) }
         return .clear
+    }
+
+    /// Primary (title) color — white on the filled selection for contrast, else the theme foreground.
+    private var primaryColor: Color { tab.isSelected ? .white : theme.foreground }
+
+    /// Secondary (dir / branch / status) color — a readable white on the selection, else the theme's.
+    private var secondaryColor: Color { tab.isSelected ? .white.opacity(0.85) : theme.secondaryText }
+
+    /// The left color strip, shown only for UNSELECTED colored tabs (a selected tab's fill is its color).
+    private var accentStrip: Color {
+        guard !tab.isSelected, let nsColor = tab.tabColor.displayColor else { return .clear }
+        let base = Color(nsColor: nsColor)
+        return dimInactive ? base.opacity(0.55) : base
     }
 
     /// The border color for the thin card border — always neutral gray.
@@ -253,7 +284,7 @@ private struct SidebarTabCard: View {
                 bottomTrailingRadius: 0,
                 topTrailingRadius: 0
             )
-            .fill(accentColor)
+            .fill(accentStrip)
             .frame(width: 5)
 
             VStack(alignment: .leading, spacing: 4) {
@@ -264,7 +295,7 @@ private struct SidebarTabCard: View {
                             .font(.system(size: 12, weight: tab.isSelected ? .semibold : .regular))
                             .lineLimit(1)
                             .truncationMode(.tail)
-                            .foregroundColor(tab.isSelected ? theme.foreground : theme.secondaryText)
+                            .foregroundColor(primaryColor)
 
                         Spacer()
 
@@ -283,10 +314,10 @@ private struct SidebarTabCard: View {
                     HStack(spacing: 4) {
                         Image(systemName: "folder")
                             .font(.system(size: 9))
-                            .foregroundColor(theme.secondaryText)
+                            .foregroundColor(secondaryColor)
                         Text(dir)
                             .font(.system(size: 10))
-                            .foregroundColor(theme.secondaryText)
+                            .foregroundColor(secondaryColor)
                             .lineLimit(1)
                     }
                 }
@@ -296,21 +327,21 @@ private struct SidebarTabCard: View {
                     HStack(spacing: 4) {
                         Image(systemName: "arrow.triangle.branch")
                             .font(.system(size: 9))
-                            .foregroundColor(theme.secondaryText)
+                            .foregroundColor(secondaryColor)
                         Text(branch)
                             .font(.system(size: 10))
-                            .foregroundColor(theme.secondaryText)
+                            .foregroundColor(secondaryColor)
                             .lineLimit(1)
                         if tab.gitDirty {
                             // Uncommitted changes
                             Circle()
-                                .fill(theme.secondaryText)
+                                .fill(secondaryColor)
                                 .frame(width: 4, height: 4)
                         }
                         if tab.gitAhead > 0 || tab.gitBehind > 0 {
                             Text(Self.aheadBehind(ahead: tab.gitAhead, behind: tab.gitBehind))
                                 .font(.system(size: 9))
-                                .foregroundColor(theme.secondaryText)
+                                .foregroundColor(secondaryColor)
                                 .lineLimit(1)
                         }
                     }
@@ -323,11 +354,11 @@ private struct SidebarTabCard: View {
                             if let icon = entry.icon {
                                 Image(systemName: icon)
                                     .font(.system(size: 9))
-                                    .foregroundColor(theme.secondaryText)
+                                    .foregroundColor(secondaryColor)
                             }
                             Text(entry.value)
                                 .font(.system(size: 10))
-                                .foregroundColor(theme.secondaryText)
+                                .foregroundColor(secondaryColor)
                                 .lineLimit(1)
                         }
                     }
@@ -340,16 +371,24 @@ private struct SidebarTabCard: View {
         .clipShape(RoundedRectangle(cornerRadius: Self.cardRadius))
         .background(
             RoundedRectangle(cornerRadius: Self.cardRadius)
-                .fill(tab.isSelected ? theme.activeTabBackground : Color.clear)
+                .fill(cardFill)
+                // A subtle drop shadow lifts the selected row off the sidebar material (depth/elevation).
+                .shadow(color: tab.isSelected ? selectionFill.opacity(0.35) : .clear, radius: 4, y: 1)
         )
         .overlay(
             Group {
-                if showCardBorder {
+                // The hairline border competes with a filled selection and the sidebar vibrancy, so it's
+                // dropped on the selected row and whenever the glass/vibrancy pane is active (the clean
+                // borderless macOS sidebar look). It stays available for the Reduce-Transparency fallback.
+                if showCardBorder && !tab.isSelected && !glassActive {
                     RoundedRectangle(cornerRadius: Self.cardRadius)
                         .strokeBorder(cardBorderColor, lineWidth: 1)
                 }
             }
         )
+        .onHover { isHovered = $0 }
+        .animation(.easeOut(duration: 0.12), value: tab.isSelected)
+        .animation(.easeOut(duration: 0.12), value: isHovered)
     }
 }
 

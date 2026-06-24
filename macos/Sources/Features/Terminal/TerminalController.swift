@@ -4,6 +4,12 @@ import SwiftUI
 import Combine
 import GhosttyKit
 
+/// An `NSSplitView` whose divider is invisible, so the sidebar's floating glass panel reads as one
+/// continuous surface with the terminal (no hard pane edge). The divider remains draggable for resizing.
+fileprivate final class SeamlessSplitView: NSSplitView {
+    override var dividerColor: NSColor { .clear }
+}
+
 /// A classic, tabbed terminal experience.
 class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Controller, NSSplitViewDelegate {
     override var windowNibName: NSNib.Name? {
@@ -79,6 +85,12 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
 
     /// The sidebar hosting view, kept for theme updates on config change.
     private var sidebarHostingView: NSHostingView<SidebarView>?
+
+    /// Whether the sidebar is hosted on a translucent vibrancy pane this session (macOS 26 and Reduce
+    /// Transparency is off). Decided once when the window loads and reused for theme refreshes so the
+    /// SwiftUI `glassActive` flag always matches the actual pane. Read by `TerminalWindow.syncAppearance`
+    /// to make the window non-opaque so the `.behindWindow` sidebar material can sample the desktop.
+    private(set) var sidebarUsesGlass = false
 
 
     init(_ ghostty: Ghostty.App,
@@ -626,6 +638,60 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         config.macosTitlebarStyle == .hidden ? 28 : 0
     }
 
+    /// Whether the sidebar should adopt a Liquid Glass pane: macOS 26+ with Reduce Transparency off.
+    /// Under Reduce Transparency we keep the opaque solid theme background for legibility (the glass's
+    /// translucency is exactly what that accessibility setting asks us to drop).
+    private static func computeSidebarGlass() -> Bool {
+#if compiler(>=6.2)
+        if #available(macOS 26.0, *) {
+            return !NSWorkspace.shared.accessibilityDisplayShouldReduceTransparency
+        }
+#endif
+        return false
+    }
+
+    /// Wraps the sidebar hosting view as a Liquid Glass panel that floats *on* the terminal (the macOS-26
+    /// "navigation floats above content" model; cf. Apple's Landmarks sample, which extends the content
+    /// background under the sidebar via `backgroundExtensionEffect`). The container is painted the terminal
+    /// background color so the sidebar reads as one continuous surface with the terminal (no walled-off
+    /// pane / hard divider), and a rounded `NSGlassEffectView` (radius 15, matching Landmarks' app-wide
+    /// corner radius) floats on it with a soft shadow. Returns the bare hosting view (solid theme
+    /// background) when glass is off (Reduce Transparency / pre-26 fallback).
+    private func makeSidebarPane(hosting: NSView, config: Ghostty.Config) -> NSView {
+        guard sidebarUsesGlass else { return hosting }
+#if compiler(>=6.2)
+        if #available(macOS 26.0, *) {
+            // The terminal background continues behind the sidebar so the panel floats on the terminal.
+            let container = NSView()
+            container.wantsLayer = true
+            container.layer?.backgroundColor = NSColor(config.backgroundColor).cgColor
+
+            let glass = NSGlassEffectView()
+            glass.contentView = hosting
+            glass.cornerRadius = 15
+            glass.translatesAutoresizingMaskIntoConstraints = false
+            // A soft drop shadow lifts the panel off the terminal surface (depth/elevation).
+            glass.wantsLayer = true
+            glass.shadow = NSShadow()
+            glass.layer?.shadowColor = NSColor.black.cgColor
+            glass.layer?.shadowOpacity = 0.20
+            glass.layer?.shadowRadius = 10
+            glass.layer?.shadowOffset = CGSize(width: 0, height: -1)
+
+            container.addSubview(glass)
+            let inset: CGFloat = 8
+            NSLayoutConstraint.activate([
+                glass.leadingAnchor.constraint(equalTo: container.leadingAnchor, constant: inset),
+                glass.trailingAnchor.constraint(equalTo: container.trailingAnchor, constant: -inset),
+                glass.topAnchor.constraint(equalTo: container.topAnchor, constant: inset),
+                glass.bottomAnchor.constraint(equalTo: container.bottomAnchor, constant: -inset),
+            ])
+            return container
+        }
+#endif
+        return hosting
+    }
+
     /// Updates the sidebar theme when the terminal config changes.
     private func updateSidebarTheme(_ config: Ghostty.Config) {
         guard let sidebarHostingView, let sidebarTabManager else { return }
@@ -634,7 +700,8 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
             tabManager: sidebarTabManager,
             theme: newTheme,
             fields: config.sidebarFields,
-            topInset: Self.sidebarTopInset(for: config)
+            topInset: Self.sidebarTopInset(for: config),
+            glassActive: sidebarUsesGlass
         )
     }
 
@@ -1201,19 +1268,27 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         terminalContainer.initialContentSize = focusedSurface?.initialSize
 
         // Create the sidebar hosting view
+        let glassActive = Self.computeSidebarGlass()
+        self.sidebarUsesGlass = glassActive
         let sidebarHostingView = NSHostingView(rootView: SidebarView(
             tabManager: tabManager,
             theme: ghostty.config.sidebarTheme,
             fields: ghostty.config.sidebarFields,
-            topInset: Self.sidebarTopInset(for: config)
+            topInset: Self.sidebarTopInset(for: config),
+            glassActive: glassActive
         ))
         self.sidebarHostingView = sidebarHostingView
 
-        // Build the split view: sidebar | terminal
-        let splitView = NSSplitView()
+        // Liquid Glass: host the sidebar on a glass pane (the macOS-26 navigation layer). Within-window,
+        // so it frosts the window backing and gets richer when the terminal itself is run translucent.
+        let sidebarPane = makeSidebarPane(hosting: sidebarHostingView, config: config)
+
+        // Build the split view: sidebar | terminal. The divider is invisible so the floating sidebar
+        // panel reads as one continuous surface with the terminal (still draggable to resize).
+        let splitView = SeamlessSplitView()
         splitView.isVertical = true
         splitView.dividerStyle = .thin
-        splitView.addSubview(sidebarHostingView)
+        splitView.addSubview(sidebarPane)
         splitView.addSubview(terminalContainer)
         splitView.setHoldingPriority(.defaultLow, forSubviewAt: 0)
         splitView.setHoldingPriority(.defaultHigh, forSubviewAt: 1)
@@ -1222,7 +1297,7 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
         // Set initial sidebar width (synced across tabs via UserDefaults)
         let savedWidth = UserDefaults.standard.double(forKey: "SidebarWidth")
         let sidebarWidth = savedWidth > 0 ? min(max(savedWidth, 140), 280) : 200
-        sidebarHostingView.frame = NSRect(x: 0, y: 0, width: sidebarWidth, height: 400)
+        sidebarPane.frame = NSRect(x: 0, y: 0, width: sidebarWidth, height: 400)
         terminalContainer.frame = NSRect(x: sidebarWidth, y: 0, width: 600, height: 400)
 
         window.contentView = splitView
