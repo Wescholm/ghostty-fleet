@@ -4,8 +4,8 @@
 > tabbing is off by default; IPC-over-sessions / G1 reaches background sessions; per-session bell
 > attribution / G2 done; per-session lifecycle status dot + Claude Code hooks done; multi-session
 > restoration / Step 8 — quit→relaunch restores all sessions in one window; undo/redo / Step 7 —
-> closing a session is undoable, process and scrollback intact). Remaining tail: native-tab reference
-> audit (Step 9) and the full UI pass (Step 11). This is the architecture direction for the sidebar fork.
+> closing a session is undoable, process and scrollback intact). Remaining tail is cleanup/polish —
+> see **Next steps** below. This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
 >
@@ -15,6 +15,44 @@
 > removed from `NewTerminalIntent` (the only App Intent that still carried it). The Zig core's
 > `osVersionMin` (`src/build/Config.zig`) is still 13.0.0 — harmless (the app gates at 26 via
 > `LSMinimumSystemVersion`); raise it for consistency whenever a full `make build` is next run.
+
+## Next steps (remaining work)
+
+Steps 0–8 are done; the core in-app-sessions feature set works. What's left is **cleanup + polish**,
+not core function. Roughly in priority order:
+
+- [ ] **Step 9 — audit & remove dead native-tab code.** With `FleetDisableNativeTabs` default-on, the
+      native-tab paths are unreachable but still present. Remove or gate them:
+  - `TerminalController.closeTabImmediately` / `closeOtherTabsImmediately` / `closeTabsOnTheRightImmediately`
+    and their `UndoState`/`tabGroup`-based undo (superseded by `closeSession` + Step 7 undo).
+  - The native New-Tab / New-Window undo registration (the `ghostty.newTab` / `addTabbedWindowSafely`
+    paths) — `newTab` already routes to `newSession`.
+  - The `closeTab` / `closeOtherTabs` / `closeTabsOnTheRight` IBActions and the **`Close Tab [⌘⌥W]`**
+    menu item: they branch on `window.tabGroup` and fall through to `closeWindow` for a single window —
+    route them to `closeSession` (active / others / right) so the menu matches the keybind behavior.
+  - AppleScript (`ScriptTab` / `ScriptWindow`), `Fullscreen.swift`, `TabTitleEditor`,
+    `TabGroupCloseCoordinator`, `NSWindow+Extension` — audit for native-tab assumptions.
+- [ ] **Step 10 — drop the moot native-tab menu items** (Show All Tabs, Merge All Windows) — Scope
+      decision 3; the sidebar replaces them.
+- [ ] **Step 11 — full UI pass + `make test`.** Exercise switch/IME, off-screen keep-alive, restoration
+      round-trip, fullscreen/traffic-lights, and the status/undo flows end-to-end.
+- [ ] **Title-layer unification.** Renaming the *active* session (sidebar / `ghosttyctl rename`) updates
+      its card but **not** the window titlebar (titlebar reads `controller.titleOverride`; rename sets
+      `session.titleOverride`). `promptTabTitle` (⌘⇧I) is the inverse. Unify so the window chrome tracks
+      `activeSession.titleOverride`; folds together with the `promptRenameTab` per-session-prompt TODO.
+- [ ] **`make test` codesign papercut.** The test-host app is built into DerivedData and sets its icon
+      at launch → `com.apple.FinderInfo` detritus → next codesign fails ("resource fork… not allowed").
+      Add `xattr -cr "<DerivedData>/…/Debug/Ghostty.app"` to the Makefile `test` target (the `app`/`dev`
+      targets only clean `macos/build`). Manual fix today: `xattr -cr` that DerivedData copy.
+- [ ] **Richer OSC-133 status signals** (non-agent fallback for `Session.status`): `.error` on a
+      non-zero command exit, prompt-mark → `.idle` / running → `.running`.
+- [ ] **Undo grouping for bulk close** (Close Other Tabs / Close Tabs to the Right): today each closed
+      session registers its own undo (one ⌘Z per session). Group them so one undo restores the set.
+- [ ] **Raise the Zig core's `osVersionMin`** (`src/build/Config.zig`) to 26.0.0 on the next full
+      `make build` (cosmetic; the app already gates at 26 via `LSMinimumSystemVersion`).
+- [ ] **Confirm `⌘⇧Z` redo with a physical keypress.** It didn't reproduce through peekaboo's synthetic
+      events; the redo *action* (menu) and the undo keybinds all work, so this is almost certainly a
+      harness artifact — verify once by hand.
 
 ## Vision
 
