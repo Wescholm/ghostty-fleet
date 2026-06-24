@@ -6,7 +6,17 @@ This is a **personal fork of Ghostty** that replaces the native horizontal tab b
 **left vertical sidebar** of rich tab cards (title · directory · git branch · status · attention/
 working dots), built for managing many parallel **Claude Code / agent sessions**. It is the
 `tomreinert/ghostty` sidebar feature rebased onto current upstream `ghostty-org/main`, plus polish
-and enhancements.
+and enhancements. The vision: **cmux-like, but lightweight, high-performance, and stable** — *be*
+Ghostty (minimally patched), not a new app on libghostty.
+
+> **⚠️ In flight — read `SIDEBAR-REARCHITECTURE.md`.** The fork is migrating off native `NSWindow`
+> tabbing onto **in-app "sessions"**: one window/`TerminalController` owns N `Session`s (each a
+> `SplitTree`), the sidebar switches the *active* one (mount swap + per-session occlusion), and native
+> window tabbing is **disabled by default** (`FleetDisableNativeTabs`, so Cmd+T makes an in-app
+> session, not a native tab/window — this kills the macOS-26 tab-bar bug class). **Done & verified:**
+> macOS 26+ baseline, the `Session` model + controller API, and Step 5 (sidebar ← `controller.sessions`).
+> **Still in progress:** IPC-over-sessions (so `ghosttyctl` reaches background sessions), per-session
+> bell/status, undo, and restoration. Some notes below pre-date this and are flagged.
 
 > Branches: **`dev`** = the working branch (pushed to the fork; the GitHub **default** branch) ·
 > **`main`** = pristine mirror of upstream · `sidebar` = the minimal rebased base (local checkpoint).
@@ -119,9 +129,15 @@ Don't assume a tool/skill/agent applies; this table is the source of truth. Veri
 
 ## The fork feature — where things live (under `macos/Sources/Features/Terminal/`)
 
-- **`Sidebar/SidebarTabManager.swift`** — `@MainActor` model: builds `TabItem`s, observes the tab
-  group, attention tracking, **git info** (off-main `git status --porcelain=v2 --branch` → branch
-  incl. worktrees, dirty, ahead/behind), and a **CPU-activity poll** (`proc_pidinfo` on each tab's
+- **`Session.swift`** — `@Observable final class Session` (one `SplitTree` + `status` /
+  `titleOverride` / `tabColor`) and `enum SessionStatus` (idle/running/waiting/done/attention/error).
+  `BaseTerminalController` owns `sessions: [Session]` + `activeSessionIndex` and the session API
+  (`selectSession` / `newSession` / `closeSession` / `moveSession`); `newSession` is what Cmd+T now
+  routes to. (Sidebar re-architecture — `SIDEBAR-REARCHITECTURE.md`.)
+- **`Sidebar/SidebarTabManager.swift`** — `@MainActor` model: builds `TabItem`s from
+  **`controller.sessions`** (one card per in-app session — was the native tab group), observing the
+  controller; attention tracking, **git info** (off-main `git status --porcelain=v2 --branch` → branch
+  incl. worktrees, dirty, ahead/behind), and a **CPU-activity poll** (`proc_pidinfo` on each session's
   `foregroundPID` → "working" dot, with a grace period to avoid flicker).
 - **`Sidebar/SidebarView.swift`** — the SwiftUI sidebar (cards, drag-reorder, context menu, dot/
   branch rendering). Has a `#Preview` ("Sidebar — states") + a `previewTabs:` mock init for rendering.
@@ -155,7 +171,10 @@ on-disk bundle stays `Ghostty.app` (PRODUCT_NAME unchanged).
   **hosts the running Claude Code session** — killing it ends the session. Always scope to the fork's
   **absolute** path (`…/ghostty-sidebar/macos/build/Debug/Ghostty.app/Contents/MacOS/ghostty`), as the
   Makefile's `quit`/`dev`/`prune-apps` do.
-- **macOS 26 "Tahoe" titlebar tabs aren't suppressed.** The sidebar hides the *old* `NSTabBar`
+- **macOS 26 "Tahoe" titlebar tabs aren't suppressed** *(now moot by default — only bites if you
+  re-enable native tabbing).* Since `FleetDisableNativeTabs` defaults **on**, no `NSWindowTabGroup`
+  ever forms (Cmd+T makes an in-app session), so the tab strip below never renders. The rest applies
+  only if you set `FleetDisableNativeTabs=false`: the sidebar hides the *old* `NSTabBar`
   accessory, but `macos-titlebar-style = tabs` on macOS 26 renders tabs as an `NSToolbar`
   (`TitlebarTabsTahoeTerminalWindow`) the fork doesn't catch → a horizontal bar appears above the
   sidebar. Default `transparent` shows only the normal titlebar (no tab row with ≤1 tab). For a clean
@@ -166,6 +185,14 @@ on-disk bundle stays `Ghostty.app` (PRODUCT_NAME unchanged).
   `TerminalController.sidebarTopInset`.
 - **Trust the build, not SourceKit.** Live SourceKit diagnostics for this multi-file module are
   unreliable (false "cannot find type X", "No such module 'Sparkle'"). Confirm with a real build.
+- **macOS 26 is the baseline — deployment target is 26.0** (all three app configs in `project.pbxproj`;
+  bumped from 13.0). This is what lets the fork use `@Observable` / Liquid Glass / macOS-26 AppKit with
+  **no `if #available` guards** — write 26-only code freely in the Swift app. Two consequences when
+  rebasing or touching App Intents: (1) the `<26`-obsoleted `AppIntent.openAppWhenRun` was removed from
+  `NewTerminalIntent` (use `supportedModes` if you need that behavior) — re-adding it won't compile;
+  (2) the Zig core's `osVersionMin` (`src/build/Config.zig`) is still 13.0.0, which is harmless (the
+  app gates at 26 via `LSMinimumSystemVersion`), but raise it to 26.0.0 for consistency the next time a
+  full `make build` runs.
 - **A background-launched app makes no window.** Launching `Ghostty.app` from a detached script won't
   create a terminal window/shell; launch it interactively (`open`) in a real GUI session.
 - **Visual UI checks via the Xcode MCP bridge** (Xcode 26.3+): with the project open in Xcode,

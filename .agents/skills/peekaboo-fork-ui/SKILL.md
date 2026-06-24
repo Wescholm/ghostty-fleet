@@ -59,6 +59,12 @@ MCP tool. If a long sidebar (this fork is built for *many* parallel sessions) ge
 the AX traversal limits: `--max-elements` / `--max-depth` / `--max-children` (or set
 `PEEKABOO_AX_MAX_ELEMENTS` / `PEEKABOO_AX_MAX_DEPTH` / `PEEKABOO_AX_MAX_CHILDREN`).
 
+**`inspect_ui` also reads the terminal's *content*** — the focused surface's AX value carries the
+on-screen text (prompt, command output). That's the reliable way to confirm *which session is
+active* after a switch: echo a unique marker into a session (e.g. `echo SESSION-A`), switch away and
+back, and assert the marker is present in the AX value — no screenshot, no flaky pixel diff. This is
+how the in-app-session switch + keep-alive was verified end-to-end.
+
 **Capture pixels (when you actually need an image):**
 ```bash
 peekaboo list windows --app PID:$PID --include-details ids,bounds   # find the window id
@@ -73,6 +79,12 @@ peekaboo perform-action --on <id> --action AXPress   # AXShowMenu opens a card's
 ```
 `perform-action` invokes the accessibility action directly, so it works even when the window is
 off-screen or unfocused — handy for exercising the sidebar (select a tab, open the context menu).
+
+**Prefer element-id clicks (`--on <id>`) over coordinate clicks.** If you must click by point,
+peekaboo's `click` coordinates are **window-relative**, not screen-global — a card click computed
+against screen geometry will miss (this bit the Step 5 verification: a coord meant for the first card
+landed outside its tappable area). Pass `--global-coords` to interpret the point as screen
+coordinates, or just click by element id and sidestep the whole class of error.
 
 **Read / click the menu bar:**
 ```bash

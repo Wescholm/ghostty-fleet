@@ -1,6 +1,8 @@
 # Sidebar re-architecture — in-app sessions
 
-> Status: **decided, Step 0 landed.** This is the architecture direction for the sidebar fork.
+> Status: **Steps 0–5 core landed & verified** (in-app sessions are the live default; native window
+> tabbing is off by default). Next: G1 IPC-over-sessions, G2 per-session bell/status, then
+> restoration/undo. This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
 >
@@ -158,16 +160,21 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
   surfaces, mount-then-focus. Hardened per adversarial review: rebinds the title listener via
   `focusedSurfaceDidChange(to:)`, resigns the outgoing first responder via `moveFocus(to:from:)`,
   re-syncs focus after the async settles, and re-applies the color scheme to the newly mounted surfaces.
-- **Step 4 (partial — `newSession` done):** `newSession(baseConfig:)` creates a fresh surface + Session
-  and switches to it. Remaining for Step 5+: route Cmd+T (and Cmd+N) to `newSession`, and implement
-  close/goto/move as `[Session]` array ops.
-- **Step 5:** rewrite `SidebarTabManager` to read `controller.sessions` (delete the `tabbedWindows` /
-  `refreshAllSidebars` machinery); wire sidebar selection → `selectSession`, Cmd+T/Cmd+N → `newSession`;
-  flip `FleetDisableNativeTabs` on by default; add the `Session.status` model. **Review-mandated wiring
-  (else multi-session breaks):** drive per-session **bell/status from each `Session`'s own surfaces**,
-  not the controller-level mounted-tree publisher (which only sees the active tree — G2); and the
-  **close path must switch to a sibling *before* the active tree empties** (TerminalController closes the
-  window on an empty mounted tree — E1).
+- **Step 4 (done):** `newSession(baseConfig:)` creates a fresh surface + Session and switches to it;
+  `closeSession(at:)` (switches to a sibling *before* the active tree empties — E1 guard; closes the
+  window when the last session goes) and `moveSession(from:to:)` round out the `[Session]` array ops.
+  Cmd+T (and Cmd+N) now route to `newSession` when the flag is on.
+- **Step 5 (core done & verified):** `SidebarTabManager` was rewritten to build its cards from
+  `controller.sessions` (the `tabbedWindows` / `refreshAllSidebars` / `window: NSWindow` machinery is
+  gone; `TabItem.id` is now the `Session`'s `UUID`); it observes the controller via
+  `objectWillChange`, and sidebar selection → `selectSession`, close → `closeSession`, drag-reorder →
+  `moveSession`. `FleetDisableNativeTabs` is **flipped on by default**. The `Session.status` model
+  exists. **Verified e2e** (peekaboo-fork-ui): Cmd+T makes an in-app session, switching both
+  directions works, the off-screen session stays live (keep-alive), and no native tab bar / no crash.
+  **Still pending in Step 5's scope:** render `Session.status` on the cards, and the two
+  review-mandated wirings — per-session **bell/status from each `Session`'s own surfaces** (not the
+  controller-level mounted-tree publisher, which only sees the active tree — G2), and IPC over
+  sessions (G1, see Step 6).
 - **Step 6 (BLOCKER, land with Step 5):** migrate `GhosttyIPCServer.surfaceForId` /
   `controllerForSurfaceId` to iterate `controller.sessions[].surfaceTree`, not just the mounted
   `surfaceTree` — otherwise `ghosttyctl set-status/focus/rename/notify` can't reach **background**
@@ -211,23 +218,21 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
    All Windows" are moot, and "Show All Tabs" is replaced by the sidebar itself (which already has
    drag-reorder). Remove/disable their menu items; nothing to reimplement.
 
-## Step 0 — how to run the validation
+## The `FleetDisableNativeTabs` flag (now default-on)
 
-Off by default (no behavior change). To validate the thesis:
+The flag is **on by default** (`UserDefaults.standard.object(forKey:) as? Bool ?? true`), so the
+in-app-sessions path is what ships: no `NSWindowTabGroup` can form, the macOS-26 `NSToolbar` tab strip
+never appears, the suppression code path is dead, and Cmd+T/Cmd+N create an in-app session.
+
+To **fall back to native window tabbing** (e.g. to reproduce the old tab-bar behavior) set it false:
 
 ```sh
-# persistent toggle
-defaults write com.wescholm.ghostty-fleet FleetDisableNativeTabs -bool YES
-open macos/build/Debug/Ghostty.app
-# or, one-off via launch arg (NSUserDefaults argument domain)
-open macos/build/Debug/Ghostty.app --args -FleetDisableNativeTabs YES
+defaults write com.wescholm.ghostty-fleet FleetDisableNativeTabs -bool NO
+# or one-off via launch arg (NSUserDefaults argument domain):
+open macos/build/Debug/Ghostty.app --args -FleetDisableNativeTabs NO
 ```
-
-With the flag on, no `NSWindowTabGroup` can form, so the macOS-26 `NSToolbar` tab strip never appears and the
-suppression code path is dead. (Interim: Cmd+T opens a new window rather than an in-app session — that lands
-in Step 4.)
 
 The flag gates two code paths: `NSWindow.allowsAutomaticWindowTabbing = false` in
 `AppDelegate.applicationWillFinishLaunching` (blocks *automatic* tabbing) and an early `return false` in
 `NSWindow.addTabbedWindowSafely` (blocks Ghostty's *explicit* tabbing — the load-bearing one; automatic-only
-was insufficient). Both read `UserDefaults.standard.bool(forKey: "FleetDisableNativeTabs")`.
+was insufficient — this catch was the key "verify, don't assume" moment of Step 0).
