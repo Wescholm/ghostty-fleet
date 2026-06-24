@@ -13,7 +13,8 @@ and enhancements.
 > Remotes: **`origin`** = the fork (`Wescholm/ghostty-fleet`) · **`upstream`** = `ghostty-org/ghostty`.
 >
 > **Deeper docs in the repo:** `SIDEBAR-FORK-REPORT.md` (rebase + toolchain), `ENHANCEMENTS.md`
-> (the sidebar features + dot legend), `VALIDATION.md` (how the UI was verified).
+> (the sidebar features + dot legend), `VALIDATION.md` (how the UI was verified),
+> `SIDEBAR-REARCHITECTURE.md` (the in-app-sessions direction + migration plan; Step 0 landed).
 
 ---
 
