@@ -48,6 +48,15 @@ extension NSWindow {
         _ child: NSWindow,
         ordered: NSWindow.OrderingMode
     ) -> Bool {
+        // Step 0 of the sidebar re-architecture (SIDEBAR-REARCHITECTURE.md): when native tabbing is
+        // disabled, never form a tab group. NSWindow.allowsAutomaticWindowTabbing only blocks
+        // *automatic* tabs, but Ghostty tabs *explicitly* through here — so this is the real
+        // chokepoint. Returning false makes the caller present the window standalone, so no
+        // NSWindowTabGroup forms and the macOS-26 NSToolbar tab strip never appears.
+        if UserDefaults.standard.bool(forKey: "FleetDisableNativeTabs") {
+            return false
+        }
+
         var error: NSError?
         let success = GhosttyAddTabbedWindowSafely(self, child, ordered.rawValue, &error)
         if let error {

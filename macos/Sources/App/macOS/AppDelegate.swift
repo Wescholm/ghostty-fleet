@@ -198,6 +198,17 @@ class AppDelegate: NSObject,
             // Manual autofill via the `Edit => AutoFill` menu item still work as expected.
             "NSAutoFillHeuristicControllerEnabled": false,
         ])
+
+        // Step 0 of the sidebar re-architecture (see SIDEBAR-REARCHITECTURE.md): optionally turn off
+        // native NSWindow tabbing app-wide. With no NSWindowTabGroup, macOS never shows its window
+        // tab bar (including the macOS-26 NSToolbar tab strip), so the entire tab-bar-suppression
+        // code path goes dead — the cheap validation that moving to in-app sessions removes the
+        // tab-bar bug class. Off by default; enable with:
+        //   defaults write com.wescholm.ghostty-fleet FleetDisableNativeTabs -bool YES
+        // or a launch arg:  open … --args -FleetDisableNativeTabs YES
+        if UserDefaults.standard.bool(forKey: "FleetDisableNativeTabs") {
+            NSWindow.allowsAutomaticWindowTabbing = false
+        }
     }
 
     func applicationDidFinishLaunching(_ notification: Notification) {
