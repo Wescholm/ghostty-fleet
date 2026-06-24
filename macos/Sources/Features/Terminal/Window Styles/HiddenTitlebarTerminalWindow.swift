@@ -90,10 +90,11 @@ class HiddenTitlebarTerminalWindow: TerminalWindow {
         DispatchQueue.main.async { [weak self] in self?.repositionTrafficLights() }
     }
 
-    /// Floating-traffic-light inset from the window's top-left corner (matches the comfortable spacing of
-    /// system apps like Messages, rather than the default corner-hugging position the full-size content
-    /// view produces).
-    private static let trafficLightInset = CGPoint(x: 19, y: 16)
+    /// Floating-traffic-light inset from the window's top-left corner. Tuned so the rendered button frame
+    /// lands at an 18×18pt inset — matching macOS system apps (measured from Messages: close button at an
+    /// 18,18 offset from its window corner) — rather than the default corner-hugging position the full-size
+    /// content view produces. (These target values render ~1pt smaller in practice, hence 19.)
+    private static let trafficLightInset = CGPoint(x: 19, y: 19)
 
     /// Re-positions the close/miniaturize/zoom buttons as a group, preserving their spacing, with a
     /// comfortable top-left inset. Used because the hidden titlebar's full-size content view otherwise
