@@ -137,6 +137,13 @@ gray ● dirty (uncommitted) · `↑n ↓m` ahead/behind upstream. Orange beats 
 icon differs from a release Ghostty everywhere (Dock/Finder/Spotlight/⌘-Tab). Swap `.blueprint` to
 any `AppIcon` case to taste. Applied on launch via Ghostty's `AppIconUpdater` (`NSWorkspace.setIcon`).
 
+**Distinct name:** the Debug app's `CFBundleDisplayName` is **`Ghostty Fleet`** (Debug config in
+`project.pbxproj`), so Dock / Finder / ⌘-Tab / app-switcher read "Ghostty Fleet". The **menu-bar
+title and menu items still read "Ghostty"** — those come from `CFBundleName` (= `$(PRODUCT_NAME)`;
+`INFOPLIST_KEY_CFBundleName` is *not* honored) and hardcoded strings in `MainMenu.xib` /
+`AppDelegate.swift`, so renaming them needs upstream-file edits and is intentionally left alone. The
+on-disk bundle stays `Ghostty.app` (PRODUCT_NAME unchanged).
+
 ---
 
 ## Gotchas & hard rules
