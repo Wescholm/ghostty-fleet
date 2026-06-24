@@ -23,18 +23,23 @@ not core function. A full audit ran 2026-06-24 (**`AUDIT-REPORT.md`**); its clos
 (H3/H4/H5), the `FleetDisableNativeTabs` chokepoint default (M3), and the shared new-tab routing (M4) are
 **fixed** — remaining audit items are folded into "Audit follow-ups" below. Roughly in priority order:
 
-- [ ] **Step 9 — audit & remove dead native-tab code.** With `FleetDisableNativeTabs` default-on, the
-      native-tab paths are unreachable but still present. Remove or gate them:
-  - `TerminalController.closeTabImmediately` / `closeOtherTabsImmediately` / `closeTabsOnTheRightImmediately`
-    and their `UndoState`/`tabGroup`-based undo (superseded by `closeSession` + Step 7 undo).
-  - The native New-Tab / New-Window undo registration (the `ghostty.newTab` / `addTabbedWindowSafely`
-    paths) — `newTab` already routes to `newSession`.
-  - ~~route the `closeTab`/`closeOtherTabs`/`closeTabsOnTheRight` IBActions to `closeSession`~~ —
-    **done** (audit H4/L2). What remains is *deleting* the now-unused native-tab `*Immediately` variants
-    + their `tabGroup`/`UndoState` undo, once the flag is permanent.
-  - AppleScript (`ScriptTab` / `ScriptWindow`), `Fullscreen.swift`, `TabTitleEditor`,
-    `TabGroupCloseCoordinator` — audit for native-tab assumptions. (`NSWindow+Extension` chokepoint is
-    done — M3.)
+- [x] **Step 9 — audit native-tab code (done; decision: keep the flag, delete nothing).** A verified
+      multi-agent audit (2026-06-24) classified every native-tab reference by origin × reachability. Key
+      finding: the native-tab bodies (`closeTab`/`closeOtherTabs`/`closeTabsOnTheRight` + their
+      `*Immediately` helpers and `tabGroup`/`UndoState` undo; the static `newTab` body + New-Tab undo;
+      `onGotoTab`/`onMoveTab` native paths; `addTabbedWindowSafely`; `TabGroupCloseCoordinator`;
+      `TabTitleEditor`; the window-style tab plumbing) are **upstream-verbatim** — the fork's footprint is
+      only thin *prepended* flag-guards. Deleting them would *grow* the diff from upstream (against the
+      stability pillar) and break the documented `FleetDisableNativeTabs=false` fallback, and they
+      self-neutralise with the flag on (no `NSWindowTabGroup` ever forms → every branch guard-returns).
+      **Decision: keep the flag as the fallback, delete nothing.** The audit's two flag-on defect
+      candidates: `move_tab` (⌃⇧PageUp/Down) was a real no-op for sessions — **fixed** (emitter +
+      `onMoveTab` session branch, parity with goto_tab/M5; commit `c696559c0`); the `validateMenuItem`
+      "Close Tabs to the Right" force-disable was a **false positive** (that AppKit item only lives in the
+      native tab context menu — `isTabContextMenu` — which never forms with the flag on, so it is never
+      shown). The aggressive deletion (remove the flag + delete the upstream native-tab code across ~8
+      files, rewriting upstream callers) is the `planFlagPermanent` path — deferred unless upstream itself
+      drops native tabbing. See `AUDIT-REPORT.md` for the full dual-path plan.
 - [ ] **Step 10 — drop the moot native-tab menu items** (Show All Tabs, Merge All Windows) — Scope
       decision 3; the sidebar replaces them.
 - [ ] **Step 11 — full UI pass + `make test`.** Exercise switch/IME, off-screen keep-alive, restoration
@@ -53,9 +58,11 @@ not core function. A full audit ran 2026-06-24 (**`AUDIT-REPORT.md`**); its clos
       session registers its own undo (one ⌘Z per session). Group them so one undo restores the set.
 - [ ] **Raise the Zig core's `osVersionMin`** (`src/build/Config.zig`) to 26.0.0 on the next full
       `make build` (cosmetic; the app already gates at 26 via `LSMinimumSystemVersion`).
-- [ ] **Confirm `⌘⇧Z` redo with a physical keypress.** It didn't reproduce through peekaboo's synthetic
-      events; the redo *action* (menu) and the undo keybinds all work, so this is almost certainly a
-      harness artifact — verify once by hand.
+- [ ] **Confirm two keybinds with a physical keypress.** `⌘⇧Z` redo and `⌃⇧PageUp/Down` `move_tab`
+      (session reorder, Step 9) couldn't be driven through peekaboo / AppleScript synthetic events. The
+      redo *action* (menu) works, and `Cmd+T` fires fine via the same synthetic pipeline, so this is a
+      special-key delivery (harness) artifact, not an app bug. Both are correct by construction (`move_tab`
+      mirrors goto_tab/M5 and uses the unit-tested `moveSession`); verify each once by hand.
 
 ### Audit follow-ups (2026-06-24 — see `AUDIT-REPORT.md` for full detail)
 
