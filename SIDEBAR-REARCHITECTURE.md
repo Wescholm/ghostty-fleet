@@ -1,8 +1,9 @@
 # Sidebar re-architecture — in-app sessions
 
 > Status: **Steps 0–6 landed & verified** (in-app sessions are the live default; native window
-> tabbing is off by default; IPC-over-sessions / G1 reaches background sessions). Next: G2 per-session
-> bell/status, then restoration/undo. This is the architecture direction for the sidebar fork.
+> tabbing is off by default; IPC-over-sessions / G1 reaches background sessions; per-session bell
+> attribution / G2 done). Next: render `Session.status` on the cards (+ Claude Code hooks), then
+> restoration/undo. This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
 >
@@ -171,10 +172,15 @@ over cmux: deep, agent-aware, per-session state because the fork owns both the c
   `moveSession`. `FleetDisableNativeTabs` is **flipped on by default**. The `Session.status` model
   exists. **Verified e2e** (peekaboo-fork-ui): Cmd+T makes an in-app session, switching both
   directions works, the off-screen session stays live (keep-alive), and no native tab bar / no crash.
-  **Still pending in Step 5's scope:** render `Session.status` on the cards, and the two
-  review-mandated wirings — per-session **bell/status from each `Session`'s own surfaces** (not the
-  controller-level mounted-tree publisher, which only sees the active tree — G2). IPC over sessions
-  (G1) is now **done** — see Step 6.
+  **Still pending in Step 5's scope:** render `Session.status` on the cards. The two review-mandated
+  wirings are now **done**: IPC-over-sessions (G1, see Step 6) and per-session **bell attribution**
+  (G2) — the sidebar drives attention from the per-surface `.ghosttyBellDidRing` notification (which
+  carries the originating surface) instead of the controller-level `.terminalWindowBellDidChange`
+  aggregate, whose `surfaceValuesPublisher` only watches the *mounted* tree and so never saw a
+  background session's bell. Verified e2e: a delayed BEL armed in a session that's then backgrounded
+  rings while occluded and lights the orange dot on **its** card (not the active one), and the dot
+  clears when the session is visited. Gated on `bell-features` containing `attention` (unchanged).
+  Desktop notifications + IPC notify already carried the surface, so they were per-session correct.
 - **Step 6 / G1 (done & verified):** `GhosttyIPCServer` resolution now searches every session's tree,
   not just the mounted one, so `ghosttyctl` reaches **background** sessions. Concretely: `resolve(surfaceId:)`
   / `resolveTarget(params:)` iterate `controller.sessions[].surfaceTree`; `tab.list` emits one entry **per
