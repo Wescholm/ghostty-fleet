@@ -1,5 +1,5 @@
 import Foundation
-import Combine
+import Observation
 
 /// The lifecycle / agent status of a ``Session``, surfaced as the sidebar card indicator.
 ///
@@ -39,27 +39,28 @@ enum SessionStatus: String, Codable, CaseIterable {
 /// Steps 2+), so defining it changes no behavior.
 ///
 /// It is a reference type so a session has a stable identity shared by the controller, the sidebar,
-/// and the live-surface store. It uses `ObservableObject` / `@Published` (not the Observation
-/// framework's `@Observable`) to match the existing controller/sidebar paradigm and the app's
-/// macOS 13 deployment floor (`@Observable` requires macOS 14+).
-final class Session: ObservableObject, Identifiable {
+/// and the live-surface store. It uses the Observation framework's `@Observable` (the app's baseline
+/// is now macOS 26): AppKit automatically observes the property accesses and invalidates/redraws the
+/// views that read them, which is exactly what the upcoming surface-swap content host wants.
+@Observable
+final class Session: Identifiable {
     /// Stable identity for sidebar selection and the live-surface store. Survives reorder/rename and
     /// outlives any individual `SurfaceView`.
     let id: UUID
 
     /// This session's split layout (a single terminal, or splits). This is the unit the content host
     /// will mount when the session is active and keep alive (occluded) when it is not.
-    @Published var surfaceTree: SplitTree<Ghostty.SurfaceView>
+    var surfaceTree: SplitTree<Ghostty.SurfaceView>
 
     /// Lifecycle / agent status surfaced as the sidebar card indicator. See ``SessionStatus``.
-    @Published var status: SessionStatus
+    var status: SessionStatus
 
     /// User-set title override (from the rename action or `ghosttyctl rename`). When `nil` the card
     /// falls back to the live terminal title.
-    @Published var titleOverride: String?
+    var titleOverride: String?
 
     /// Optional accent color (sidebar "Tab Color" context menu / IPC).
-    @Published var tabColor: TerminalTabColor?
+    var tabColor: TerminalTabColor?
 
     init(
         id: UUID = UUID(),

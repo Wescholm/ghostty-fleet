@@ -3,6 +3,13 @@
 > Status: **decided, Step 0 landed.** This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
+>
+> **Baseline: macOS 26+.** The macOS app's deployment target was raised from 13.0 to 26.0 (all three
+> app configs), which unlocks the Observation framework's `@Observable` and Liquid Glass / macOS-26
+> APIs without availability guards. Consequence: the obsoleted `openAppWhenRun` (<26) fallback was
+> removed from `NewTerminalIntent` (the only App Intent that still carried it). The Zig core's
+> `osVersionMin` (`src/build/Config.zig`) is still 13.0.0 — harmless (the app gates at 26 via
+> `LSMinimumSystemVersion`); raise it for consistency whenever a full `make build` is next run.
 
 ## Vision
 

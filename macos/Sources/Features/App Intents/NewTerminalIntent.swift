@@ -50,8 +50,8 @@ struct NewTerminalIntent: AppIntent {
     static var supportedModes: IntentModes = .background
 #endif
 
-    @available(macOS, obsoleted: 26.0, message: "Replaced by supportedModes")
-    static var openAppWhenRun = false
+    // Fork: the obsoleted `openAppWhenRun` <26 fallback is removed because the app's deployment floor
+    // is macOS 26 (see SIDEBAR-REARCHITECTURE.md). `supportedModes` above satisfies AppIntent on 26+.
 
     @MainActor
     func perform() async throws -> some IntentResult & ReturnsValue<TerminalEntity?> {
