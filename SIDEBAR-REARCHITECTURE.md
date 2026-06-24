@@ -1,9 +1,10 @@
 # Sidebar re-architecture — in-app sessions
 
-> Status: **Steps 0–6 landed & verified** (in-app sessions are the live default; native window
+> Status: **Steps 0–6 + 8 landed & verified** (in-app sessions are the live default; native window
 > tabbing is off by default; IPC-over-sessions / G1 reaches background sessions; per-session bell
-> attribution / G2 done; per-session lifecycle status dot + Claude Code hooks done). Next: undo/redo
-> (Step 7) and multi-session restoration (Step 8). This is the architecture direction for the sidebar fork.
+> attribution / G2 done; per-session lifecycle status dot + Claude Code hooks done; multi-session
+> restoration / Step 8 done — quit→relaunch restores all sessions in one window). Next: undo/redo
+> (Step 7). This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
 >
@@ -212,9 +213,21 @@ uses the dedicated `tab.set-state` verb / `Session.status`, **not** the key/valu
   is the inverse: it updates the titlebar but not the card). Unify the title layer so the window chrome
   tracks `activeSession.titleOverride` — folds together with the `promptRenameTab` per-session-prompt TODO.
 - **Step 7:** reimplement undo/redo in terms of `(controller, sessionIndex)` (net-new code).
-- **Step 8:** new single-window multi-session `TerminalRestorableState` (serialize the array of
-  `SplitTree`s + `activeSessionIndex`); bump the format version and raise `minimumVersion` to **reject
-  pre-rework state once** (one-time reset, no migration — Scope decision 2).
+- **Step 8 (done & verified):** `TerminalRestorableState.InternalState` now carries an optional
+  `sessions: [SessionState]` (each = `SplitTree` + `status` + `titleOverride` + `tabColor`) +
+  `activeSessionIndex`; the format version is bumped 7→**8**. On encode the top-level `surfaceTree` is
+  left empty (every tree, incl. the active one, lives in `sessions`) so the active session's surfaces
+  aren't decoded twice. `restoreWindow` rebuilds all sessions into **one** window via the new
+  `BaseTerminalController.restoreSessions(_:activeIndex:)` (mounts the active session, occludes the
+  rest); a pre-v8 archive (no `sessions` key) falls back to the unchanged single-tree path.
+  **Deviation from Scope decision 2 (deliberate, strictly better):** `minimumVersion` is kept at **5**,
+  *not* raised — so no forced one-time reset. Pre-v8 archives still restore (a single window → one
+  session) via the legacy path, which is unchanged code (no migration risk); only the new v8 format
+  carries multiple sessions. This avoids losing users' windows on upgrade. Verified e2e: 3 renamed
+  sessions with distinct status dots survive quit→relaunch in one window (titles, status, active
+  session, pwd all restored; scrollback is not — Ghostty restores structure, not content). Also fixed:
+  the `GhosttyTests` target's deployment target was still 15.5 (left behind by the 26.0 app bump),
+  which had made the whole test suite uncompilable — now 26.0, and `make test` runs again.
 - **Step 9:** audit the long tail of native-tab references (AppDelegate hide-others / Show-All-Tabs,
   AppleScript, `Fullscreen.swift`, `TabTitleEditor`, `TabGroupCloseCoordinator`, `NSWindow+Extension`).
 - **Step 10:** remove/disable the dropped native-tab menu items (Show All Tabs, Merge All Windows,
@@ -245,6 +258,10 @@ uses the dedicated `tab.set-state` verb / `Session.status`, **not** the key/valu
    old model doesn't map onto single-window/N-sessions, and migration code is one-time cost plus
    long-tail risk. Bump the restorable `minimumVersion` to reject pre-rework state once; the new
    single-window/N-session format restores reliably afterward.
+   > **Superseded by the Step 8 implementation:** in practice `minimumVersion` was kept at 5, *not*
+   > raised — pre-v8 archives restore cleanly as a single-session window through the **unchanged**
+   > legacy path (no migration code, so no long-tail risk), and only the new v8 format carries N
+   > sessions. This is strictly better than a reset (no window loss on upgrade) at no added risk.
 3. **Drop the native-tab niceties.** Under single-window scope, "move/drag between windows" and "Merge
    All Windows" are moot, and "Show All Tabs" is replaced by the sidebar itself (which already has
    drag-reorder). Remove/disable their menu items; nothing to reimplement.
