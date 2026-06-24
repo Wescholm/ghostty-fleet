@@ -6,7 +6,9 @@ import AppKit
 struct TerminalRestorableTests {
     @Test
     func areYouForgettingToAddMigrationTests() {
-        #expect(TerminalRestorableState.version == 7)
+        // v8 adds the in-app `sessions` array (sidebar fork, Step 8); minimumVersion stays 5 so
+        // pre-v8 archives still restore via the legacy single-tree path.
+        #expect(TerminalRestorableState.version == 8)
         #expect(TerminalRestorableState.minimumVersion == 5)
 
         #expect(QuickTerminalRestorableState.version == 1)
@@ -108,6 +110,49 @@ struct TerminalRestorableTests {
         #expect(v7Generic.titleOverride == "tip")
         #expect(v7Generic.surfaceTree.contains(where: { $0.id.uuidString == "953CE952-D91D-4D36-AC72-9D0F1F6BCE73" }))
         #expect(v7Generic.surfaceTree.contains(where: { $0.id.uuidString == "D3223569-2E01-4BC5-9DB2-DBFC3AFF46D1" }))
+    }
+
+    // v8 adds the in-app `sessions` array. Round-trip a multi-session state through the same secure
+    // archiver the OS uses, and confirm every session's tree + metadata survives.
+    @MainActor
+    @Test func restoreTerminalV8MultiSession() throws {
+        let tree0 = try SplitTreeTests.makeHorizontalSplit()
+        let tree1 = try SplitTreeTests.makeHorizontalSplit()
+
+        let internalState = TerminalRestorableState.InternalState<MockView>(
+            focusedSurface: tree1.1.id.uuidString,
+            surfaceTree: .init(),
+            effectiveFullscreenMode: nil,
+            tabColor: nil,
+            titleOverride: nil,
+            sessions: [
+                .init(surfaceTree: tree0.0, status: .done, titleOverride: "first", tabColor: .green),
+                .init(surfaceTree: tree1.0, status: .running, titleOverride: nil, tabColor: nil),
+            ],
+            activeSessionIndex: 1
+        )
+
+        let data = try archive(CodableBridge(DummyTerminalRestorableState(internalState)), className: "CodableBridge<Terminal>")
+        let decoded = try unarchive(data, className: "CodableBridge<Terminal>", as: CodableBridge<DummyTerminalRestorableState>.self)
+            .value.internalState
+
+        #expect(decoded.activeSessionIndex == 1)
+        #expect(decoded.focusedSurface == tree1.1.id.uuidString)
+        #expect(decoded.surfaceTree.isEmpty)
+        #expect(decoded.sessions?.count == 2)
+
+        let s0 = try #require(decoded.sessions?[0])
+        #expect(s0.status == .done)
+        #expect(s0.titleOverride == "first")
+        #expect(s0.tabColor == .green)
+        #expect(s0.surfaceTree.contains(where: { $0.id == tree0.1.id }))
+        #expect(s0.surfaceTree.contains(where: { $0.id == tree0.2.id }))
+
+        let s1 = try #require(decoded.sessions?[1])
+        #expect(s1.status == .running)
+        #expect(s1.titleOverride == nil)
+        #expect(s1.tabColor == nil)
+        #expect(s1.surfaceTree.contains(where: { $0.id == tree1.1.id }))
     }
 }
 

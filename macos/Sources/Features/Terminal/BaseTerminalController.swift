@@ -419,6 +419,27 @@ class BaseTerminalController: NSWindowController,
         }
     }
 
+    /// Install a restored set of sessions during window restoration (sidebar re-architecture, Step 8).
+    /// Call right after init (the controller starts with a single throwaway session wrapping the active
+    /// tree). Mounts the active session and occludes the rest so background surfaces don't render while
+    /// unmounted. No-op on an empty list.
+    func restoreSessions(_ restored: [Session], activeIndex: Int) {
+        guard !restored.isEmpty else { return }
+        let idx = min(max(0, activeIndex), restored.count - 1)
+        sessions = restored
+        activeSessionIndex = idx
+        surfaceTree = restored[idx].surfaceTree
+
+        // Occlude every non-active session's surfaces (they aren't in the mounted tree). Mirrors the
+        // occlusion `selectSession` applies to an outgoing session.
+        for (i, session) in restored.enumerated() where i != idx {
+            for view in session.surfaceTree {
+                if let surface = view.surface { ghostty_surface_set_occlusion(surface, false) }
+                view.isWindowVisible = false
+            }
+        }
+    }
+
     /// Called when the surfaceTree variable changed.
     ///
     /// Subclasses should call super first.

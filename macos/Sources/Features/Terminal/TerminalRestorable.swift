@@ -58,7 +58,10 @@ extension TerminalRestorable {
 
 /// The state stored for terminal window restoration.
 final class TerminalRestorableState: TerminalRestorable {
-    static var version: Int { 7 }
+    // Version 8 adds the in-app `sessions` array (sidebar re-architecture, Step 8). minimumVersion is
+    // kept at 5: pre-v8 archives have no `sessions` key and restore fine via the legacy single-tree
+    // path (one window → one session), so no forced reset is needed on upgrade.
+    static var version: Int { 8 }
     static var minimumVersion: Int { 5 }
 
     var focusedSurface: String? {
@@ -75,6 +78,13 @@ final class TerminalRestorableState: TerminalRestorable {
     }
     var titleOverride: String? {
         internalState.titleOverride
+    }
+    /// The window's in-app sessions (v8+), or nil for a pre-v8 archive (→ legacy single-tree restore).
+    var sessions: [SessionState<Ghostty.SurfaceView>]? {
+        internalState.sessions
+    }
+    var activeSessionIndex: Int? {
+        internalState.activeSessionIndex
     }
 
     /// Internal State we use to perform unit tests
@@ -155,9 +165,25 @@ class TerminalWindowRestoration: NSObject, NSWindowRestoration {
         // can be found for events from libghostty. This uses the low-level
         // createWindow so that AppKit can place the window wherever it should
         // be.
-        let c = TerminalController.init(
-            appDelegate.ghostty,
-            withSurfaceTree: state.surfaceTree)
+        let c: TerminalController
+        if let sessionStates = state.sessions, !sessionStates.isEmpty {
+            // v8+: restore every in-app session into a single window (sidebar re-architecture, Step 8).
+            let activeIdx = min(max(0, state.activeSessionIndex ?? 0), sessionStates.count - 1)
+            let restored = sessionStates.map { ss in
+                Session(
+                    surfaceTree: ss.surfaceTree,
+                    status: ss.status,
+                    titleOverride: ss.titleOverride,
+                    tabColor: ss.tabColor
+                )
+            }
+            // Build with the active session's tree mounted, then install the full session list.
+            c = TerminalController.init(appDelegate.ghostty, withSurfaceTree: restored[activeIdx].surfaceTree)
+            c.restoreSessions(restored, activeIndex: activeIdx)
+        } else {
+            // Pre-v8 archive: a single window/tree → one session (legacy path, unchanged).
+            c = TerminalController.init(appDelegate.ghostty, withSurfaceTree: state.surfaceTree)
+        }
         guard let window = c.window else {
             completionHandler(nil, TerminalRestoreError.windowDidNotLoad)
             return
