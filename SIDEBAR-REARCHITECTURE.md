@@ -1,10 +1,11 @@
 # Sidebar re-architecture — in-app sessions
 
-> Status: **Steps 0–6 + 8 landed & verified** (in-app sessions are the live default; native window
+> Status: **Steps 0–8 landed & verified** (in-app sessions are the live default; native window
 > tabbing is off by default; IPC-over-sessions / G1 reaches background sessions; per-session bell
 > attribution / G2 done; per-session lifecycle status dot + Claude Code hooks done; multi-session
-> restoration / Step 8 done — quit→relaunch restores all sessions in one window). Next: undo/redo
-> (Step 7). This is the architecture direction for the sidebar fork.
+> restoration / Step 8 — quit→relaunch restores all sessions in one window; undo/redo / Step 7 —
+> closing a session is undoable, process and scrollback intact). Remaining tail: native-tab reference
+> audit (Step 9) and the full UI pass (Step 11). This is the architecture direction for the sidebar fork.
 > Companion docs: `ENHANCEMENTS.md` (today's sidebar features), `SIDEBAR-FORK-REPORT.md` (rebase/toolchain),
 > `VALIDATION.md` (how the UI is verified).
 >
@@ -212,7 +213,23 @@ uses the dedicated `tab.set-state` verb / `Session.status`, **not** the key/valu
   `session.titleOverride`. This is a pre-existing title-layer split (the Cmd+Shift+I `promptTabTitle` dialog
   is the inverse: it updates the titlebar but not the card). Unify the title layer so the window chrome
   tracks `activeSession.titleOverride` — folds together with the `promptRenameTab` per-session-prompt TODO.
-- **Step 7:** reimplement undo/redo in terms of `(controller, sessionIndex)` (net-new code).
+- **Step 7 (done & verified):** closing an in-app session is now undoable. `closeSession(at:)`
+  snapshots the closing session (tree + status + title + color + index + wasActive + focused surface)
+  and registers an undo on the shared `ExpiringUndoManager`; the undo closure *retains the surfaceTree*,
+  so the session's surfaces stay alive (occluded) until the undo is invoked or expires
+  (`undo-timeout`, default 5s) — making a close fully reversible **with its running process and
+  scrollback**, after which the surfaces are released and the ptys die. `restoreClosedSession` re-inserts
+  the session at its index (re-selecting + refocusing if it was active) and registers the matching redo;
+  redo re-closes (re-registering undo), so the chain holds across cycles. Because close is reversible,
+  no running-process confirmation prompt is needed. Also routed `TerminalController.closeSurface`: when
+  the active session is the root being closed and there is >1 session, it closes **that session** (not
+  the window) — so Cmd+W (close_surface) now closes the active tab, undoably; the last session still
+  closes the window. Verified e2e: Cmd+W close → undo restores the live session (a unique echo marker
+  came back) → redo re-closes → undo again, marker still live; menu Undo/Redo + Cmd+Z work and
+  `canUndo`/`canRedo` are correct. (Note: the Undo/Redo *menu items* have no key equivalent; Cmd+Z /
+  Cmd+Shift+T undo and Cmd+Shift+Z redo come from libghostty's default keybinds. The Cmd+Shift+Z redo
+  keybind didn't reproduce through the test harness's synthetic events — undo keybinds and the redo
+  *action* itself all work — likely a synthetic-event artifact, not app logic.)
 - **Step 8 (done & verified):** `TerminalRestorableState.InternalState` now carries an optional
   `sessions: [SessionState]` (each = `SplitTree` + `status` + `titleOverride` + `tabColor`) +
   `activeSessionIndex`; the format version is bumped 7→**8**. On encode the top-level `surfaceTree` is
