@@ -1129,7 +1129,7 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
 
         // Initialize sidebar tab manager
         let tabManager = SidebarTabManager(
-            window: window,
+            controller: self,
             bellTriggersAttention: ghostty.config.bellFeatures.contains(.attention)
         )
         self.sidebarTabManager = tabManager
@@ -1421,6 +1421,14 @@ class TerminalController: BaseTerminalController, TabGroupCloseCoordinator.Contr
     }
 
     @IBAction func newTab(_ sender: Any?) {
+        // Sidebar re-architecture (Step 5): when native NSWindow tabbing is disabled (the default),
+        // Cmd+T / the "+" adds an in-app session in this window instead of a new tabbed window.
+        let disableNativeTabs = UserDefaults.standard.object(forKey: "FleetDisableNativeTabs") as? Bool ?? true
+        if disableNativeTabs {
+            newSession()
+            return
+        }
+
         guard let surface = focusedSurface?.surface else { return }
         ghostty.newTab(surface: surface)
     }

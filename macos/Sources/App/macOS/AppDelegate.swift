@@ -206,7 +206,7 @@ class AppDelegate: NSObject,
         // tab-bar bug class. Off by default; enable with:
         //   defaults write com.wescholm.ghostty-fleet FleetDisableNativeTabs -bool YES
         // or a launch arg:  open … --args -FleetDisableNativeTabs YES
-        if UserDefaults.standard.bool(forKey: "FleetDisableNativeTabs") {
+        if UserDefaults.standard.object(forKey: "FleetDisableNativeTabs") as? Bool ?? true {
             NSWindow.allowsAutomaticWindowTabbing = false
         }
     }

@@ -71,8 +71,8 @@ struct SidebarView: View {
 
     @AppStorage("SidebarShowCardBorder") private var showCardBorder: Bool = true
     @AppStorage("SidebarDimInactiveColors") private var dimInactiveColors: Bool = false
-    @State private var draggingTabID: ObjectIdentifier?
-    @State private var dropTargetTabID: ObjectIdentifier?
+    @State private var draggingTabID: UUID?
+    @State private var dropTargetTabID: UUID?
 
     var body: some View {
         ScrollView {
@@ -162,8 +162,8 @@ private struct TabDropDelegate: DropDelegate {
     let tabManager: SidebarTabManager
     let currentTab: SidebarTabManager.TabItem
     let currentIndex: Int
-    @Binding var draggingTabID: ObjectIdentifier?
-    @Binding var dropTargetTabID: ObjectIdentifier?
+    @Binding var draggingTabID: UUID?
+    @Binding var dropTargetTabID: UUID?
 
     func dropEntered(info: DropInfo) {
         dropTargetTabID = currentTab.id
@@ -359,9 +359,8 @@ private func previewTab(
     color: TerminalTabColor = .none,
     status: [TabMetadataStore.StatusEntry] = []
 ) -> SidebarTabManager.TabItem {
-    let w = NSWindow()
     return SidebarTabManager.TabItem(
-        id: ObjectIdentifier(w),
+        id: UUID(),
         title: title,
         pwd: "/Users/me/\(dir)",
         gitBranch: branch,
@@ -373,8 +372,7 @@ private func previewTab(
         isSelected: selected,
         needsAttention: attention,
         isWorking: working,
-        tabColor: color,
-        window: w
+        tabColor: color
     )
 }
 

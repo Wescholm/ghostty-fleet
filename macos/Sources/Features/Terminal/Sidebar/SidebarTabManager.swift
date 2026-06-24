@@ -2,11 +2,17 @@ import Cocoa
 import Combine
 import Darwin
 
-/// Observes the tab group of a window and publishes tab metadata for the sidebar.
+/// Observes a controller's in-app ``Session``s and publishes tab metadata for the sidebar.
+///
+/// Sidebar re-architecture (Step 5): the data source is now the controller's `sessions` (one split
+/// tree each), not native `NSWindow` tabs. The git-polling, CPU-activity, and `TabMetadataStore`
+/// status machinery is unchanged — only the source of `TabItem`s and the tab actions moved from
+/// windows → sessions.
 @MainActor
 class SidebarTabManager: ObservableObject {
     struct TabItem: Identifiable, Equatable {
-        let id: ObjectIdentifier
+        /// The owning ``Session``'s stable id. Survives reorder/rename and surface swaps.
+        let id: UUID
         let title: String
         let pwd: String?
         let gitBranch: String?
@@ -19,7 +25,6 @@ class SidebarTabManager: ObservableObject {
         let needsAttention: Bool
         let isWorking: Bool
         let tabColor: TerminalTabColor
-        let window: NSWindow
 
         /// The last path component of the pwd, for compact display.
         var directoryName: String? {
@@ -47,15 +52,18 @@ class SidebarTabManager: ObservableObject {
 
     @Published var tabs: [TabItem] = []
 
-    /// Windows that need attention, cleared when the tab is selected.
-    private var attentionWindows: Set<ObjectIdentifier> = []
+    /// Sessions that need attention, keyed by ``Session/id``, cleared when the session is selected.
+    private var attentionSessions: Set<UUID> = []
 
     /// Whether bells should trigger the sidebar attention indicator.
     /// Derived from `bell-features` containing `attention`.
     private let bellTriggersAttention: Bool
 
-    private weak var window: NSWindow?
+    /// The controller whose sessions back this sidebar.
+    private weak var controller: BaseTerminalController?
+
     private var observers: [NSObjectProtocol] = []
+    private var cancellables: Set<AnyCancellable> = []
     private var timer: Timer?
 
     /// Cache of git info keyed by pwd. Populated off the main thread by a
@@ -75,10 +83,11 @@ class SidebarTabManager: ObservableObject {
     /// between tool calls don't flicker the indicator.
     private static let workingGracePeriod: TimeInterval = 2.5
 
-    init(window: NSWindow, bellTriggersAttention: Bool = true) {
-        self.window = window
+    init(controller: BaseTerminalController, bellTriggersAttention: Bool = true) {
+        self.controller = controller
         self.bellTriggersAttention = bellTriggersAttention
         setupObservers()
+        observeController(controller)
         refresh()
         startGitPolling()
         activityTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] _ in
@@ -95,12 +104,22 @@ class SidebarTabManager: ObservableObject {
 
 #if DEBUG
     /// Preview/testing only: a manager with fixed tabs and none of the live
-    /// machinery (no window, observers, timers, or git polling).
+    /// machinery (no controller, observers, timers, or git polling).
     init(previewTabs: [TabItem]) {
         self.bellTriggersAttention = false
         self.tabs = previewTabs
     }
 #endif
+
+    /// Subscribe to the controller's published session state so the sidebar re-renders when sessions
+    /// are added/removed/reordered or the active session changes. `objectWillChange` fires *before*
+    /// the change, so refresh on the next runloop turn to read the new value.
+    private func observeController(_ controller: BaseTerminalController) {
+        controller.objectWillChange
+            .receive(on: RunLoop.main)
+            .sink { [weak self] _ in self?.refresh() }
+            .store(in: &cancellables)
+    }
 
     private func setupObservers() {
         let center = NotificationCenter.default
@@ -127,13 +146,16 @@ class SidebarTabManager: ObservableObject {
                 queue: .main
             ) { [weak self] notification in
                 guard let self,
-                      let controller = notification.object as? BaseTerminalController,
-                      let w = controller.window else { return }
+                      let bellController = notification.object as? BaseTerminalController,
+                      bellController === self.controller else { return }
                 let hasBell = notification.userInfo?[Notification.Name.terminalWindowHasBellKey] as? Bool ?? false
                 if hasBell {
-                    self.markAttention(window: w)
+                    // TODO(Step 5 follow-up): precise per-session bell attribution (review item G2).
+                    // The bell notification carries the controller, not the originating surface, so we
+                    // best-effort attribute to the focused surface's session, falling back to active.
+                    let surface = self.controller?.focusedSurface
+                    self.markAttention(sessionId: self.sessionId(for: surface) ?? self.controller?.activeSession?.id)
                 } else {
-                    self.clearAttention(for: ObjectIdentifier(w))
                     self.refresh()
                 }
             }
@@ -147,9 +169,8 @@ class SidebarTabManager: ObservableObject {
             queue: .main
         ) { [weak self] notification in
             guard let self,
-                  let surfaceView = notification.object as? Ghostty.SurfaceView,
-                  let w = surfaceView.window else { return }
-            self.markAttention(window: w)
+                  let surfaceView = notification.object as? Ghostty.SurfaceView else { return }
+            self.markAttention(sessionId: self.sessionId(for: surfaceView))
         }
         observers.append(desktopNotifObserver)
 
@@ -159,13 +180,14 @@ class SidebarTabManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] notification in
-            guard let self,
-                  let w = notification.object as? NSWindow else { return }
-            self.markAttention(window: w)
+            guard let self else { return }
+            // TODO(Step 5 follow-up): the IPC notification carries an NSWindow, not a surface/session
+            // (review item G1 — IPC-over-sessions). Best-effort: attribute to the active session.
+            self.markAttention(sessionId: self.controller?.activeSession?.id)
         }
         observers.append(ipcNotifObserver)
 
-        // Poll periodically for tab group changes, title changes, pwd changes, metadata changes.
+        // Poll periodically for session changes, title changes, pwd changes, metadata changes.
         timer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: true) { [weak self] _ in
             self?.refresh()
         }
@@ -173,16 +195,22 @@ class SidebarTabManager: ObservableObject {
 
     // MARK: - Attention
 
-    private func markAttention(window w: NSWindow) {
-        // Don't mark attention for the currently selected tab — the user can already see it.
-        let selected = window?.tabGroup?.selectedWindow ?? window
-        guard w !== selected else { return }
-        attentionWindows.insert(ObjectIdentifier(w))
+    /// Find the session that owns the given surface, if any.
+    private func sessionId(for surface: Ghostty.SurfaceView?) -> UUID? {
+        guard let surface, let controller else { return nil }
+        return controller.sessions.first(where: { $0.surfaceTree.contains(surface) })?.id
+    }
+
+    private func markAttention(sessionId: UUID?) {
+        guard let sessionId else { return }
+        // Don't mark attention for the currently selected session — the user can already see it.
+        guard sessionId != controller?.activeSession?.id else { return }
+        attentionSessions.insert(sessionId)
         refresh()
     }
 
-    private func clearAttention(for id: ObjectIdentifier) {
-        attentionWindows.remove(id)
+    private func clearAttention(for id: UUID) {
+        attentionSessions.remove(id)
     }
 
     // MARK: - Git Info
@@ -281,24 +309,24 @@ class SidebarTabManager: ObservableObject {
 
     // MARK: - Activity
 
-    /// Sample CPU usage of each tab's foreground process to detect which sessions
-    /// are actively computing. proc_pidinfo is a fast syscall, so this runs on the
-    /// main actor and re-publishes only when the working set changes.
+    /// The surface that represents a session in the sidebar (its single visible/dot-bearing surface).
+    /// For the active session this is the focused surface; otherwise the tree's leftmost leaf.
+    private func representativeSurface(for session: Session, at index: Int) -> Ghostty.SurfaceView? {
+        let focused = (index == controller?.activeSessionIndex) ? controller?.focusedSurface : nil
+        return focused ?? session.surfaceTree.root?.leftmostLeaf()
+    }
+
+    /// Sample CPU usage of each session's representative foreground process to detect which sessions
+    /// are actively computing. proc_pidinfo is a fast syscall, so this runs on the main actor and
+    /// re-publishes only when the working set changes.
     private func sampleActivity() {
-        guard let window else { return }
-        let tabWindows: [NSWindow]
-        if let tabbedWindows = window.tabbedWindows, !tabbedWindows.isEmpty {
-            tabWindows = tabbedWindows
-        } else {
-            tabWindows = [window]
-        }
+        guard let controller else { return }
 
         let now = Date().timeIntervalSinceReferenceDate
         var newWorking: Set<UUID> = []
         var seen: Set<UUID> = []
-        for w in tabWindows {
-            guard let controller = w.windowController as? BaseTerminalController,
-                  let surface = controller.focusedSurface else { continue }
+        for (i, session) in controller.sessions.enumerated() {
+            guard let surface = representativeSurface(for: session, at: i) else { continue }
             let sid = surface.id
             seen.insert(sid)
             guard let pid = surface.surfaceModel?.foregroundPID,
@@ -338,31 +366,24 @@ class SidebarTabManager: ObservableObject {
     // MARK: - Refresh
 
     func refresh() {
-        guard let window else { return }
+        guard let controller else { return }
 
-        let tabWindows: [NSWindow]
-        if let tabbedWindows = window.tabbedWindows, !tabbedWindows.isEmpty {
-            tabWindows = tabbedWindows
-        } else {
-            tabWindows = [window]
-        }
-
-        let selectedWindow = window.tabGroup?.selectedWindow ?? window
         let metadataStore = TabMetadataStore.shared
+        let activeId = controller.activeSession?.id
 
-        let newTabs = tabWindows.map { w -> TabItem in
-            let controller = w.windowController as? BaseTerminalController
-            let surface = controller?.focusedSurface
-            let wid = ObjectIdentifier(w)
+        let newTabs = controller.sessions.enumerated().map { (i, session) -> TabItem in
+            let surface = representativeSurface(for: session, at: i)
             let sid = surface?.id
             let pwd = surface?.pwd
+            let title = session.titleOverride ?? surface?.title ?? ""
             let entries = sid.map { metadataStore.statusEntries(for: $0) } ?? []
             let gitInfo = pwd.flatMap { gitInfoCache[$0] } ?? .none
-            let color = (w as? TerminalWindow)?.tabColor ?? .none
+            let isSelected = i == controller.activeSessionIndex
+            let color = session.tabColor ?? .none
 
             return TabItem(
-                id: wid,
-                title: w.title,
+                id: session.id,
+                title: title,
                 pwd: pwd,
                 gitBranch: gitInfo.branch,
                 gitDirty: gitInfo.dirty,
@@ -370,11 +391,10 @@ class SidebarTabManager: ObservableObject {
                 gitBehind: gitInfo.behind,
                 surfaceId: sid,
                 statusEntries: entries,
-                isSelected: w === selectedWindow,
-                needsAttention: attentionWindows.contains(wid) && w !== selectedWindow,
+                isSelected: isSelected,
+                needsAttention: attentionSessions.contains(session.id) && session.id != activeId,
                 isWorking: sid.map { workingSurfaces.contains($0) } ?? false,
-                tabColor: color,
-                window: w
+                tabColor: color
             )
         }
 
@@ -385,83 +405,68 @@ class SidebarTabManager: ObservableObject {
 
     // MARK: - Tab Actions
 
+    /// Resolve a tab's session id to its current index in the controller's sessions.
+    private func index(of tab: TabItem) -> Int? {
+        controller?.sessions.firstIndex(where: { $0.id == tab.id })
+    }
+
     func selectTab(_ tab: TabItem) {
         clearAttention(for: tab.id)
-        tab.window.makeKeyAndOrderFront(nil)
+        guard let idx = index(of: tab) else { return }
+        controller?.selectSession(at: idx)
     }
 
     func setTabColor(_ color: TerminalTabColor, for tab: TabItem) {
-        (tab.window as? TerminalWindow)?.tabColor = color
+        guard let idx = index(of: tab) else { return }
+        controller?.sessions[idx].tabColor = color
         refresh()
     }
 
     func closeTab(_ tab: TabItem) {
-        guard let controller = tab.window.windowController as? TerminalController else { return }
-        controller.closeTab(nil)
+        guard let idx = index(of: tab) else { return }
+        controller?.closeSession(at: idx)
     }
 
     func renameTab(_ tab: TabItem, to newTitle: String) {
-        guard let controller = tab.window.windowController as? BaseTerminalController else { return }
-        controller.titleOverride = newTitle.isEmpty ? nil : newTitle
+        guard let idx = index(of: tab) else { return }
+        controller?.sessions[idx].titleOverride = newTitle.isEmpty ? nil : newTitle
         refresh()
     }
 
     func promptRenameTab(_ tab: TabItem) {
-        guard let controller = tab.window.windowController as? BaseTerminalController else { return }
-        controller.promptTabTitle()
+        // TODO(Step 5 follow-up): prompt against the specific session, not just the active one. For now
+        // this edits the active session's title (the common case — rename is usually for the current tab).
+        controller?.promptTabTitle()
     }
 
     func closeOtherTabs(_ tab: TabItem) {
-        guard let window else { return }
-        let tabWindows: [NSWindow]
-        if let tabbedWindows = window.tabbedWindows, !tabbedWindows.isEmpty {
-            tabWindows = tabbedWindows
-        } else {
-            return
-        }
-        for w in tabWindows where ObjectIdentifier(w) != tab.id {
-            if let controller = w.windowController as? TerminalController {
-                controller.closeTab(nil)
-            }
+        guard let controller else { return }
+        // Close every session except `tab`, from the highest index downward so earlier indices stay
+        // valid as sessions are removed.
+        let indicesToClose = controller.sessions.enumerated()
+            .filter { $0.element.id != tab.id }
+            .map { $0.offset }
+            .sorted(by: >)
+        for idx in indicesToClose {
+            controller.closeSession(at: idx)
         }
     }
 
     func moveTab(from sourceIndex: Int, to destinationIndex: Int) {
-        guard let window else { return }
-        guard let tabbedWindows = window.tabbedWindows, !tabbedWindows.isEmpty else { return }
+        guard let controller else { return }
         guard sourceIndex != destinationIndex,
-              sourceIndex >= 0, sourceIndex < tabbedWindows.count,
-              destinationIndex >= 0, destinationIndex < tabbedWindows.count else { return }
-
-        let movingWindow = tabbedWindows[sourceIndex]
-        let targetWindow = tabbedWindows[destinationIndex]
-
-        if sourceIndex > destinationIndex {
-            targetWindow.addTabbedWindowSafely(movingWindow, ordered: .below)
-        } else {
-            targetWindow.addTabbedWindowSafely(movingWindow, ordered: .above)
-        }
-
-        if let selectedWindow = window.tabGroup?.selectedWindow {
-            selectedWindow.makeKeyAndOrderFront(nil)
-        }
-
+              controller.sessions.indices.contains(sourceIndex),
+              controller.sessions.indices.contains(destinationIndex) else { return }
+        controller.moveSession(from: sourceIndex, to: destinationIndex)
         refresh()
     }
 
     func closeTabsToTheRight(of tab: TabItem) {
-        guard let window else { return }
-        let tabWindows: [NSWindow]
-        if let tabbedWindows = window.tabbedWindows, !tabbedWindows.isEmpty {
-            tabWindows = tabbedWindows
-        } else {
-            return
-        }
-        guard let idx = tabWindows.firstIndex(where: { ObjectIdentifier($0) == tab.id }) else { return }
-        for w in tabWindows[(idx + 1)...] {
-            if let controller = w.windowController as? TerminalController {
-                controller.closeTab(nil)
-            }
+        guard let controller, let idx = index(of: tab) else { return }
+        // Close from highest index downward so earlier indices stay valid as sessions are removed.
+        let indicesToClose = Array(controller.sessions.indices.filter { $0 > idx }).sorted(by: >)
+        for i in indicesToClose {
+            controller.closeSession(at: i)
         }
     }
 }
